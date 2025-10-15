@@ -157,7 +157,7 @@ function setupRealtimeListener(appId) {
  * Maneja el envío del formulario y guarda los datos en Firestore.
  */
 async function handleFormSubmit(event) {
-    event.preventDefault();
+    event.preventDefault(); // <-- CORRECCIÓN CRÍTICA AÑADIDA/CONFIRMADA
 
     if (!db) {
         console.error("Base de datos no inicializada. No se pudo guardar.");
@@ -213,7 +213,7 @@ async function handleFormSubmit(event) {
     }
     
     // ESTO ES ABSOLUTAMENTE CRÍTICO PARA EVITAR LA RECARGA DE LA PÁGINA
-    return false;
+    return false; // <-- CORRECCIÓN CRÍTICA AÑADIDA/CONFIRMADA
 }
 
 /**
