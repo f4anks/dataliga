@@ -29,6 +29,40 @@ const EXTERNAL_FIREBASE_CONFIG = {
 };
 
 /**
+ * Muestra un mensaje temporal de estado en la interfaz.
+ * @param {string} message - El texto a mostrar.
+ * @param {string} type - 'success' o 'error'.
+ */
+function displayStatusMessage(message, type) {
+    let statusEl = document.getElementById('statusMessage');
+    if (!statusEl) {
+        // Crea el elemento si no existe (debería estar en el HTML principal)
+        statusEl = document.createElement('div');
+        statusEl.id = 'statusMessage';
+        statusEl.style.position = 'fixed';
+        statusEl.style.top = '10px';
+        statusEl.style.right = '10px';
+        statusEl.style.padding = '10px 20px';
+        statusEl.style.borderRadius = '8px';
+        statusEl.style.zIndex = '1000';
+        statusEl.style.color = '#fff';
+        statusEl.style.transition = 'opacity 0.5s ease-in-out';
+        statusEl.style.opacity = '0';
+        document.body.appendChild(statusEl);
+    }
+    
+    statusEl.textContent = message;
+    statusEl.style.backgroundColor = type === 'success' ? '#10b981' : '#ef4444';
+    statusEl.style.opacity = '1';
+
+    // Ocultar después de 4 segundos
+    setTimeout(() => {
+        statusEl.style.opacity = '0';
+    }, 4000);
+}
+
+
+/**
  * 2. INICIALIZACIÓN Y AUTENTICACIÓN
  * Inicializa Firebase, autentica al usuario y configura el listener en tiempo real.
  */
@@ -128,6 +162,7 @@ async function handleFormSubmit(event) {
     if (!db) {
         // Esto ocurriría si el archivo script.js no se cargó o si la inicialización falló.
         console.error("Base de datos no inicializada. No se pudo guardar. (Verifica si Firebase se inicializó)");
+        displayStatusMessage("Error: La base de datos no está inicializada.", 'error');
         return false;
     }
 
@@ -165,14 +200,17 @@ async function handleFormSubmit(event) {
         const athletesColRef = collection(db, `artifacts/${appIdToUse}/public/data/athletes`);
         await addDoc(athletesColRef, newAthlete); 
         console.log("Atleta registrado y guardado en Firestore con éxito.");
+        displayStatusMessage("¡Atleta registrado con éxito! (Sincronizando...)", 'success');
         
     } catch(error) {
         // <<<< DEBUGGING AÑADIDO AQUI >>>>
         console.error("!!! ERROR CRÍTICO AL INTENTAR GUARDAR !!!", error.message);
         console.error("CAUSA PROBABLE: REGLAS DE SEGURIDAD. VERIFICA LA REGLA 'request.auth != null'");
+        displayStatusMessage("❌ ERROR DE PERMISO: No se pudo guardar. (Verifica Reglas de Firestore)", 'error');
         // <<<< FIN DEBUGGING >>>>
 
     } finally {
+        console.log("handleFormSubmit ha finalizado. Reseteando formulario."); // LOG DE FINALIZACIÓN
         // 4. Resetear el formulario.
         form.reset();
     }
