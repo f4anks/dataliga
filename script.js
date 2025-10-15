@@ -67,6 +67,7 @@ function displayStatusMessage(message, type) {
  * Inicializa Firebase, autentica al usuario y configura el listener en tiempo real.
  */
 async function initFirebaseAndLoadData() {
+    console.log("Iniciando Firebase y autenticación...");
     try {
         // Determinamos la configuración y el App ID
         let configToUse;
@@ -142,7 +143,8 @@ function setupRealtimeListener(appId) {
         athletesData = fetchedData;
         
         if (athletesData.length > 0) {
-            sortTable(currentSortKey, false); // Ordena sin cambiar la dirección (mantiene el estado)
+            // Ordena sin cambiar la dirección (mantiene el estado)
+            sortTable(currentSortKey, false); 
         } else {
              renderTable();
         }
@@ -152,12 +154,15 @@ function setupRealtimeListener(appId) {
     });
 }
 
-// NUEVA FUNCIÓN: Configura el event listener en el DOM
+// FUNCIÓN ACTUALIZADA: Asegura que el formulario esté en el DOM antes de adjuntar el listener.
 function setupFormListener() {
     const form = document.getElementById('athleteForm');
     if (form) {
-        // Attach the async submit handler directly. Esto es más robusto.
+        // Adjunta el manejador de envío asíncrono directamente. Esto evita la recarga.
         form.addEventListener('submit', handleFormSubmit);
+        console.log("Listener de formulario de atleta adjunto.");
+    } else {
+        console.error("Error: No se encontró el formulario con ID 'athleteForm'. ¿Está cargado el index.html?");
     }
 }
 
@@ -214,8 +219,13 @@ async function handleFormSubmit(event) {
         
     } catch(error) {
         console.error("!!! ERROR CRÍTICO AL INTENTAR GUARDAR !!!", error.message);
-        console.error("CAUSA PROBABLE: REGLAS DE SEGURIDAD.");
-        displayStatusMessage("❌ ERROR DE PERMISO: No se pudo guardar. (Verifica Reglas de Firestore)", 'error');
+        console.error("CAUSA PROBABLE: REGLAS DE SEGURIDAD.", error);
+        // Mostrar error de permiso detallado para el usuario:
+        if (error.code === 'permission-denied') {
+             displayStatusMessage("❌ ERROR DE PERMISO: No se pudo guardar. Revisa tus Reglas de Firestore.", 'error');
+        } else {
+            displayStatusMessage(`❌ ERROR: ${error.message}`, 'error');
+        }
 
     } finally {
         console.log("handleFormSubmit ha finalizado. Reseteando formulario.");
