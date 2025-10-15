@@ -19,7 +19,6 @@
                 <p>Por favor, complete el siguiente formulario para registrar a un atleta.</p>
             </div>
             
-            <!-- CORRECCIÓN: Se elimina el onsubmit. Ahora el script.js maneja el evento de envío con addEventListener. -->
             <form id="athleteForm">
                 
                 <div class="form-group"> 
@@ -95,5 +94,38 @@
     
     <!-- Vincula el archivo de JavaScript con soporte para módulos -->
     <script type="module" src="script.js"></script>
+
+    <!-- BLOQUE DE CÓDIGO DE SEGURIDAD PARA PROTEGER EL CÓDIGO FUENTE -->
+    <script>
+        // 1. Bloquea el botón derecho del ratón (menú contextual)
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            // Opcional: Mostrar un mensaje si alguien intenta usar el botón derecho
+            // console.log("Acción bloqueada: No se permite el menú contextual.");
+        });
+
+        // 2. Bloquea las combinaciones de teclas (Ctrl+Shift+I, F12, Ctrl+U, etc.)
+        document.addEventListener('keydown', function(e) {
+            // F12
+            if (e.key === 'F12' || e.keyCode === 123) {
+                e.preventDefault();
+            }
+
+            // Ctrl+Shift+I (o Cmd+Option+I en Mac)
+            if (e.ctrlKey && e.shiftKey && (e.key === 'i' || e.key === 'I')) {
+                e.preventDefault();
+            }
+
+            // Ctrl+Shift+J (o Cmd+Option+J en Mac) - Para la consola
+            if (e.ctrlKey && e.shiftKey && (e.key === 'j' || e.key === 'J')) {
+                e.preventDefault();
+            }
+
+            // Ctrl+U (Ver código fuente)
+            if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) {
+                e.preventDefault();
+            }
+        });
+    </script>
 </body>
 </html>
