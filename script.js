@@ -36,7 +36,7 @@ const EXTERNAL_FIREBASE_CONFIG = {
 function displayStatusMessage(message, type) {
     let statusEl = document.getElementById('statusMessage');
     if (!statusEl) {
-        // Crea el elemento si no existe (debería estar en el HTML principal)
+        // Crea el elemento si no existe (lo inyectamos en el cuerpo)
         statusEl = document.createElement('div');
         statusEl.id = 'statusMessage';
         statusEl.style.position = 'fixed';
@@ -160,8 +160,7 @@ async function handleFormSubmit(event) {
     event.preventDefault();
 
     if (!db) {
-        // Esto ocurriría si el archivo script.js no se cargó o si la inicialización falló.
-        console.error("Base de datos no inicializada. No se pudo guardar. (Verifica si Firebase se inicializó)");
+        console.error("Base de datos no inicializada. No se pudo guardar.");
         displayStatusMessage("Error: La base de datos no está inicializada.", 'error');
         return false;
     }
@@ -184,7 +183,7 @@ async function handleFormSubmit(event) {
         pesoFormatted: pesoValue ? `${pesoValue} kg` : 'N/A',
         correo: form.correo.value,
         telefono: form.telefono.value,
-        timestamp: Date.now() // Marca de tiempo para orden (opcional)
+        timestamp: Date.now() 
     };
     
     try {
@@ -200,21 +199,20 @@ async function handleFormSubmit(event) {
         const athletesColRef = collection(db, `artifacts/${appIdToUse}/public/data/athletes`);
         await addDoc(athletesColRef, newAthlete); 
         console.log("Atleta registrado y guardado en Firestore con éxito.");
-        displayStatusMessage("¡Atleta registrado con éxito! (Sincronizando...)", 'success');
+        displayStatusMessage("¡Atleta registrado con éxito! (Sincronizando tabla...)", 'success');
         
     } catch(error) {
-        // <<<< DEBUGGING AÑADIDO AQUI >>>>
         console.error("!!! ERROR CRÍTICO AL INTENTAR GUARDAR !!!", error.message);
-        console.error("CAUSA PROBABLE: REGLAS DE SEGURIDAD. VERIFICA LA REGLA 'request.auth != null'");
+        console.error("CAUSA PROBABLE: REGLAS DE SEGURIDAD.");
         displayStatusMessage("❌ ERROR DE PERMISO: No se pudo guardar. (Verifica Reglas de Firestore)", 'error');
-        // <<<< FIN DEBUGGING >>>>
 
     } finally {
-        console.log("handleFormSubmit ha finalizado. Reseteando formulario."); // LOG DE FINALIZACIÓN
+        console.log("handleFormSubmit ha finalizado. Reseteando formulario.");
         // 4. Resetear el formulario.
         form.reset();
     }
     
+    // ESTO ES ABSOLUTAMENTE CRÍTICO PARA EVITAR LA RECARGA DE LA PÁGINA
     return false;
 }
 
