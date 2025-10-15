@@ -15,25 +15,53 @@ let sortDirection = 'asc';
 // Ajustar el nivel de log para depuración (opcional)
 setLogLevel('Debug');
 
+// =========================================================================
+// !!! ATENCIÓN: CONFIGURACIÓN PARA AMBIENTE EXTERNO (GitHub Pages) !!!
+// Se usa tu configuración real para que funcione fuera del Canvas.
+// =========================================================================
+const EXTERNAL_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyA5u1whBdu_fVb2Kw7SDRZbuyiM77RXVDE",
+    authDomain: "datalvmel.firebaseapp.com",
+    projectId: "datalvmel",
+    storageBucket: "datalvmel.firebasestorage.app",
+    messagingSenderId: "733536533303",
+    appId: "1:733536533303:web:3d2073504aefb2100378b2"
+};
+
 /**
  * 2. INICIALIZACIÓN Y AUTENTICACIÓN
  * Inicializa Firebase, autentica al usuario y configura el listener en tiempo real.
  */
 async function initFirebaseAndLoadData() {
     try {
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        
-        const app = initializeApp(firebaseConfig);
+        // Determinamos la configuración y el App ID
+        let configToUse;
+        let appIdToUse;
+        let tokenToUse = '';
+
+        // Priorizamos las variables globales si estamos en el entorno Canvas
+        if (typeof __firebase_config !== 'undefined' && __firebase_config.length > 2) {
+            configToUse = JSON.parse(__firebase_config);
+            appIdToUse = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            tokenToUse = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : '';
+        } else {
+            // Usamos la configuración fija si estamos en un entorno externo (GitHub Pages)
+            configToUse = EXTERNAL_FIREBASE_CONFIG;
+            // Para la ruta de guardado, usamos el projectId como fallback para el appId
+            appIdToUse = configToUse.projectId; 
+            
+            // Nota: En GitHub Pages, NO hay token inicial, así que solo usamos la autenticación anónima.
+        }
+
+        const app = initializeApp(configToUse);
         db = getFirestore(app);
         auth = getAuth(app);
         
-        // Autenticación: Intentar con token personalizado o usar anónimo
-        const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : '';
-        
-        if (token && token.length > 0) {
-            await signInWithCustomToken(auth, token);
+        // Autenticación: Intentar con token personalizado (solo en Canvas) o usar anónimo
+        if (tokenToUse.length > 0) {
+            await signInWithCustomToken(auth, tokenToUse);
         } else {
+            // Autenticación anónima para GitHub Pages
             await signInAnonymously(auth);
         }
         
@@ -43,12 +71,12 @@ async function initFirebaseAndLoadData() {
                 userId = user.uid;
                 console.log("Usuario autenticado. UID:", userId);
                 // Una vez autenticado, se puede empezar a escuchar los datos
-                setupRealtimeListener(appId);
+                setupRealtimeListener(appIdToUse);
             } else {
                 console.error("No se pudo autenticar al usuario.");
                 // Fallback para entornos sin autenticación
                 userId = crypto.randomUUID(); 
-                setupRealtimeListener(appId);
+                setupRealtimeListener(appIdToUse);
             }
         });
 
@@ -98,8 +126,8 @@ async function handleFormSubmit(event) {
     event.preventDefault();
 
     if (!db) {
-        // Esto ocurriría si el archivo script.js no se cargó (el error actual) o si la inicialización falló.
-        console.error("Base de datos no inicializada. No se pudo guardar. (Verifica si script.js se cargó)");
+        // Esto ocurriría si el archivo script.js no se cargó o si la inicialización falló.
+        console.error("Base de datos no inicializada. No se pudo guardar. (Verifica si Firebase se inicializó)");
         return false;
     }
 
@@ -125,17 +153,24 @@ async function handleFormSubmit(event) {
     };
     
     try {
-        // 2. GUARDAR DATOS EN FIRESTORE
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const athletesColRef = collection(db, `artifacts/${appId}/public/data/athletes`);
+        // 2. OBTENER EL APP ID PARA LA RUTA DE GUARDADO
+        let appIdToUse;
+        if (typeof __app_id !== 'undefined') {
+            appIdToUse = __app_id; // Si estamos en Canvas
+        } else {
+            appIdToUse = EXTERNAL_FIREBASE_CONFIG.projectId; // Si estamos en GitHub Pages
+        }
+
+        // 3. GUARDAR DATOS EN FIRESTORE
+        const athletesColRef = collection(db, `artifacts/${appIdToUse}/public/data/athletes`);
         await addDoc(athletesColRef, newAthlete); 
         console.log("Atleta registrado y guardado en Firestore con éxito.");
 
     } catch(error) {
-        // Una vez cargado script.js, este error será casi siempre "Permission Denied"
+        // Una vez inicializado, este error será casi siempre "Permission Denied"
         console.error("Error al guardar el documento en Firestore. VERIFICAR REGLAS DE SEGURIDAD:", error);
     } finally {
-        // 3. Resetear el formulario.
+        // 4. Resetear el formulario.
         form.reset();
     }
     
@@ -143,7 +178,7 @@ async function handleFormSubmit(event) {
 }
 
 /**
- * LÓGICA DE ORDENAMIENTO Y RENDERIZADO
+ * LÓGICA DE ORDENAMIENTO Y RENDERIZADO (sin cambios)
  */
 function sortTable(key, toggleDirection = true) {
     if (currentSortKey === key && toggleDirection) {
