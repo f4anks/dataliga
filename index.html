@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data de Atletas - Liga de Voleibol</title>
+    <!-- Vincula el archivo de estilos CSS -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Vincula la fuente Montserrat de Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&amp;display=swap"
+          rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="form-card">
+            <div class="form-header">
+                <h2>Data de Atletas</h2>
+                <h2>&nbsp;Liga de Voleibol Menor del Estado Lara</h2>
+                <p>Por favor, complete el siguiente formulario para registrar a un atleta.</p>
+            </div>
+            
+            <!-- La acción del botón (submit) llama a esta función de JavaScript -->
+            <form id="athleteForm" onsubmit="return handleFormSubmit(event)">
+                
+                <div class="form-group"> 
+                    <label for="club">Club <span class="required-star">*</span></label>
+                    <input id="club" name="club" required="" type="text"> 
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group"> 
+                        <label for="nombre">Nombre <span class="required-star">*</span></label>
+                        <input id="nombre" name="nombre" required="" type="text"> 
+                    </div>
+                    <div class="form-group"> 
+                        <label for="apellido">Apellido <span class="required-star">*</span></label>
+                        <input id="apellido" name="apellido" required="" type="text"> 
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group"> 
+                        <label for="categoria">Categoría <span class="required-star">*</span></label>
+                        <select id="categoria" name="categoria" required="">
+                            <option value="" disabled="disabled" selected="selected">Selecciona una Categoría</option>
+                            <option value="3ra División">3ra División</option>
+                            <option value="2da División">2da División</option>
+                            <option value="1era División">1era División</option>
+                            <option value="CIAR">CIAR</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group"> 
+                        <label for="talla">Talla (cm)</label> 
+                        <input id="talla" name="talla" type="number"> 
+                    </div>
+                    <div class="form-group"> 
+                        <label for="peso">Peso (kg)</label> 
+                        <input id="peso" name="peso" type="number"> 
+                    </div>
+                </div>
+
+                <!-- CAMBIO SOLICITADO: Agrupamos Fecha Nac., Correo y Teléfono en la misma fila, con Fecha Nac. de primero -->
+                <div class="form-row">
+                    <div class="form-group"> 
+                        <label for="fechaNac">Fecha de Nacimiento <span class="required-star">*</span></label> 
+                        <input id="fechaNac" name="fechaNac" required="" pattern="\d{4}-\d{2}-\d{2}" type="date"> 
+                    </div>
+                    
+                    <div class="form-group"> 
+                        <label for="correo">Correo <span class="required-star">*</span></label>
+                        <input id="correo" name="correo" required="" type="email"> 
+                    </div>
+
+                    <div class="form-group"> 
+                        <label for="telefono">Teléfono <span class="required-star">*</span></label>
+                        <input id="telefono" name="telefono" required="" type="tel"> 
+                    </div>
+                </div>
+                
+                <p class="required-note"><span class="required-star">*</span> Campos obligatorios</p>
+
+                <button type="submit">Registrar Atleta</button> 
+            </form>
+        </div>
+
+        <!-- SECCIÓN DONDE SE MOSTRARÁN LOS DATOS REGISTRADOS DINÁMICAMENTE -->
+        <div class="registered-athletes-section">
+            <h3>Atletas Registrados</h3>
+            <div id="registeredData">
+                <p class="no-data-message">No hay atletas registrados aún. ¡Registra el primero!</p>
+            </div>
+        </div>
+        
+    </div>
+    
+    <!-- Vincula el archivo de JavaScript con soporte para módulos -->
+    <script type="module" src="script.js"></script>
+</body>
+</html>

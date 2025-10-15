@@ -1,0 +1,344 @@
+:root {
+    /* Paleta de Colores Vivos */
+    --vinotinto: #800020; /* Vinotinto principal */
+    --gris-oscuro: #333333;
+    --negro: #000000;
+    --blanco: #ffffff;
+    --gris-claro: #f5f5f5; /* Fondo del formulario */
+    --sombra: rgba(0, 0, 0, 0.2);
+    --sombra-fuerte: rgba(0, 0, 0, 0.5); 
+    --borde: #cccccc;
+    --transicion-rapida: all 0.3s ease;
+}
+
+/* FIX CRÍTICO: Aseguramos que BODY y HTML ocupen todo el viewport para el fondo */
+html, body {
+    width: 100%;
+    height: 100%; 
+    margin: 0;
+    padding: 0;
+}
+
+/* Estilos generales y FONDO DEGRADADO ANIMADO */
+body {
+    font-family: 'Montserrat', sans-serif;
+    display: flex;
+    justify-content: center;
+    /* Usamos min-height y padding para el scroll si el contenido es largo */
+    min-height: 100vh; 
+    padding: 40px 0;
+    color: var(--gris-oscuro);
+    box-sizing: border-box;
+
+    /* Degradado de Fondo Solicitado: Vinotinto, Gris Oscuro y Negro */
+    background: linear-gradient(135deg, var(--vinotinto) 0%, var(--gris-oscuro) 50%, var(--negro) 100%);
+    
+    background-size: 400% 400%; /* Tamaño grande para la animación */
+    background-attachment: fixed; /* Fija el fondo al viewport */
+    background-repeat: no-repeat;
+    animation: background-animacion 15s infinite alternate; /* Animación de movimiento */
+}
+
+/* Animación del fondo (movimiento sutil) */
+@keyframes background-animacion {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+}
+
+/* Contenedor principal */
+.container {
+    width: 100%;
+    max-width: 950px; /* Aumento del ancho para darle más espacio al formulario y la tabla */
+    padding: 20px;
+    box-sizing: border-box;
+    position: relative; 
+    z-index: 1; /* Asegura que el contenido esté sobre el fondo */
+}
+
+/* Estilos de la tarjeta del formulario (fondo claro y sombras) */
+.form-card {
+    background-color: var(--gris-claro); /* Fondo claro para el formulario */
+    border-radius: 15px;
+    padding: 40px;
+    box-shadow: 0 10px 30px var(--sombra-fuerte);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: var(--transicion-rapida);
+    margin-bottom: 30px;
+}
+
+.form-card:hover {
+    box-shadow: 0 18px 45px var(--sombra-fuerte);
+    transform: translateY(-5px) scale(1.005);
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.form-header h2 {
+    font-size: 2.4em;
+    font-weight: 700;
+    color: var(--vinotinto); 
+    text-shadow: 1px 1px 2px var(--sombra);
+    margin-bottom: 5px;
+}
+
+/* Campos de formulario */
+.form-group { margin-bottom: 20px; }
+.form-row { display: flex; flex-wrap: wrap; gap: 20px; }
+.form-row .form-group { flex: 1; min-width: 200px; }
+
+label { display: block; margin-bottom: 8px; font-weight: 700; color: var(--gris-oscuro); transition: color 0.2s; }
+.required-star { color: var(--vinotinto); font-size: 1.1em; margin-left: 3px; }
+.required-note { font-size: 0.9em; color: var(--blanco); 
+    text-align: right; margin-top: -10px; opacity: 0.8; }
+
+/* ESTILOS UNIFICADOS PARA INPUTS Y SELECT */
+input[type="text"], input[type="email"], input[type="number"], input[type="tel"], input[type="date"], select {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid var(--borde);
+    border-radius: 8px;
+    font-size: 1em;
+    background-color: var(--blanco);
+    color: var(--negro);
+    box-shadow: inset 0 1px 3px var(--sombra);
+    transition: var(--transicion-rapida);
+    box-sizing: border-box;
+    /* Estilos personalizados para SELECT */
+    -webkit-appearance: none; 
+    -moz-appearance: none; 
+    appearance: none; 
+    /* Flecha SVG de color vinotinto para el select */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23800020' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); 
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 35px; /* Espacio para el icono */
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--vinotinto);
+    box-shadow: 0 0 12px rgba(128, 0, 32, 0.6);
+    background-color: var(--blanco);
+}
+
+/* Estilos del botón de envío */
+button[type="submit"] {
+    display: block;
+    width: 100%;
+    padding: 18px;
+    margin-top: 30px;
+    background-color: var(--vinotinto);
+    color: var(--blanco);
+    border: none;
+    border-radius: 10px;
+    font-size: 1.3em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transicion-rapida);
+    box-shadow: 0 8px 20px var(--sombra-fuerte);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+button[type="submit"]:hover {
+    background-color: #a3002a;
+    box-shadow: 0 12px 30px var(--sombra-fuerte);
+    transform: translateY(-4px);
+}
+
+/* --- ESTILOS PARA LA SECCIÓN DE DATOS REGISTRADOS (TABLA) --- */
+.registered-athletes-section {
+    margin-top: 40px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 5px 20px var(--sombra-fuerte);
+}
+
+.registered-athletes-section h3 {
+    text-align: center;
+    color: var(--gris-oscuro);
+    font-size: 1.8em;
+    border-bottom: 3px solid var(--vinotinto);
+    padding-bottom: 10px;
+    margin-bottom: 25px;
+}
+
+.no-data-message {
+    text-align: center;
+    color: var(--gris-oscuro);
+    padding: 20px;
+    font-style: italic;
+    opacity: 0.7;
+}
+
+.table-note-message {
+    text-align: center;
+    font-size: 0.9em;
+    color: var(--gris-oscuro);
+    margin-top: 15px;
+    opacity: 0.7;
+}
+
+/* Contenedor de tabla responsivo */
+.table-responsive-wrapper {
+    overflow-x: auto; /* Permite scroll horizontal si la tabla es muy ancha */
+}
+
+.athlete-data-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px; /* Espacio entre filas */
+}
+
+/* Estilos de la cabecera de la tabla */
+.athlete-data-table thead th {
+    background-color: var(--vinotinto);
+    color: var(--blanco);
+    padding: 12px 10px;
+    font-weight: 700;
+    text-align: left;
+    position: sticky;
+    top: 0;
+    cursor: default; /* Por defecto no hay cursor de puntero */
+    transition: background-color 0.2s;
+}
+
+/* Indicador visual de que la columna es clickeable/ordenable */
+.athlete-data-table thead th[data-sort-key]:hover {
+    background-color: #a3002a; /* Color un poco más oscuro al pasar el ratón */
+    cursor: pointer;
+}
+
+/* Estilos para indicar la columna actualmente ordenada */
+.athlete-data-table thead th.sorted-asc {
+    background-color: #c90035; /* Color más claro para el encabezado ordenado */
+    /* Triángulo ASC (flecha hacia arriba) */
+    position: relative;
+}
+.athlete-data-table thead th.sorted-asc::after {
+    content: ' ▲'; 
+    font-size: 0.8em;
+}
+
+.athlete-data-table thead th.sorted-desc {
+    background-color: #c90035;
+    /* Triángulo DESC (flecha hacia abajo) */
+    position: relative;
+}
+.athlete-data-table thead th.sorted-desc::after {
+    content: ' ▼';
+    font-size: 0.8em;
+}
+
+
+/* Estilos de las filas de datos */
+.athlete-table-row {
+    background-color: var(--blanco);
+    box-shadow: 0 2px 5px var(--sombra);
+    transition: all 0.2s ease;
+}
+
+.athlete-table-row:hover {
+    background-color: var(--gris-claro);
+    box-shadow: 0 4px 10px var(--sombra-fuerte);
+}
+
+.athlete-table-row td {
+    padding: 12px 10px;
+    border: none;
+    vertical-align: middle;
+}
+
+/* Bordes redondeados para la primera y última celda de la cabecera */
+.athlete-data-table thead tr th:first-child { border-top-left-radius: 8px; }
+.athlete-data-table thead tr th:last-child { border-top-right-radius: 8px; }
+
+/* Bordes redondeados para la primera y última celda de cada fila de datos */
+.athlete-table-row td:first-child { border-bottom-left-radius: 8px; border-top-left-radius: 8px; border-left: 4px solid var(--vinotinto); }
+.athlete-table-row td:last-child { border-bottom-right-radius: 8px; border-top-right-radius: 8px; }
+
+/* --- Responsividad de la Tabla (Mobile First) --- */
+
+/* Por defecto, ocultamos las celdas en dispositivos pequeños */
+.athlete-data-table {
+    display: block; /* Hacemos que la tabla se comporte como bloque */
+}
+.athlete-data-table thead {
+    display: none; /* Ocultamos la cabecera de la tabla en móvil */
+}
+
+/* Mobile View: Convertir cada fila en una tarjeta */
+.athlete-table-row {
+    display: block;
+    margin-bottom: 15px;
+    border-left: none !important; /* El borde pasa a la parte superior */
+    border-radius: 10px;
+}
+.athlete-table-row td {
+    display: block; /* Cada celda toma el ancho completo de la tarjeta */
+    text-align: right;
+    padding: 10px 15px;
+    border-bottom: 1px solid var(--borde);
+    
+}
+.athlete-table-row td:last-child {
+    border-bottom: none;
+}
+
+/* Mostrar el nombre del campo (header) en la vista móvil usando el atributo data-label */
+.athlete-table-row td::before {
+    content: attr(data-label);
+    float: left;
+    font-weight: 700;
+    color: var(--vinotinto);
+}
+
+/* Ocultar / Mostrar columnas específicas en móvil */
+.table-hidden-mobile {
+    display: none; /* Ocultar en móvil por defecto */
+}
+.table-hidden-desktop {
+    display: block; /* Mostrar los campos importantes en móvil (ej. Correo, Teléfono) */
+}
+
+
+/* Vista de Escritorio (Desktop View) */
+@media (min-width: 768px) {
+    .athlete-data-table {
+        display: table;
+        border-spacing: 0 8px;
+    }
+    .athlete-data-table thead {
+        display: table-header-group;
+    }
+    .athlete-table-row {
+        display: table-row;
+        border-left: none;
+    }
+    .athlete-table-row td {
+        display: table-cell;
+        text-align: left;
+        border-bottom: none;
+    }
+    .athlete-table-row td::before {
+        content: none;
+    }
+
+    /* Mostrar / Ocultar columnas específicas en escritorio */
+    .table-hidden-mobile {
+        display: table-cell; /* Mostrar en escritorio */
+    }
+    .table-hidden-desktop {
+        display: table-cell; /* Mostrar campos importantes en escritorio */
+    }
+
+    /* NUEVO: Regla para darle más espacio a la columna F. Nac. (4ta columna) en escritorio */
+    .athlete-data-table thead tr th:nth-child(4),
+    .athlete-data-table tbody tr td:nth-child(4) {
+        min-width: 105px; /* Ajuste para asegurar que quepa el formato YYYY-MM-DD */
+    }
+}
