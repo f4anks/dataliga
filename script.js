@@ -152,12 +152,23 @@ function setupRealtimeListener(appId) {
     });
 }
 
+// NUEVA FUNCIÓN: Configura el event listener en el DOM
+function setupFormListener() {
+    const form = document.getElementById('athleteForm');
+    if (form) {
+        // Attach the async submit handler directly. Esto es más robusto.
+        form.addEventListener('submit', handleFormSubmit);
+    }
+}
+
+
 /**
  * 4. FUNCIÓN DE GUARDADO (handleFormSubmit)
  * Maneja el envío del formulario y guarda los datos en Firestore.
  */
 async function handleFormSubmit(event) {
-    event.preventDefault(); // <-- CORRECCIÓN CRÍTICA AÑADIDA/CONFIRMADA
+    // ESTA ES LA LÍNEA CRÍTICA: Detiene la recarga de la página (el comportamiento por defecto del formulario).
+    event.preventDefault(); 
 
     if (!db) {
         console.error("Base de datos no inicializada. No se pudo guardar.");
@@ -212,8 +223,8 @@ async function handleFormSubmit(event) {
         form.reset();
     }
     
-    // ESTO ES ABSOLUTAMENTE CRÍTICO PARA EVITAR LA RECARGA DE LA PÁGINA
-    return false; // <-- CORRECCIÓN CRÍTICA AÑADIDA/CONFIRMADA
+    // Devolvemos false para asegurar que no se envíe el formulario, aunque event.preventDefault() ya lo hizo.
+    return false; 
 }
 
 /**
@@ -326,5 +337,8 @@ function setupSorting() {
     });
 }
 
-// Inicializar Firebase al cargar el contenido
-document.addEventListener('DOMContentLoaded', initFirebaseAndLoadData);
+// Inicializar Firebase y los Listeners al cargar el contenido
+document.addEventListener('DOMContentLoaded', () => {
+    initFirebaseAndLoadData();
+    setupFormListener();
+});
