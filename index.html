@@ -19,8 +19,8 @@
                 <p>Por favor, complete el siguiente formulario para registrar a un atleta.</p>
             </div>
             
-            <!-- La acción del botón (submit) llama a esta función de JavaScript -->
-            <form id="athleteForm" onsubmit="return handleFormSubmit(event)">
+            <!-- CORRECCIÓN: Se elimina el onsubmit. Ahora el script.js maneja el evento de envío con addEventListener. -->
+            <form id="athleteForm">
                 
                 <div class="form-group"> 
                     <label for="club">Club <span class="required-star">*</span></label>
@@ -60,7 +60,6 @@
                     </div>
                 </div>
 
-                <!-- CAMBIO SOLICITADO: Agrupamos Fecha Nac., Correo y Teléfono en la misma fila, con Fecha Nac. de primero -->
                 <div class="form-row">
                     <div class="form-group"> 
                         <label for="fechaNac">Fecha de Nacimiento <span class="required-star">*</span></label> 
