@@ -21,11 +21,11 @@ setLogLevel('Debug');
 // =========================================================================
 const EXTERNAL_FIREBASE_CONFIG = {
     apiKey: "AIzaSyA5u1whBdu_fVb2Kw7SDRZbuyiM77RXVDE",
-    authDomain: "datalvmel.firebaseapp.com",
-    projectId: "datalvmel",
-    storageBucket: "datalvmel.firebasestorage.app",
-    messagingSenderId: "733536533303",
-    appId: "1:733536533303:web:3d2073504aefb2100378b2"
+  authDomain: "datalvmel.firebaseapp.com",
+  projectId: "datalvmel",
+  storageBucket: "datalvmel.firebasestorage.app",
+  messagingSenderId: "733536533303",
+  appId: "1:733536533303:web:3d2073504aefb2100378b2"
 };
 
 /**
@@ -165,10 +165,13 @@ async function handleFormSubmit(event) {
         const athletesColRef = collection(db, `artifacts/${appIdToUse}/public/data/athletes`);
         await addDoc(athletesColRef, newAthlete); 
         console.log("Atleta registrado y guardado en Firestore con éxito.");
-
+        
     } catch(error) {
-        // Una vez inicializado, este error será casi siempre "Permission Denied"
-        console.error("Error al guardar el documento en Firestore. VERIFICAR REGLAS DE SEGURIDAD:", error);
+        // <<<< DEBUGGING AÑADIDO AQUI >>>>
+        console.error("!!! ERROR CRÍTICO AL INTENTAR GUARDAR !!!", error.message);
+        console.error("CAUSA PROBABLE: REGLAS DE SEGURIDAD. VERIFICA LA REGLA 'request.auth != null'");
+        // <<<< FIN DEBUGGING >>>>
+
     } finally {
         // 4. Resetear el formulario.
         form.reset();
