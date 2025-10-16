@@ -119,6 +119,33 @@ input:focus, select:focus {
     outline: none;
 }
 
+/* --- ELIMINAR RESIDUOS AZULES EN INPUTS TIPO NUMBER Y DATE --- */
+
+/* Eliminar los botones de incremento/decremento (spinners) en inputs tipo number */
+input[type="number"]::-webkit-inner-spin-button, 
+input[type="number"]::-webkit-outer-spin-button { 
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type="number"] {
+    -moz-appearance: textfield; /* Para Firefox */
+}
+
+/* En el input de fecha, el icono de calendario y su color pueden ser controlados por el SO, 
+   pero forzamos que el color del texto del placeholder sea gris para evitar que se vea azul al cargar. */
+input[type="date"]::-webkit-datetime-edit-year-field:focus,
+input[type="date"]::-webkit-datetime-edit-month-field:focus,
+input[type="date"]::-webkit-datetime-edit-day-field:focus {
+    color: #9C0033; /* Forzar el color de enfoque del texto a vinotinto */
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+    /* Intentar cambiar el color del icono de calendario. No es 100% efectivo en todos los navegadores, 
+       pero se puede probar. Si esto no funciona, el azul es del SO. */
+    /* Este filtro intenta convertir el color del icono a un tono rojizo/vinotinto */
+    filter: invert(10%) sepia(90%) saturate(1000%) hue-rotate(330deg) brightness(80%);
+}
+
+
 /* --- Botón de Envío --- */
 button[type="submit"] {
     /* Botón Vinotinto */
