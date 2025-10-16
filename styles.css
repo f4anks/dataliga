@@ -23,36 +23,10 @@ body {
 }
 
 /* ======================================= */
-/* ESTILOS DEL BANNER */
+/* ESTILOS DEL BANNER (ELIMINADO) */
 /* ======================================= */
-.banner-wrapper {
-    /* El banner ocupa todo el ancho de la ventana */
-    width: 100%;
-    /* Nueva altura SOLICITADA: 300px */
-    height: 300px; 
-    /* Oculta la parte de la imagen que excede el alto */
-    overflow: hidden; 
-    /* Añadimos un poco de margen para separarlo del contenido del formulario */
-    margin-bottom: 20px;
-    /* Esto es clave para las esquinas redondeadas del contenedor */
-    border-radius: 0 0 15px 15px; /* Bordes redondeados solo en la parte inferior */
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5); /* Sombra más fuerte para contraste */
-    /* Nuevo: Borde para "encerrar" la imagen */
-    border-bottom: 5px solid #720025;
-}
-
-.banner-image {
-    width: 100%;
-    height: 100%; /* La imagen debe ocupar el 100% del alto del wrapper (300px) */
-    /* Asegura que la imagen cubra el contenedor sin distorsionarse, recortando si es necesario */
-    object-fit: cover; 
-    display: block; 
-    /* Mejoramos la calidad visual de la imagen en diferentes dispositivos */
-    image-rendering: -webkit-optimize-contrast; 
-    image-rendering: crisp-edges;
-    image-rendering: optimizeSpeed; 
-}
-
+/* .banner-wrapper, .banner-image rules removed
+*/
 
 .container {
     max-width: 1200px;
