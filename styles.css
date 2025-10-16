@@ -11,6 +11,17 @@ body {
     min-height: 100vh; 
 }
 
+/* Nuevo: Estilo de selección de texto para eliminar el azul por defecto del navegador */
+::selection {
+    background: #720025;
+    color: #ffffff;
+}
+/* Agregado para navegadores antiguos */
+::-moz-selection {
+    background: #720025;
+    color: #ffffff;
+}
+
 /* ======================================= */
 /* ESTILOS DEL BANNER */
 /* ======================================= */
@@ -128,9 +139,9 @@ select {
 }
 
 input:focus, select:focus {
-    /* Corregido: Color de enfoque Vinotinto en lugar de Azul */
-    border-color: #720025;
-    box-shadow: 0 0 0 3px rgba(114, 0, 37, 0.4); /* Sombra vinotinto con opacidad */
+    /* Corregido: Color de enfoque Vinotinto más brillante para asegurar la anulación */
+    border-color: #9C0033;
+    box-shadow: 0 0 0 4px rgba(156, 0, 51, 0.5); /* Sombra vinotinto más visible */
     outline: none;
 }
 
