@@ -25,7 +25,9 @@ body {
     margin-bottom: 20px;
     /* Esto es clave para las esquinas redondeadas del contenedor */
     border-radius: 0 0 15px 15px; /* Bordes redondeados solo en la parte inferior */
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* Sombra para darle profundidad */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5); /* Sombra más fuerte para contraste */
+    /* Nuevo: Borde para "encerrar" la imagen */
+    border-bottom: 5px solid #720025;
 }
 
 .banner-image {
@@ -126,8 +128,9 @@ select {
 }
 
 input:focus, select:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    /* Corregido: Color de enfoque Vinotinto en lugar de Azul */
+    border-color: #720025;
+    box-shadow: 0 0 0 3px rgba(114, 0, 37, 0.4); /* Sombra vinotinto con opacidad */
     outline: none;
 }
 
