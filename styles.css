@@ -14,7 +14,7 @@ body {
 .banner-wrapper {
     /* El banner ocupa todo el ancho de la ventana */
     width: 100%;
-    /* Nueva altura MODERADA para el banner */
+    /* Nueva altura SOLICITADA: 300px */
     height: 300px; 
     /* Oculta la parte de la imagen que excede el alto */
     overflow: hidden; 
@@ -27,7 +27,7 @@ body {
 
 .banner-image {
     width: 100%;
-    height: 100%; /* La imagen debe ocupar el 100% del alto del wrapper (120px) */
+    height: 100%; /* La imagen debe ocupar el 100% del alto del wrapper (300px) */
     /* Asegura que la imagen cubra el contenedor sin distorsionarse, recortando si es necesario */
     object-fit: cover; 
     display: block; 
@@ -276,5 +276,3 @@ button[type="submit"]:active {
 .table-hidden-desktop {
     display: none;
 }
-
-
