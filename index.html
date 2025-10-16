@@ -15,7 +15,7 @@
     <!-- BANNER DE ENCABEZADO -->
     <div class="banner-wrapper">
         <!-- RUTA DE IMAGEN LOCAL CORREGIDA: images/banner1.jpg -->
-        <img src="Images/banner1.jpg" alt="LVMeL - Liga de Voleibol Menor del Estado Lara" class="banner-image">
+        <img src="images/banner1.jpg" alt="LVMeL - Liga de Voleibol Menor del Estado Lara" class="banner-image">
     </div>
     <!-- FIN DEL BANNER -->
 
@@ -59,7 +59,7 @@
                     
                     <div class="form-group"> 
                         <label for="talla">Talla (cm)</label> 
-                        <input id="talla" name="talla" type="number"> 
+                        <input id="talla" name="talla" type="number" step="0.01"> 
                     </div>
                     <div class="form-group"> 
                         <label for="peso">Peso (kg)</label> 
@@ -80,7 +80,7 @@
 
                     <div class="form-group"> 
                         <label for="telefono">Teléfono <span class="required-star">*</span></label>
-                        <input id="telefono" name="telefono" required="" type="tel"> 
+                        <input id="telefono" name="telefono" required="" type="tel" pattern="\d{4}-\d{7}"> 
                     </div>
                 </div>
                 
