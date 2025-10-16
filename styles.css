@@ -15,7 +15,7 @@ body {
     /* El banner ocupa todo el ancho de la ventana */
     width: 100%;
     /* Nueva altura fija para el banner */
-    height: 200px; 
+    height: 500px; 
     /* Oculta la parte de la imagen que excede los 200px de alto */
     overflow: hidden; 
     /* Añadimos un poco de margen para separarlo del contenido del formulario */
@@ -276,4 +276,5 @@ button[type="submit"]:active {
 .table-hidden-desktop {
     display: none;
 }
+
 
