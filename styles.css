@@ -1,11 +1,14 @@
 /* --- Base y Tipografía --- */
 body {
     font-family: 'Montserrat', sans-serif;
-    background-color: #f0f4f8;
+    /* Fondo Degradado: Vinotinto oscuro a Negro */
+    background: linear-gradient(180deg, #5B001F 0%, #000000 100%);
     color: #334155;
     margin: 0;
     padding: 0;
     line-height: 1.6;
+    /* Asegura que el degradado cubra toda la altura de la vista */
+    min-height: 100vh; 
 }
 
 /* ======================================= */
@@ -62,7 +65,8 @@ body {
 }
 
 .form-header h2 {
-    color: #1e3a8a;
+    /* Título Vinotinto */
+    color: #720025;
     font-weight: 700;
     margin: 0 0 5px 0;
     font-size: 1.8rem;
@@ -129,7 +133,8 @@ input:focus, select:focus {
 
 /* --- Botón de Envío --- */
 button[type="submit"] {
-    background-color: #1e3a8a;
+    /* Botón Vinotinto */
+    background-color: #720025;
     color: white;
     padding: 12px 25px;
     border: none;
@@ -144,12 +149,14 @@ button[type="submit"] {
 }
 
 button[type="submit"]:hover {
-    background-color: #1e40af;
+    /* Vinotinto más claro al pasar el ratón */
+    background-color: #9C0033;
     transform: translateY(-1px);
 }
 
 button[type="submit"]:active {
-    background-color: #1e3a8a;
+    /* Vinotinto más oscuro al hacer clic */
+    background-color: #5B001F;
     transform: translateY(1px);
 }
 
@@ -162,7 +169,8 @@ button[type="submit"]:active {
 }
 
 .registered-athletes-section h3 {
-    color: #1e3a8a;
+    /* Título Vinotinto */
+    color: #720025;
     font-weight: 700;
     margin-top: 0;
     margin-bottom: 20px;
@@ -213,7 +221,8 @@ button[type="submit"]:active {
 
 .athlete-data-table th {
     background-color: #f8fafc;
-    color: #1e3a8a;
+    /* Encabezado de tabla Vinotinto */
+    color: #720025;
     font-weight: 700;
     border-bottom: 2px solid #e2e8f0;
     position: sticky; /* Fija los encabezados al hacer scroll vertical */
@@ -223,13 +232,15 @@ button[type="submit"]:active {
 
 .athlete-data-table th.sorted-asc::after {
     content: " ▲";
-    color: #1e3a8a;
+    /* Color de flecha de ordenamiento Vinotinto */
+    color: #720025;
     font-size: 0.7em;
 }
 
 .athlete-data-table th.sorted-desc::after {
     content: " ▼";
-    color: #1e3a8a;
+    /* Color de flecha de ordenamiento Vinotinto */
+    color: #720025;
     font-size: 0.7em;
 }
 
