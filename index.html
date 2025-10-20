@@ -13,16 +13,16 @@
             font-family: 'Inter', sans-serif;
             background-color: #1A1A1A; /* Fondo oscuro */
         }
-        /* Definición del color principal revertido a un Indigo/Azul */
+        /* Definición del color principal revertido a un Indigo/Azul (Simulando el color anterior) */
         .bg-primary { background-color: #4F46E5; } /* Indigo-600 */
         .hover\:bg-primary-dark:hover { background-color: #4338CA; } /* Indigo-700 */
         .text-primary { color: #4F46E5; }
         .border-primary { border-color: #4F46E5; }
 
-        /* Estilos del Banner ANTERIOR reintroducidos */
+        /* Estilos del Banner ANTERIOR que podrían haber causado el conflicto */
         .banner-wrapper {
             width: 100%;
-            height: 150px; /* Altura original del banner */
+            height: 150px; 
             overflow: hidden;
             display: flex;
             justify-content: center;
@@ -124,7 +124,6 @@
             messageBox.textContent = text;
             messageBox.className = 'mt-4 p-3 rounded-lg text-sm'; // Resetear clases
 
-            // Usando clases neutrales de Tailwind que pueden haber sido el "problema azul"
             if (type === 'success') {
                 messageBox.classList.add('bg-green-100', 'text-green-800', 'border', 'border-green-400');
             } else if (type === 'error') {
