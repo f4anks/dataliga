@@ -1,25 +1,139 @@
-/* Usamos el patrón de "Data-Label" para que las celdas se vean como bloques en móvil si el scroll no es suficiente */
-    .athlete-data-table, .athlete-data-table tbody, .athlete-data-table tr, .athlete-data-table td {
-        display: block;
-    }
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data de Atletas - Liga de Voleibol</title>
+    <!-- Vincula el archivo de estilos CSS -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Vincula la fuente Montserrat de Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&amp;display=swap"
+          rel="stylesheet">
+</head>
+<body>
+    
+    <!-- BANNER DE ENCABEZADO -->
+    <div class="banner-wrapper">
+        <!-- RUTA DE IMAGEN LOCAL CORREGIDA: images/banner1.jpg -->
+        <img src="images/banner1.jpg" alt="LVMeL - Liga de Voleibol Menor del Estado Lara" class="banner-image">
+    </div>
+    <!-- FIN DEL BANNER -->
 
-    .athlete-data-table td {
-        text-align: right;
-        padding-left: 50%;
-        position: relative;
-    }
+    <div class="container">
+        <div class="form-card">
+            <div class="form-header">
+                <h2>Data de Atletas</h2>
+                <h2>&nbsp;Liga de Voleibol Menor del Estado Lara</h2>
+                <p>Por favor, complete el siguiente formulario para registrar a un atleta.</p>
+            </div>
+            
+            <form id="athleteForm">
+                
+                <div class="form-group"> 
+                    <label for="club">Club <span class="required-star">*</span></label>
+                    <input id="club" name="club" required="" type="text"> 
+                </div>
 
-    .athlete-data-table td::before {
-        content: attr(data-label);
-        position: absolute;
-        left: 0;
-        width: 50%;
-        padding-left: 15px;
-        font-weight: 600;
-        text-align: left;
-    }
-}
-/* Aseguramos que la columna 'Teléfono' se vea en móvil y no en desktop (era un ejemplo) */
-.table-hidden-desktop {
-    display: none;
-}
+                <div class="form-row">
+                    <div class="form-group"> 
+                        <label for="nombre">Nombre <span class="required-star">*</span></label>
+                        <input id="nombre" name="nombre" required="" type="text"> 
+                    </div>
+                    <div class="form-group"> 
+                        <label for="apellido">Apellido <span class="required-star">*</span></label>
+                        <input id="apellido" name="apellido" required="" type="text"> 
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group"> 
+                        <label for="categoria">Categoría <span class="required-star">*</span></label>
+                        <select id="categoria" name="categoria" required="">
+                            <option value="" disabled="disabled" selected="selected">Selecciona una Categoría</option>
+                            <option value="3ra División">3ra División</option>
+                            <option value="2da División">2da División</option>
+                            <option value="1era División">1era División</option>
+                            <option value="CIAR">CIAR</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group"> 
+                        <label for="talla">Talla (cm)</label> 
+                        <input id="talla" name="talla" type="number"> 
+                    </div>
+                    <div class="form-group"> 
+                        <label for="peso">Peso (kg)</label> 
+                        <input id="peso" name="peso" type="number"> 
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group"> 
+                        <label for="fechaNac">Fecha de Nacimiento <span class="required-star">*</span></label> 
+                        <input id="fechaNac" name="fechaNac" required="" pattern="\d{4}-\d{2}-\d{2}" type="date"> 
+                    </div>
+                    
+                    <div class="form-group"> 
+                        <label for="correo">Correo <span class="required-star">*</span></label>
+                        <input id="correo" name="correo" required="" type="email"> 
+                    </div>
+
+                    <div class="form-group"> 
+                        <label for="telefono">Teléfono <span class="required-star">*</span></label>
+                        <input id="telefono" name="telefono" required="" type="tel"> 
+                    </div>
+                </div>
+                
+                <p class="required-note"><span class="required-star">*</span> Campos obligatorios</p>
+
+                <button type="submit">Registrar Atleta</button> 
+            </form>
+        </div>
+
+        <!-- SECCIÓN DONDE SE MOSTRARÁN LOS DATOS REGISTRADOS DINÁMICAMENTE -->
+        <div class="registered-athletes-section">
+            <h3>Atletas Registrados</h3>
+            <div id="registeredData" class="table-scroll-wrapper">
+                <p class="no-data-message">No hay atletas registrados aún. ¡Registra el primero!</p>
+            </div>
+        </div>
+        
+    </div>
+    
+    <!-- Vincula el archivo de JavaScript con soporte para módulos -->
+    <script type="module" src="script.js"></script>
+
+    <!-- BLOQUE DE CÓDIGO DE SEGURIDAD PARA PROTEGER EL CÓDIGO FUENTE -->
+    <script>
+        // 1. Bloquea el botón derecho del ratón (menú contextual)
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            // Opcional: Mostrar un mensaje si alguien intenta usar el botón derecho
+            // console.log("Acción bloqueada: No se permite el menú contextual.");
+        });
+
+        // 2. Bloquea las combinaciones de teclas (Ctrl+Shift+I, F12, Ctrl+U, etc.)
+        document.addEventListener('keydown', function(e) {
+            // F12
+            if (e.key === 'F12' || e.keyCode === 123) {
+                e.preventDefault();
+            }
+
+            // Ctrl+Shift+I (o Cmd+Option+I en Mac)
+            if (e.ctrlKey && e.shiftKey && (e.key === 'i' || e.key === 'I')) {
+                e.preventDefault();
+            }
+
+            // Ctrl+Shift+J (o Cmd+Option+J en Mac) - Para la consola
+            if (e.ctrlKey && e.shiftKey && (e.key === 'j' || e.key === 'J')) {
+                e.preventDefault();
+            }
+
+            // Ctrl+U (Ver código fuente)
+            if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>
