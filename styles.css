@@ -1,424 +1,250 @@
+/* ------------------------------------------------ */
+/* COLORES BASE (Inspiración Vinotinto)            */
+/* ------------------------------------------------ */
 :root {
-    /* Paleta de Colores Vivos */
-    --vinotinto: #800020; /* Vinotinto principal */
-    --vinotinto-claro: #A3002A; /* Tono más brillante para acentos */
-    --gris-oscuro: #1A1A1A; /* Negro muy oscuro para texto/fondo */
-    --negro: #000000;
-    --blanco: #ffffff;
-    --gris-claro: #f5f5f5; /* Fondo secundario/Filas de tabla */
-    --sombra: rgba(0, 0, 0, 0.4);
-    --sombra-fuerte: rgba(0, 0, 0, 0.65); /* Sombra más intensa para contraste */
-    --borde: #cccccc;
-    --transicion-rapida: all 0.3s ease;
+    --color-vinotinto-primary: #800020; /* Vinotinto Oscuro */
+    --color-vinotinto-dark: #400010;    /* Vinotinto para texto y acentos */
+    --color-accent-gold: #FFC300;       /* Dorado vibrante para acentos */
+    --color-background-dark: #f0f0f0;  /* Fondo gris muy claro */
+    --color-card-light: #ffffff;        /* Fondo de tarjetas (blanco) */
+    --color-text-normal: #333333;       /* Texto estándar */
+    --font-primary: 'Montserrat', sans-serif;
 }
 
-/* FIX CRÍTICO: Aseguramos que BODY y HTML ocupen todo el viewport para el fondo */
-html, body {
-    width: 100%;
-    height: 100%; 
-    margin: 0;
-    padding: 0;
-}
-
-/* Estilos generales y FONDO DEGRADADO ANIMADO */
+/* ------------------------------------------------ */
+/* ESTILOS GLOBALES Y CONTENEDOR                   */
+/* ------------------------------------------------ */
 body {
-    font-family: 'Montserrat', sans-serif;
-    display: flex;
-    flex-direction: column; 
-    align-items: center; /* Centra el contenido horizontalmente */
-    /* Usamos min-height y padding para el scroll si el contenido es largo */
-    min-height: 100vh; 
-    padding: 20px; /* Padding general ahora que no hay banner fijo arriba */
-    color: var(--gris-oscuro);
-    box-sizing: border-box;
-
-    /* Degradado de Fondo Solicitado: Vinotinto, Gris Oscuro y Negro */
-    background: linear-gradient(135deg, var(--vinotinto) 0%, var(--gris-oscuro) 50%, var(--negro) 100%);
-    
-    background-size: 400% 400%; /* Tamaño grande para la animación */
-    background-attachment: fixed; /* Fija el fondo al viewport */
-    background-repeat: no-repeat;
-    animation: background-animacion 15s infinite alternate; /* Animación de movimiento */
+    background-color: var(--color-background-dark);
+    font-family: var(--font-primary);
+    color: var(--color-text-normal);
+    line-height: 1.6;
+    margin: 0;
+    padding-bottom: 40px;
 }
 
-/* Animación del fondo (movimiento sutil) */
-@keyframes background-animacion {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 100% 50%; }
-}
-
-/* Contenedor principal */
 .container {
-    width: 100%;
-    max-width: 950px; /* Aumento del ancho para darle más espacio al formulario y la tabla */
-    padding: 0; /* Ya tenemos padding en el body */
-    box-sizing: border-box;
-    position: relative; 
-    z-index: 1; /* Asegura que el contenido esté sobre el fondo */
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 0 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
 }
 
-/* Estilos de la tarjeta del formulario (fondo claro y sombras) */
-.form-card {
-    background-color: var(--blanco); /* Blanco puro para más contraste */
-    border-radius: 15px;
-    padding: 40px;
-    padding-top: 0; /* Eliminamos el padding superior, ya que el header lo cubre */
-    box-shadow: 0 10px 30px var(--sombra-fuerte);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: var(--transicion-rapida);
+/* ------------------------------------------------ */
+/* TARJETAS (Formulario y Datos)                   */
+/* ------------------------------------------------ */
+.form-card, .registered-athletes-section {
+    background-color: var(--color-card-light);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    border-top: 5px solid var(--color-accent-gold); /* Detalle Dorado */
+}
+
+.registered-athletes-section {
+    border-top-color: var(--color-vinotinto-primary); /* Detalle Vinotinto */
+}
+
+.form-header {
+    text-align: center;
     margin-bottom: 30px;
 }
 
-.form-card:hover {
-    box-shadow: 0 18px 45px var(--sombra-fuerte);
-    transform: translateY(-5px) scale(1.005);
-}
-
-/* Contenedor para el encabezado con fondo vinotinto */
-.form-header {
-    text-align: center;
-    margin: -1px -40px 30px -40px; /* Margen negativo para expandirse al ancho de la tarjeta */
-    padding: 25px 40px;
-    background-color: var(--vinotinto); /* Fondo vinotinto */
-    border-top-left-radius: 15px;
-    border-top-right-radius: 15px;
-    box-shadow: 0 5px 15px var(--sombra);
-    color: var(--blanco); /* Texto blanco */
-}
-
 .form-header h2 {
-    font-size: 1.8em;
+    color: var(--color-vinotinto-primary);
+    font-size: 2rem;
     font-weight: 700;
-    color: var(--blanco); /* Título en blanco sobre vinotinto */
-    text-shadow: 1px 1px 2px var(--negro);
     margin: 0;
 }
-.form-header h2:first-child { font-size: 2.4em; }
 
 .form-header p {
-    color: rgba(255, 255, 255, 0.9); /* Texto descriptivo en blanco sutil */
-    margin-top: 15px;
-}
-
-/* Campos de formulario */
-.form-group { margin-bottom: 20px; }
-.form-row { display: flex; flex-wrap: wrap; gap: 20px; }
-.form-row .form-group { flex: 1; min-width: 200px; }
-
-label { display: block; margin-bottom: 8px; font-weight: 700; color: var(--gris-oscuro); transition: color 0.2s; }
-.required-star { color: var(--vinotinto-claro); font-size: 1.1em; margin-left: 3px; }
-.required-note { 
-    font-size: 0.9em; 
-    color: var(--gris-oscuro); 
-    text-align: right; 
-    margin-top: -10px; 
-    margin-bottom: 20px;
-    opacity: 0.8; 
-}
-
-/* ESTILOS UNIFICADOS PARA INPUTS Y SELECT */
-input[type="text"], input[type="email"], input[type="number"], input[type="tel"], input[type="date"], select {
-    width: 100%;
-    padding: 15px;
-    border: 2px solid var(--borde);
-    border-radius: 8px;
-    font-size: 1em;
-    background-color: var(--blanco);
-    color: var(--negro);
-    box-shadow: inset 0 1px 3px var(--sombra);
-    transition: var(--transicion-rapida);
-    box-sizing: border-box;
-    /* Estilos personalizados para SELECT */
-    -webkit-appearance: none; 
-    -moz-appearance: none; 
-    appearance: none; 
-    /* Flecha SVG de color vinotinto para el select */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23800020' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); 
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    padding-right: 35px; /* Espacio para el icono */
-}
-
-input:focus, select:focus {
-    outline: none;
-    border-color: var(--vinotinto-claro);
-    box-shadow: 0 0 12px rgba(163, 0, 42, 0.6);
-    background-color: var(--blanco);
-}
-
-/* Estilos del botón de envío */
-button[type="submit"] {
-    display: block;
-    width: 100%;
-    padding: 18px;
-    margin-top: 30px;
-    background-color: var(--vinotinto);
-    color: var(--blanco);
-    border: none;
-    border-radius: 10px;
-    font-size: 1.3em;
-    font-weight: 700;
-    cursor: pointer;
-    transition: var(--transicion-rapida);
-    box-shadow: 0 8px 20px var(--sombra-fuerte);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
-
-button[type="submit"]:hover {
-    background-color: var(--vinotinto-claro);
-    box-shadow: 0 12px 30px var(--sombra-fuerte);
-    transform: translateY(-4px);
-}
-
-/* --- ESTILOS PARA LA SECCIÓN DE DATOS REGISTRADOS (TABLA) --- */
-.registered-athletes-section {
-    margin-top: 40px;
-    background-color: var(--blanco); /* Fondo blanco para la tabla */
-    border-radius: 15px;
-    padding: 30px;
-    padding-top: 0;
-    box-shadow: 0 5px 20px var(--sombra-fuerte);
+    color: #666;
+    margin-top: 10px;
 }
 
 .registered-athletes-section h3 {
-    /* Título de la sección de datos con estilo vinotinto */
+    color: var(--color-vinotinto-dark);
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 20px;
     text-align: center;
-    color: var(--blanco); /* Texto blanco */
-    font-size: 1.8em;
-    padding: 15px 20px;
-    margin: -1px -30px 25px -30px; /* Margen negativo para expandirse */
-    background-color: var(--vinotinto-claro); /* Fondo vinotinto más brillante */
-    border-top-left-radius: 15px;
-    border-top-right-radius: 15px;
-    box-shadow: 0 3px 10px var(--sombra);
 }
 
-.no-data-message {
-    text-align: center;
-    color: var(--gris-oscuro);
-    padding: 20px;
-    font-style: italic;
-    opacity: 0.7;
+/* ------------------------------------------------ */
+/* FORMULARIO Y CAMPOS                             */
+/* ------------------------------------------------ */
+.form-group {
+    margin-bottom: 20px;
+    flex-grow: 1; /* Permite que los campos crezcan en .form-row */
 }
 
-.table-note-message {
-    text-align: center;
-    font-size: 0.9em;
-    color: var(--gris-oscuro);
-    margin-top: 15px;
-    margin-bottom: 25px;
-    opacity: 0.7;
+.form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 0;
+    /* Responsive adjustment for small screens */
 }
 
-/* Contenedor de tabla responsivo */
-.table-responsive-wrapper {
-    overflow-x: auto; /* Permite scroll horizontal si la tabla es muy ancha */
+@media (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--color-vinotinto-dark);
+    font-size: 0.95rem;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="email"],
+input[type="tel"],
+select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    font-size: 1rem;
+}
+
+input:focus, select:focus {
+    border-color: var(--color-accent-gold);
+    box-shadow: 0 0 0 3px rgba(255, 195, 0, 0.3);
+    outline: none;
+}
+
+.required-star {
+    color: var(--color-vinotinto-primary);
+}
+
+.required-note {
+    text-align: right;
+    font-size: 0.85rem;
+    color: #888;
+    margin-top: -10px;
+    margin-bottom: 20px;
+}
+
+/* Botón de Envío */
+button[type="submit"] {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    background-color: var(--color-vinotinto-primary);
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+button[type="submit"]:hover {
+    background-color: var(--color-vinotinto-dark);
+    transform: translateY(-2px);
+}
+
+/* ------------------------------------------------ */
+/* TABLA DE DATOS (Registered Athletes)            */
+/* ------------------------------------------------ */
+#registeredData {
+    overflow-x: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .athlete-data-table {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 8px; /* Espacio entre filas */
-    min-width: 700px; /* Asegura un ancho mínimo para la tabla */
+    min-width: 700px; /* Asegura un ancho mínimo para desktop */
+    border-collapse: collapse;
 }
 
-/* Estilos de la cabecera de la tabla */
-.athlete-data-table thead th {
-    background-color: var(--vinotinto); /* Vinotinto en cabecera de tabla */
-    color: var(--blanco);
-    padding: 12px 10px;
-    font-weight: 700;
+.athlete-data-table th, .athlete-data-table td {
+    padding: 12px 15px;
     text-align: left;
-    position: sticky;
-    top: 0;
-    cursor: default;
-    transition: background-color 0.2s;
-    white-space: nowrap; /* Evita que los encabezados se envuelvan */
+    border-bottom: 1px solid #eee;
 }
 
-/* Indicador visual de que la columna es clickeable/ordenable */
-.athlete-data-table thead th[data-sort-key]:hover {
-    background-color: var(--vinotinto-claro); /* Tono más claro al pasar el ratón */
+.athlete-data-table th {
+    background-color: var(--color-vinotinto-primary);
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
     cursor: pointer;
+    position: sticky; /* Fija la cabecera si hay mucho scroll */
+    top: 0;
 }
 
-/* Estilos para indicar la columna actualmente ordenada */
-.athlete-data-table thead th.sorted-asc,
-.athlete-data-table thead th.sorted-desc {
-    background-color: var(--vinotinto-claro); 
-    position: relative;
-}
-.athlete-data-table thead th.sorted-asc::after {
-    content: ' ▲'; 
-    font-size: 0.8em;
-    padding-left: 5px;
-}
-.athlete-data-table thead th.sorted-desc::after {
-    content: ' ▼';
-    font-size: 0.8em;
-    padding-left: 5px;
+.athlete-data-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
 }
 
-
-/* Estilos de las filas de datos */
-.athlete-table-row {
-    background-color: var(--gris-claro); /* Fondo gris muy claro para filas (rayado) */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease;
+.athlete-data-table tbody tr:hover {
+    background-color: #fffbe6; /* Color muy claro al pasar el ratón */
 }
 
-.athlete-table-row:nth-child(even) {
-    background-color: var(--blanco); /* Filas pares en blanco */
+/* Mensaje de No Data */
+.no-data-message {
+    text-align: center;
+    padding: 20px;
+    color: var(--color-vinotinto-dark);
+    font-style: italic;
 }
 
-.athlete-table-row:hover {
-    background-color: #e0e0e0; /* Un poco más oscuro al pasar el ratón */
-    box-shadow: 0 4px 10px var(--sombra);
-}
-
-.athlete-table-row td {
-    padding: 12px 10px;
-    border: none;
-    vertical-align: middle;
-}
-
-/* Bordes redondeados para la primera y última celda de la cabecera */
-.athlete-data-table thead tr th:first-child { border-top-left-radius: 8px; }
-.athlete-data-table thead tr th:last-child { border-top-right-radius: 8px; }
-
-/* Bordes redondeados para la primera y última celda de cada fila de datos */
-.athlete-table-row td:first-child { 
-    border-bottom-left-radius: 8px; 
-    border-top-left-radius: 8px; 
-    border-left: 4px solid var(--vinotinto-claro); /* Borde de color */
-}
-.athlete-table-row td:last-child { 
-    border-bottom-right-radius: 8px; 
-    border-top-right-radius: 8px; 
-}
-
-/* --- Responsividad de la Tabla (Mobile First) --- */
-
-/* Mobile View: Convertir cada fila en una tarjeta */
-@media (max-width: 767px) {
-    .athlete-data-table {
-        display: block;
-        min-width: 100%;
-    }
-    .athlete-data-table thead {
-        display: none; /* Ocultamos la cabecera de la tabla en móvil */
-    }
-
-    .athlete-table-row {
-        display: block;
-        margin-bottom: 15px;
-        border-left: none !important;
-        border-radius: 10px;
-        box-shadow: 0 3px 8px var(--sombra);
-    }
-    
-    .athlete-table-row td {
-        display: block; /* Cada celda toma el ancho completo de la tarjeta */
-        text-align: right;
-        padding: 10px 15px;
-        border-bottom: 1px solid var(--borde);
-    }
-    .athlete-table-row td:last-child {
-        border-bottom: none;
-    }
-
-    /* Mostrar el nombre del campo (header) en la vista móvil usando el atributo data-label */
-    .athlete-table-row td::before {
-        content: attr(data-label);
-        float: left;
-        font-weight: 700;
-        color: var(--vinotinto); /* Color vinotinto para las etiquetas en móvil */
-    }
-
-    /* Ocultar / Mostrar columnas específicas en móvil */
-    .table-hidden-mobile {
-        display: none; /* Ocultar en móvil por defecto */
-    }
-    .table-hidden-desktop {
-        display: block; /* Mostrar campos importantes en móvil (ej. Correo, Teléfono) */
-    }
-
-    /* Reseteo de bordes para móvil */
-    .athlete-table-row td:first-child, .athlete-table-row td:last-child { 
-        border-radius: 0; 
-        border-left: none;
-    }
-    .athlete-table-row td:first-child { border-top-left-radius: 10px; border-top-right-radius: 10px; border-top: 4px solid var(--vinotinto-claro); }
-    .athlete-table-row td:last-child { border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; }
-    
-    .form-header {
+/* ------------------------------------------------ */
+/* RESPONSIVE: MÓVIL (Data-Label Pattern)          */
+/* ------------------------------------------------ */
+@media screen and (max-width: 768px) {
+    .form-card, .registered-athletes-section {
         padding: 20px;
     }
-    .form-header h2:first-child { font-size: 1.8em; }
-    .form-header h2 { font-size: 1.3em; }
-    .form-card { padding: 20px; }
-}
+    
+    /* Oculta el encabezado real de la tabla en móvil */
+    .athlete-data-table thead {
+        display: none;
+    }
 
-/* Estilos para el modal */
-.custom-modal {
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.4);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: opacity 0.3s;
-}
+    /* Muestra cada fila y celda como bloques */
+    .athlete-data-table, .athlete-data-table tbody, .athlete-data-table tr {
+        display: block;
+        width: 100%;
+    }
+    
+    .athlete-data-table tr {
+        margin-bottom: 15px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        overflow: hidden;
+    }
 
-.modal-content {
-    background-color: white;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-    max-width: 90%;
-    min-width: 300px;
-    position: relative;
-    font-family: 'Montserrat', sans-serif;
-    text-align: center;
-}
+    .athlete-data-table td {
+        text-align: right;
+        padding-left: 50%;
+        position: relative;
+    }
 
-.custom-modal.error .modal-content {
-    border: 3px solid #D32F2F; /* Rojo para error */
-}
-.custom-modal.success .modal-content {
-    border: 3px solid #388E3C; /* Verde para éxito */
-}
-.custom-modal.info .modal-content {
-    border: 3px solid #1976D2; /* Azul para info */
-}
-
-.modal-content p {
-    margin: 0;
-    font-size: 1.1em;
-    color: var(--gris-oscuro);
-}
-
-.close-button {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    position: absolute;
-    top: 5px;
-    right: 10px;
-    cursor: pointer;
-    transition: color 0.2s;
-}
-
-.close-button:hover,
-.close-button:focus {
-    color: #000;
-    text-decoration: none;
-    cursor: pointer;
+    /* Crea la etiqueta para cada celda usando el atributo data-label */
+    .athlete-data-table td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        width: 50%;
+        padding-left: 15px;
+        font-weight: 700;
+        text-align: left;
+        color: var(--color-vinotinto-primary);
+    }
 }
