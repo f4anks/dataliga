@@ -3,585 +3,561 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data de Atletas - Liga de Voleibol Menor del Estado Lara</title>
+    <title>Data de Atletas - Liga de Voleibol</title>
+    <!-- Carga la librería Tailwind CSS para estilos modernos y responsive -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carga la fuente Inter (similar a Montserrat) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
-        
-        /* Configuración de la fuente (Montserrat) y colores base */
-        :root {
-            --primary-color: #720025; /* Granate oscuro */
-            --secondary-bg: #f7e8ec; /* Fondo claro para filas alternas */
-            --header-bg: #e5e7eb; /* Fondo de encabezado de tabla */
-        }
-
+        /* Estilos base de Tailwind */
         body {
-            font-family: 'Montserrat', sans-serif; /* Usamos la fuente solicitada */
-            color: #333;
-            background-color: #f3f4f6;
-        }
-
-        /* Estilo del botón primario */
-        .primary-btn {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-        .primary-btn:hover {
-            background-color: #a00035;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Estilos para el nuevo layout del formulario */
-        .form-group label {
-            display: block;
-            margin-bottom: 0.3rem;
-            font-weight: 600;
-            color: #4b5563;
-            font-size: 0.875rem;
-        }
-
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #d1d5db;
-            border-radius: 0.5rem;
-            transition: border-color 0.2s, box-shadow 0.2s;
-            outline: none;
-        }
-
-        .form-group input:focus, .form-group select:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(114, 0, 37, 0.2);
-        }
-
-        .required-star {
-            color: #ef4444;
-            font-weight: 700;
-            margin-left: 2px;
-        }
-
-        .required-note {
-            font-size: 0.875rem;
-            color: #6b7280;
-            margin-top: -0.5rem;
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f7f9; /* Gris claro de fondo */
         }
         
-        /* Estilos de tabla responsive (Manteniendo el Data-Label) */
-        .table-responsive-wrapper {
-            overflow-x: auto;
-            width: 100%;
-        }
-
+        /* Estilos personalizados para la tabla y la responsividad */
+        /* Eliminamos el enfoque "table-scroll-wrapper" y usamos overflow-x-auto de Tailwind */
         .athlete-data-table {
-            width: 100%;
-            min-width: 700px; /* Asegura un ancho mínimo en escritorio */
-            border-collapse: collapse;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            min-width: 100%;
         }
 
-        .athlete-data-table th, .athlete-data-table td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #e0e0e0;
+        /* Estilo para el ícono de ordenamiento */
+        .sorted-asc::after {
+            content: " \25B2"; /* Triángulo hacia arriba */
+            font-size: 0.8rem;
         }
-
-        .athlete-data-table th {
-            background-color: var(--header-bg);
-            font-weight: 600;
-            color: #4b5563;
-            cursor: pointer;
-            transition: background-color 0.2s;
+        .sorted-desc::after {
+            content: " \25BC"; /* Triángulo hacia abajo */
+            font-size: 0.8rem;
         }
         
-        .athlete-table-row:nth-child(even) td {
-            background-color: var(--secondary-bg);
+        /* Estilo para los mensajes de estado (Éxito/Error) */
+        #statusMessage {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
         }
 
-        /* Indicadores de ordenamiento */
-        .sorted-asc, .sorted-desc {
-            position: relative;
-        }
-        .sorted-asc::after { content: ' ▲'; font-size: 0.7em; }
-        .sorted-desc::after { content: ' ▼'; font-size: 0.7em; }
-
-        /* Responsive (Mobile view) - Aplicando el patrón Data-Label */
-        @media screen and (max-width: 768px) {
-            .athlete-data-table {
-                min-width: unset;
+        /* Responsive Table: Mostrar como bloques en pantallas muy pequeñas (< 768px) */
+        @media screen and (max-width: 767px) {
+            .athlete-data-table thead {
+                display: none; /* Oculta el encabezado en móvil */
             }
-            .athlete-data-table thead, .table-hidden-mobile {
-                display: none;
+            .athlete-data-table, .athlete-data-table tbody, .athlete-data-table tr, .athlete-data-table td {
+                display: block;
+            }
+            .athlete-data-table tr {
+                margin-bottom: 0.5rem;
+                border-bottom: 2px solid #e0e0e0;
+                padding: 0.5rem 0;
             }
             .athlete-data-table td {
-                display: block;
                 text-align: right;
-                border-bottom: 1px solid #f3f4f6;
-                padding: 10px 15px;
-                padding-left: 50%; /* Espacio para el label */
+                padding-left: 50%;
                 position: relative;
-            }
-            .athlete-data-table td:last-child {
-                border-bottom: none;
+                border: none;
+                padding-top: 0.25rem;
+                padding-bottom: 0.25rem;
             }
             .athlete-data-table td::before {
                 content: attr(data-label);
                 position: absolute;
                 left: 0;
                 width: 50%;
-                padding-left: 15px;
-                font-weight: 700;
+                padding-left: 1rem;
+                font-weight: 600;
                 text-align: left;
-                color: var(--primary-color);
+                color: #4b5563;
             }
-            .athlete-table-row {
-                display: block;
-                margin-bottom: 1rem;
-                border: 1px solid #e0e0e0;
-                border-radius: 8px;
-                overflow: hidden;
-            }
-            .table-hidden-desktop {
-                display: block;
-            }
+            /* Clases de utilidad para visibilidad responsive */
+            .table-hidden-mobile { display: none; }
+            .table-hidden-desktop { display: block; }
         }
-        @media (min-width: 769px) {
-            .table-hidden-desktop {
-                display: none;
-            }
+        /* Para escritorio (>= 768px) */
+        @media screen and (min-width: 768px) {
+            .table-hidden-desktop { display: none !important; }
+            .table-hidden-mobile { display: table-cell !important; }
         }
-    </style>
 
+    </style>
+</head>
+<body>
+    <!-- Mensaje de estado (se inyecta aquí o se crea dinámicamente) -->
+    <div id="statusMessage" class="fixed top-4 right-4 p-4 rounded-lg shadow-lg text-white font-semibold z-50 transition-opacity duration-500" style="opacity: 0;"></div>
+
+    <!-- BANNER DE ENCABEZADO -->
+    <div class="banner-wrapper w-full bg-cover bg-center h-32 md:h-48 flex items-center justify-center shadow-md"
+        style="background-image: url('https://placehold.co/1200x200/4c4187/ffffff?text=LVMeL+%7C+Liga+de+Voleibol'); background-color: #4c4187;">
+        <h1 class="text-white text-3xl md:text-5xl font-bold tracking-tight text-center p-2 bg-black bg-opacity-30 rounded-lg">LVMeL - Data de Atletas</h1>
+    </div>
+    <!-- FIN DEL BANNER -->
+
+    <div class="container mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <!-- Tarjeta del Formulario -->
+        <div class="form-card bg-white p-6 md:p-8 rounded-xl shadow-2xl border-t-4 border-indigo-600">
+            <div class="form-header text-center mb-6">
+                <h2 class="text-3xl font-extrabold text-gray-900 mb-2">Registro de Atletas</h2>
+                <p class="text-gray-500">Por favor, complete el siguiente formulario para registrar un atleta.</p>
+            </div>
+            
+            <form id="athleteForm" class="space-y-4">
+                
+                <!-- Club -->
+                <div class="form-group"> 
+                    <label for="club" class="block text-sm font-medium text-gray-700 mb-1">Club <span class="text-red-500">*</span></label>
+                    <input id="club" name="club" required type="text" placeholder="Ej: Barquisimeto Voleibol Club"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150"> 
+                </div>
+
+                <!-- Nombre y Apellido -->
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="form-group w-full"> 
+                        <label for="nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre <span class="text-red-500">*</span></label>
+                        <input id="nombre" name="nombre" required type="text" placeholder="Ej: Juan"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150"> 
+                    </div>
+                    <div class="form-group w-full"> 
+                        <label for="apellido" class="block text-sm font-medium text-gray-700 mb-1">Apellido <span class="text-red-500">*</span></label>
+                        <input id="apellido" name="apellido" required type="text" placeholder="Ej: Pérez"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150"> 
+                    </div>
+                </div>
+
+                <!-- Categoría, Talla y Peso -->
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="form-group w-full md:w-1/2"> 
+                        <label for="categoria" class="block text-sm font-medium text-gray-700 mb-1">Categoría <span class="text-red-500">*</span></label>
+                        <select id="categoria" name="categoria" required 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white appearance-none transition duration-150">
+                            <option value="" disabled selected>Selecciona una Categoría</option>
+                            <option value="3ra División">3ra División</option>
+                            <option value="2da División">2da División</option>
+                            <option value="1era División">1era División</option>
+                            <option value="CIAR">CIAR</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group w-full md:w-1/4"> 
+                        <label for="talla" class="block text-sm font-medium text-gray-700 mb-1">Talla (cm)</label> 
+                        <input id="talla" name="talla" type="number" placeholder="Ej: 180" min="50" max="300"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150"> 
+                    </div>
+                    <div class="form-group w-full md:w-1/4"> 
+                        <label for="peso" class="block text-sm font-medium text-gray-700 mb-1">Peso (kg)</label> 
+                        <input id="peso" name="peso" type="number" placeholder="Ej: 75" min="20" max="250"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150"> 
+                    </div>
+                </div>
+
+                <!-- Fecha Nacimiento, Correo y Teléfono -->
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="form-group w-full md:w-1/3"> 
+                        <label for="fechaNac" class="block text-sm font-medium text-gray-700 mb-1">F. Nacimiento <span class="text-red-500">*</span></label> 
+                        <input id="fechaNac" name="fechaNac" required type="date"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150"> 
+                    </div>
+                    
+                    <div class="form-group w-full md:w-1/3"> 
+                        <label for="correo" class="block text-sm font-medium text-gray-700 mb-1">Correo <span class="text-red-500">*</span></label>
+                        <input id="correo" name="correo" required type="email" placeholder="Ej: atleta@correo.com"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150"> 
+                    </div>
+
+                    <div class="form-group w-full md:w-1/3"> 
+                        <label for="telefono" class="block text-sm font-medium text-gray-700 mb-1">Teléfono <span class="text-red-500">*</span></label>
+                        <input id="telefono" name="telefono" required type="tel" placeholder="Ej: 0412-1234567"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150"> 
+                    </div>
+                </div>
+                
+                <p class="text-xs text-gray-500 mt-4"><span class="text-red-500">*</span> Campos obligatorios</p>
+
+                <button type="submit"
+                        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-md transition duration-200 transform hover:scale-[1.01] focus:outline-none focus:ring-4 focus:ring-indigo-300 mt-6">
+                    Registrar Atleta
+                </button>
+            </form>
+        </div>
+
+        <!-- Sección de Atletas Registrados -->
+        <div class="registered-athletes-section lg:col-span-1 bg-white p-6 md:p-8 rounded-xl shadow-2xl border-t-4 border-indigo-600">
+            <h3 class="text-2xl font-extrabold text-gray-900 mb-4 text-center">Atletas Registrados (Real-Time)</h3>
+            <div id="registeredData" class="overflow-x-auto shadow-inner rounded-lg p-1">
+                <p class="text-gray-500 text-center py-4 no-data-message">Cargando datos...</p>
+            </div>
+            <p class="text-xs text-gray-500 mt-4 text-center table-note-message hidden">
+                Haz clic en cualquier encabezado de la tabla para ordenar los resultados (por ejemplo, por Apellido o Categoría).
+            </p>
+        </div>
+        
+    </div>
+    
+    <!-- Scripts de Seguridad y Firebase -->
     <script type="module">
-        // 1. IMPORTACIONES DE FIREBASE
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, collection, query, addDoc, onSnapshot, setLogLevel } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        // 1. IMPORTACIONES DE FIREBASE (Usamos la última versión estable)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, query, addDoc, onSnapshot, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // VARIABLES DE ESTADO Y FIREBASE
         let db;
         let auth;
-        let userId = ''; 
-        let athletesData = []; 
-        let currentSortKey = 'apellido'; 
-        let sortDirection = 'asc'; 
+        let userId = ''; 
+        let athletesData = []; // Array que contendrá los datos sincronizados de Firestore
+        let currentSortKey = 'apellido'; 
+        let sortDirection = 'asc'; 
+        const DEFAULT_APP_ID = 'lvmel-default-app'; // ID de respaldo
 
+        // Configuración de Logging de Firebase (útil para la depuración)
         setLogLevel('Debug');
 
-        // =========================================================================
-        // !!! ATENCIÓN: CONFIGURACIÓN PARA AMBIENTE EXTERNO (GitHub Pages) !!!
-        // Se usa la configuración base de la aplicación.
-        // =========================================================================
-        const EXTERNAL_FIREBASE_CONFIG = {
-            apiKey: "AIzaSyA5u1whBdu_fVb2Kw7SDRZbuyiM77RXVDE",
-            authDomain: "datalvmel.firebaseapp.com",
-            projectId: "datalvmel",
-            storageBucket: "datalvmel.firebasestorage.app",
-            messagingSenderId: "733536533303",
-            appId: "1:733536533303:web:3d2073504aefb2100378b2"
-        };
-
         /**
-         * Muestra un mensaje temporal de estado en la interfaz.
-         */
+         * Muestra un mensaje temporal de estado en la interfaz.
+         * @param {string} message - El texto a mostrar.
+         * @param {string} type - 'success' o 'error'.
+         */
         function displayStatusMessage(message, type) {
-            let statusEl = document.getElementById('statusMessage');
-            if (!statusEl) {
-                statusEl = document.createElement('div');
-                statusEl.id = 'statusMessage';
-                statusEl.className = 'fixed top-4 right-4 p-3 rounded-lg shadow-xl text-white opacity-0 transition-opacity duration-500 z-50';
-                document.body.appendChild(statusEl);
-            }
-            
-            statusEl.textContent = message;
-            statusEl.style.backgroundColor = type === 'success' ? '#10b981' : '#ef4444';
-            statusEl.style.opacity = '1';
+            const statusEl = document.getElementById('statusMessage');
+            if (!statusEl) return;
+            
+            statusEl.textContent = message;
+            statusEl.className = 'fixed top-4 right-4 p-4 rounded-lg shadow-lg text-white font-semibold z-50 transition-opacity duration-500';
 
-            setTimeout(() => {
-                statusEl.style.opacity = '0';
-            }, 4000);
+            statusEl.style.backgroundColor = type === 'success' ? '#10b981' : '#ef4444'; // Tailwind: emerald-500 vs red-500
+            statusEl.style.opacity = '1';
+
+            // Ocultar después de 4 segundos
+            setTimeout(() => {
+                statusEl.style.opacity = '0';
+            }, 4000);
         }
 
-
         /**
-         * 2. INICIALIZACIÓN Y AUTENTICACIÓN
-         */
+         * 2. INICIALIZACIÓN Y AUTENTICACIÓN
+         * Inicializa Firebase, autentica al usuario y configura el listener en tiempo real.
+         */
         async function initFirebaseAndLoadData() {
-            console.log("Iniciando Firebase y autenticación...");
-            try {
-                let configToUse;
-                let appIdToUse;
-                let tokenToUse = '';
+            console.log("Iniciando Firebase y autenticación...");
+            try {
+                // Leer variables globales obligatorias del entorno Canvas
+                const appId = typeof __app_id !== 'undefined' ? __app_id : DEFAULT_APP_ID;
+                const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+                const tokenToUse = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : '';
 
-                const safeParseConfig = (config) => {
-                    try {
-                        return JSON.parse(config);
-                    } catch (e) {
-                        return null;
-                    }
-                };
-                
-                if (typeof __firebase_config !== 'undefined' && __firebase_config.length > 2) {
-                    configToUse = safeParseConfig(__firebase_config);
-                    appIdToUse = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-                    tokenToUse = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : '';
-                } 
-                
-                if (!configToUse) {
-                    configToUse = EXTERNAL_FIREBASE_CONFIG;
-                    appIdToUse = configToUse.projectId; 
-                    tokenToUse = ''; 
-                }
-
-                if (!configToUse.projectId) {
-                    console.error("ERROR FATAL: La configuración de Firebase está incompleta (falta projectId).");
-                    displayStatusMessage("Error: La configuración de Firebase no es válida. No se puede conectar.", 'error');
+                if (Object.keys(firebaseConfig).length === 0) {
+                    displayStatusMessage("Error: Configuración de Firebase no cargada.", 'error');
+                    console.error("Configuración de Firebase vacía o no disponible.");
                     return;
                 }
 
-                const app = initializeApp(configToUse);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                
-                if (tokenToUse.length > 0) {
-                    try {
-                        await signInWithCustomToken(auth, tokenToUse);
-                    } catch (e) {
-                        await signInAnonymously(auth);
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                // Autenticación: Usar token personalizado (si existe) o anónimo
+                if (tokenToUse.length > 0) {
+                    await signInWithCustomToken(auth, tokenToUse);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                
+                // Esperar el cambio de estado de autenticación
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        console.log("Usuario autenticado. UID:", userId);
+                        setupRealtimeListener(appId);
+                    } else {
+                        console.error("No se pudo autenticar. Usando ID aleatorio temporal.");
+                        userId = crypto.randomUUID(); // Fallback ID
+                        setupRealtimeListener(appId);
                     }
-                } else {
-                    await signInAnonymously(auth);
-                }
-                
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        userId = user.uid;
-                        setupRealtimeListener(appIdToUse);
-                        displayStatusMessage("Conexión y autenticación exitosas.", 'success');
-                    } else {
-                        userId = crypto.randomUUID(); 
-                        setupRealtimeListener(appIdToUse);
-                    }
-                });
+                });
 
-            } catch (e) {
-                console.error("Error al inicializar Firebase:", e);
-                displayStatusMessage(`Error crítico de inicialización: ${e.message}`, 'error');
-            }
+            } catch (e) {
+                console.error("Error al inicializar Firebase:", e);
+                displayStatusMessage(`Error crítico de Firebase: ${e.message}`, 'error');
+            }
         }
 
         /**
-         * 3. ESCUCHA EN TIEMPO REAL (onSnapshot)
-         */
+         * 3. ESCUCHA EN TIEMPO REAL (onSnapshot)
+         * Configura la escucha en tiempo real para la colección de atletas (Datos Públicos).
+         */
         function setupRealtimeListener(appId) {
-            // Ruta pública: artifacts/{appId}/public/data/athletes
-            const athletesColRef = collection(db, `artifacts/${appId}/public/data/athletes`);
-            const q = query(athletesColRef);
+            // La ruta pública es: artifacts/{appId}/public/data/athletes
+            const collectionPath = `artifacts/${appId}/public/data/athletes`;
+            console.log(`Configurando listener para: ${collectionPath}`);
+            const athletesColRef = collection(db, collectionPath);
+            const q = query(athletesColRef);
 
-            onSnapshot(q, (snapshot) => {
-                console.log("Datos de Firestore actualizados. Sincronizando tabla...");
-                const fetchedData = [];
-                snapshot.forEach((doc) => {
-                    fetchedData.push({ 
-                        id: doc.id, // ID del documento
-                        ...doc.data() 
-                    });
-                });
-                
-                athletesData = fetchedData;
-                
-                if (athletesData.length > 0) {
-                    sortTable(currentSortKey, false); 
-                } else {
-                     renderTable();
-                }
-            }, (error) => {
-                console.error("Error en la escucha en tiempo real:", error);
-                displayStatusMessage("❌ ERROR DE CONEXIÓN: No se pudo cargar la data. Revisa las reglas de seguridad de Firestore.", 'error');
-            });
+            onSnapshot(q, (snapshot) => {
+                console.log("Datos de Firestore actualizados. Sincronizando tabla...");
+                const fetchedData = [];
+                snapshot.forEach((doc) => {
+                    fetchedData.push({ 
+                        id: doc.id, // ID del documento
+                        ...doc.data() 
+                    });
+                });
+                
+                // Reemplazamos los datos locales y forzamos el ordenamiento inicial
+                athletesData = fetchedData;
+                
+                // Ordena sin cambiar la dirección (mantiene el estado)
+                sortTable(currentSortKey, false); 
+                
+            }, (error) => {
+                console.error("Error en la escucha en tiempo real (Permiso denegado si reglas incorrectas):", error);
+                // No mostramos error de permiso en el UI a menos que sea después del envío.
+                document.getElementById('registeredData').innerHTML = '<p class="text-center text-red-500 py-4">Error al cargar datos. Verifique los permisos de lectura de Firestore.</p>';
+            });
         }
 
         function setupFormListener() {
-            const form = document.getElementById('athleteForm');
-            if (form) {
-                form.addEventListener('submit', handleFormSubmit);
-                console.log("Listener de formulario de atleta adjunto.");
-            } else {
-                console.error("Error: No se encontró el formulario con ID 'athleteForm'.");
-            }
+            const form = document.getElementById('athleteForm');
+            if (form) {
+                form.addEventListener('submit', handleFormSubmit);
+                console.log("Listener de formulario de atleta adjunto.");
+            } else {
+                console.error("Error: No se encontró el formulario con ID 'athleteForm'.");
+            }
         }
 
 
         /**
-         * 4. FUNCIÓN DE GUARDADO (handleFormSubmit)
-         */
+         * 4. FUNCIÓN DE GUARDADO (handleFormSubmit)
+         * Maneja el envío del formulario y guarda los datos en Firestore.
+         */
         async function handleFormSubmit(event) {
-            event.preventDefault(); 
+            // CRÍTICO: Detiene la recarga de la página
+            event.preventDefault(); 
 
-            if (!db) {
-                displayStatusMessage("Error: La base de datos no está inicializada.", 'error');
-                return false;
-            }
+            if (!db) {
+                console.error("Base de datos no inicializada. No se pudo guardar.");
+                displayStatusMessage("Error: La base de datos no está inicializada.", 'error');
+                return false;
+            }
 
-            const form = document.getElementById('athleteForm');
+            const form = document.getElementById('athleteForm');
 
-            // 1. Recolectar datos y preparar el objeto (documento)
-            const tallaValue = form.talla.value;
-            const pesoValue = form.peso.value;
-            
-            const newAthlete = {
-                club: form.club.value,
-                nombre: form.nombre.value,
-                apellido: form.apellido.value,
-                fechaNac: form.fechaNac.value,
-                categoria: form.categoria.value, 
-                tallaRaw: tallaValue, 
-                pesoRaw: pesoValue,   
-                tallaFormatted: tallaValue ? `${tallaValue} cm` : 'N/A',
-                pesoFormatted: pesoValue ? `${pesoValue} kg` : 'N/A',
-                correo: form.correo.value,
-                telefono: form.telefono.value,
-                timestamp: Date.now() 
-            };
-            
-            try {
-                let appIdToUse;
-                if (typeof __app_id !== 'undefined') {
-                    appIdToUse = __app_id; // Si estamos en Canvas
-                } else {
-                    appIdToUse = EXTERNAL_FIREBASE_CONFIG.projectId; // Si estamos en entorno externo
-                }
+            // 1. Recolectar datos y preparar el objeto (documento)
+            const tallaValue = form.talla.value;
+            const pesoValue = form.peso.value;
+            
+            const newAthlete = {
+                club: form.club.value.trim(),
+                nombre: form.nombre.value.trim(),
+                apellido: form.apellido.value.trim(),
+                fechaNac: form.fechaNac.value,
+                categoria: form.categoria.value, 
+                // Almacenar valores raw para ordenamiento numérico
+                tallaRaw: tallaValue ? parseFloat(tallaValue) : null, 
+                pesoRaw: pesoValue ? parseFloat(pesoValue) : null,
+                // Almacenar valores formateados para visualización
+                tallaFormatted: tallaValue ? `${tallaValue} cm` : 'N/A',
+                pesoFormatted: pesoValue ? `${pesoValue} kg` : 'N/A',
+                correo: form.correo.value.trim(),
+                telefono: form.telefono.value.trim(),
+                timestamp: Date.now() 
+            };
+            
+            try {
+                // 2. OBTENER EL APP ID PARA LA RUTA DE GUARDADO
+                const appIdToUse = typeof __app_id !== 'undefined' ? __app_id : DEFAULT_APP_ID;
 
-                // Ruta pública: artifacts/{appId}/public/data/athletes
-                const athletesColRef = collection(db, `artifacts/${appIdToUse}/public/data/athletes`);
-                await addDoc(athletesColRef, newAthlete); 
-                displayStatusMessage("¡Atleta registrado con éxito! (Sincronizando tabla...)", 'success');
-                
-            } catch(error) {
-                console.error("!!! ERROR CRÍTICO AL INTENTAR GUARDAR !!!", error);
-                if (error.code === 'permission-denied') {
-                     displayStatusMessage("❌ ERROR DE PERMISO: No se pudo guardar. Revisa tus Reglas de Firestore.", 'error');
-                } else {
-                    displayStatusMessage(`❌ ERROR: ${error.message}`, 'error');
-                }
+                // 3. GUARDAR DATOS EN FIRESTORE (Colección pública)
+                const athletesColRef = collection(db, `artifacts/${appIdToUse}/public/data/athletes`);
+                await addDoc(athletesColRef, newAthlete); 
+                console.log("Atleta registrado y guardado en Firestore con éxito.");
+                displayStatusMessage("¡Atleta registrado con éxito! (Sincronizando tabla...)", 'success');
+                
+            } catch(error) {
+                console.error("!!! ERROR CRÍTICO AL INTENTAR GUARDAR !!!", error.message);
+                
+                let userErrorMessage = "❌ ERROR: No se pudo guardar el atleta.";
+                if (error.code === 'permission-denied') {
+                    userErrorMessage = "❌ ERROR DE PERMISO: No se pudo guardar. Revisa tus Reglas de Firestore.";
+                } else if (error.message.includes('No document to set')) {
+                     userErrorMessage = "❌ ERROR: Base de datos no inicializada correctamente.";
+                }
 
-            } finally {
-                form.reset();
-            }
-            
-            return false; 
+                displayStatusMessage(userErrorMessage, 'error');
+
+            } finally {
+                // 4. Resetear el formulario.
+                form.reset();
+            }
+            
+            return false; 
         }
 
         /**
-         * LÓGICA DE ORDENAMIENTO Y RENDERIZADO
-         */
+         * LÓGICA DE ORDENAMIENTO Y RENDERIZADO
+         */
         function sortTable(key, toggleDirection = true) {
-            if (currentSortKey === key && toggleDirection) {
-                sortDirection = (sortDirection === 'asc') ? 'desc' : 'asc';
-            } else if (currentSortKey !== key) {
-                currentSortKey = key;
-                sortDirection = 'asc';
-            }
+            if (currentSortKey === key && toggleDirection) {
+                sortDirection = (sortDirection === 'asc') ? 'desc' : 'asc';
+            } else if (currentSortKey !== key) {
+                currentSortKey = key;
+                sortDirection = 'asc';
+            }
 
-            athletesData.sort((a, b) => {
-                let valA = a[key];
-                let valB = b[key];
+            athletesData.sort((a, b) => {
+                let valA = a[key];
+                let valB = b[key];
 
-                if (key === 'tallaRaw' || key === 'pesoRaw') {
-                    valA = parseFloat(valA) || 0;
-                    valB = parseFloat(valB) || 0;
-                } else if (key === 'fechaNac') {
-                    valA = new Date(valA);
-                    valB = new Date(valB);
-                } else {
-                    valA = String(valA || "").toLowerCase();
-                    valB = String(valB || "").toLowerCase();
-                }
+                // Manejo de valores nulos o no definidos para Talla/Peso
+                if (key === 'tallaRaw' || key === 'pesoRaw') {
+                    // Trata nulos (N/A) como 0 o el valor más bajo para ordenación
+                    valA = a[key] !== null ? a[key] : (sortDirection === 'asc' ? -Infinity : Infinity);
+                    valB = b[key] !== null ? b[key] : (sortDirection === 'asc' ? -Infinity : Infinity);
+                } else if (key === 'fechaNac') {
+                    valA = new Date(valA);
+                    valB = new Date(valB);
+                } else {
+                    valA = String(valA).toLowerCase();
+                    valB = String(valB).toLowerCase();
+                }
 
-                let comparison = 0;
-                if (valA > valB) { comparison = 1; } 
-                else if (valA < valB) { comparison = -1; }
-                
-                return (sortDirection === 'desc') ? (comparison * -1) : comparison;
-            });
+                let comparison = 0;
+                if (valA > valB) { comparison = 1; } 
+                else if (valA < valB) { comparison = -1; }
+                
+                return (sortDirection === 'desc') ? (comparison * -1) : comparison;
+            });
 
-            renderTable();
+            renderTable();
         }
 
         function renderTable() {
-            const registeredDataContainer = document.getElementById('registeredData');
-            
-            if (athletesData.length === 0) {
-                registeredDataContainer.innerHTML = '<p class="no-data-message p-6 text-center text-gray-500 italic">No hay atletas registrados aún. ¡Registra el primero!</p>';
-                return;
-            }
+            const registeredDataContainer = document.getElementById('registeredData');
+            const noteMessage = document.querySelector('.table-note-message');
+            
+            if (athletesData.length === 0) {
+                registeredDataContainer.innerHTML = '<p class="text-gray-500 text-center py-4 no-data-message">No hay atletas registrados aún. ¡Registra el primero!</p>';
+                if(noteMessage) noteMessage.classList.add('hidden');
+                return;
+            }
 
-            let table = document.getElementById('athleteTable');
-            let tableBody = document.getElementById('athleteTableBody');
+            if(noteMessage) noteMessage.classList.remove('hidden');
 
-            if (!table) {
-                registeredDataContainer.innerHTML = `
-                    <div class="table-responsive-wrapper">
-                        <table id="athleteTable" class="athlete-data-table">
-                            <thead>
-                                <tr class="table-header-row">
-                                    <th data-sort-key="club">Club</th>
-                                    <th data-sort-key="nombre">Nombre</th>
-                                    <th data-sort-key="apellido">Apellido</th>
-                                    <th data-sort-key="fechaNac" class="table-hidden-mobile">F. Nac.</th>
-                                    <th data-sort-key="categoria">Categoría</th>
-                                    <th data-sort-key="tallaRaw" class="table-hidden-mobile">Talla</th>
-                                    <th data-sort-key="pesoRaw" class="table-hidden-mobile">Peso</th>
-                                    <th data-sort-key="correo" class="table-hidden-desktop">Correo</th>
-                                    <th data-sort-key="telefono" class="table-hidden-desktop">Teléfono</th>
-                                </tr>
-                            </thead>
-                            <tbody id="athleteTableBody">
-                            </tbody>
-                        </table>
-                    </div>
-                    <p class="table-note-message p-2 text-xs text-gray-500 text-center">Haz clic en cualquier encabezado de la tabla para ordenar.</p>
-                `;
-                tableBody = document.getElementById('athleteTableBody');
-                setupSorting(); 
-            } else {
-                tableBody.innerHTML = '';
-            }
-            
-            athletesData.forEach(data => {
-                const newRow = tableBody.insertRow(-1); 
-                newRow.classList.add('athlete-table-row', 'hover:bg-gray-50');
-                newRow.innerHTML = `
-                    <td data-label="Club" class="table-data">${data.club}</td>
-                    <td data-label="Nombre" class="table-data">${data.nombre}</td>
-                    <td data-label="Apellido" class="table-data">${data.apellido}</td>
-                    <td data-label="F. Nac." class="table-data table-hidden-mobile">${data.fechaNac}</td>
-                    <td data-label="Categoría" class="table-data">${data.categoria}</td>
-                    <td data-label="Talla" class="table-data table-hidden-mobile">${data.tallaFormatted}</td>
-                    <td data-label="Peso" class="table-data table-hidden-mobile">${data.pesoFormatted}</td>
-                    <td data-label="Correo" class="table-data table-hidden-desktop">${data.correo}</td>
-                    <td data-label="Teléfono" class="table-data table-hidden-desktop">${data.telefono}</td>
-                `;
-            });
+            let table = document.getElementById('athleteTable');
+            let tableBody = document.getElementById('athleteTableBody');
 
-            document.querySelectorAll('#athleteTable th').forEach(th => {
-                th.classList.remove('sorted-asc', 'sorted-desc');
-                if (th.getAttribute('data-sort-key') === currentSortKey) {
-                    th.classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
-                }
-            });
+            if (!table) {
+                // Crear la estructura de la tabla con estilos de Tailwind
+                registeredDataContainer.innerHTML = `
+                    <div class="table-responsive-wrapper">
+                        <table id="athleteTable" class="athlete-data-table w-full text-sm text-left text-gray-500 rounded-lg overflow-hidden">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
+                                <tr class="table-header-row">
+                                    <th scope="col" class="px-6 py-3 cursor-pointer" data-sort-key="club">Club</th>
+                                    <th scope="col" class="px-6 py-3 cursor-pointer" data-sort-key="nombre">Nombre</th>
+                                    <th scope="col" class="px-6 py-3 cursor-pointer" data-sort-key="apellido">Apellido</th>
+                                    <th scope="col" class="px-6 py-3 cursor-pointer table-hidden-mobile" data-sort-key="fechaNac">F. Nac.</th>
+                                    <th scope="col" class="px-6 py-3 cursor-pointer" data-sort-key="categoria">Categoría</th>
+                                    <th scope="col" class="px-6 py-3 cursor-pointer table-hidden-mobile" data-sort-key="tallaRaw">Talla</th>
+                                    <th scope="col" class="px-6 py-3 cursor-pointer table-hidden-mobile" data-sort-key="pesoRaw">Peso</th>
+                                    <th scope="col" class="px-6 py-3 cursor-pointer table-hidden-desktop" data-sort-key="correo">Correo</th>
+                                    <th scope="col" class="px-6 py-3 cursor-pointer table-hidden-desktop" data-sort-key="telefono">Teléfono</th>
+                                </tr>
+                            </thead>
+                            <tbody id="athleteTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                tableBody = document.getElementById('athleteTableBody');
+                setupSorting(); 
+            } else {
+                tableBody.innerHTML = '';
+            }
+            
+            // Rellenar la tabla con los datos
+            athletesData.forEach((data, index) => {
+                const newRow = tableBody.insertRow(-1); 
+                newRow.classList.add('athlete-table-row', index % 2 === 0 ? 'bg-white' : 'bg-gray-50', 'hover:bg-indigo-100/50', 'transition-colors', 'duration-150');
+                
+                newRow.innerHTML = `
+                    <td data-label="Club" class="px-6 py-2 font-medium text-gray-900 whitespace-nowrap table-data">${data.club}</td>
+                    <td data-label="Nombre" class="px-6 py-2 table-data">${data.nombre}</td>
+                    <td data-label="Apellido" class="px-6 py-2 table-data">${data.apellido}</td>
+                    <td data-label="F. Nac." class="px-6 py-2 table-data table-hidden-mobile">${data.fechaNac}</td>
+                    <td data-label="Categoría" class="px-6 py-2 table-data">${data.categoria}</td>
+                    <td data-label="Talla" class="px-6 py-2 table-data table-hidden-mobile">${data.tallaFormatted}</td>
+                    <td data-label="Peso" class="px-6 py-2 table-data table-hidden-mobile">${data.pesoFormatted}</td>
+                    <td data-label="Correo" class="px-6 py-2 table-data table-hidden-desktop text-xs">${data.correo}</td>
+                    <td data-label="Teléfono" class="px-6 py-2 table-data table-hidden-desktop text-xs">${data.telefono}</td>
+                `;
+            });
+
+            // Actualizar la indicación de ordenamiento en el encabezado
+            document.querySelectorAll('#athleteTable th').forEach(th => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+                if (th.getAttribute('data-sort-key') === currentSortKey) {
+                    th.classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
+                }
+            });
         }
 
         function setupSorting() {
-            document.querySelectorAll('#athleteTable th').forEach(header => {
-                const key = header.getAttribute('data-sort-key');
-                if (key) {
-                    header.style.cursor = 'pointer'; 
-                    header.addEventListener('click', () => sortTable(key, true)); 
-                }
-            });
+            // Elimina listeners antiguos antes de re-adjuntar para evitar duplicados
+            document.querySelectorAll('#athleteTable th').forEach(header => {
+                header.removeEventListener('click', handleSortClick);
+            });
+
+            // Adjuntar nuevos listeners
+            document.querySelectorAll('#athleteTable th').forEach(header => {
+                const key = header.getAttribute('data-sort-key');
+                if (key) {
+                    header.addEventListener('click', handleSortClick); 
+                }
+            });
         }
+
+        function handleSortClick(event) {
+            const key = event.currentTarget.getAttribute('data-sort-key');
+            sortTable(key, true);
+        }
+
 
         // Inicializar Firebase y los Listeners al cargar el contenido
         document.addEventListener('DOMContentLoaded', () => {
-            initFirebaseAndLoadData();
-            setupFormListener();
+            initFirebaseAndLoadData();
+            setupFormListener();
         });
     </script>
-</head>
-<body class="min-h-screen p-4 sm:p-8">
 
-    <div class="max-w-7xl mx-auto">
-        <!-- ENCABEZADO SIN BANNER DE IMAGEN -->
-        <header class="text-center mb-8">
-            <h1 class="text-4xl font-extrabold text-[#720025]">Data de Atletas</h1>
-            <h2 class="text-2xl font-semibold text-gray-700 mb-2">Liga de Voleibol Menor del Estado Lara</h2>
-            <p class="text-gray-600">Por favor, complete el siguiente formulario para registrar a un atleta.</p>
-        </header>
+    <!-- BLOQUE DE CÓDIGO DE SEGURIDAD ORIGINAL -->
+    <script>
+        // 1. Bloquea el botón derecho del ratón (menú contextual)
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Sección de Formulario (Usando estructura de la consulta, pero con clases Tailwind) -->
-            <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-2xl h-fit sticky top-4">
-                <form id="athleteForm" class="space-y-5">
-                    
-                    <div class="form-group"> 
-                        <label for="club">Club <span class="required-star">*</span></label>
-                        <input id="club" name="club" required="" type="text"> 
-                    </div>
+        // 2. Bloquea las combinaciones de teclas (Ctrl+Shift+I, F12, Ctrl+U, etc.)
+        document.addEventListener('keydown', function(e) {
+            // F12
+            if (e.key === 'F12' || e.keyCode === 123) {
+                e.preventDefault();
+            }
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="form-group"> 
-                            <label for="nombre">Nombre <span class="required-star">*</span></label>
-                            <input id="nombre" name="nombre" required="" type="text"> 
-                        </div>
-                        <div class="form-group"> 
-                            <label for="apellido">Apellido <span class="required-star">*</span></label>
-                            <input id="apellido" name="apellido" required="" type="text"> 
-                        </div>
-                    </div>
+            // Ctrl+Shift+I (o Cmd+Option+I en Mac)
+            if (e.ctrlKey && e.shiftKey && (e.key === 'i' || e.key === 'I')) {
+                e.preventDefault();
+            }
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div class="form-group"> 
-                            <label for="categoria">Categoría <span class="required-star">*</span></label>
-                            <select id="categoria" name="categoria" required="">
-                                <option value="" disabled="disabled" selected="selected">Selecciona Categoría</option>
-                                <option value="3ra División">3ra División</option>
-                                <option value="2da División">2da División</option>
-                                <option value="1era División">1era División</option>
-                                <option value="CIAR">CIAR</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group"> 
-                            <label for="talla">Talla (cm)</label> 
-                            <input id="talla" name="talla" type="number"> 
-                        </div>
-                        <div class="form-group"> 
-                            <label for="peso">Peso (kg)</label> 
-                            <input id="peso" name="peso" type="number"> 
-                        </div>
-                    </div>
+            // Ctrl+Shift+J (o Cmd+Option+J en Mac) - Para la consola
+            if (e.ctrlKey && e.shiftKey && (e.key === 'j' || e.key === 'J')) {
+                e.preventDefault();
+            }
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div class="form-group"> 
-                            <label for="fechaNac">F. Nacimiento <span class="required-star">*</span></label> 
-                            <input id="fechaNac" name="fechaNac" required="" type="date"> 
-                        </div>
-                        
-                        <div class="form-group"> 
-                            <label for="correo">Correo <span class="required-star">*</span></label>
-                            <input id="correo" name="correo" required="" type="email"> 
-                        </div>
-
-                        <div class="form-group"> 
-                            <label for="telefono">Teléfono <span class="required-star">*</span></label>
-                            <input id="telefono" name="telefono" required="" type="tel"> 
-                        </div>
-                    </div>
-                    
-                    <p class="required-note"><span class="required-star">*</span> Campos obligatorios</p>
-
-                    <button type="submit" class="w-full primary-btn shadow-xl hover:shadow-2xl mt-6">
-                        Registrar Atleta
-                    </button> 
-                </form>
-            </div>
-
-            <!-- Sección de Datos Registrados -->
-            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-2xl">
-                <h3 class="text-2xl font-semibold mb-6 text-gray-700 border-b pb-3">Atletas Registrados (En Tiempo Real)</h3>
-                
-                <div id="registeredData" class="table-scroll-wrapper overflow-x-auto">
-                    <!-- La tabla se renderiza aquí por JavaScript (renderTable) -->
-                    <p class="p-4 text-center text-gray-500 italic">Cargando datos de la base de datos...</p>
-                </div>
-            </div>
-        </div>
-    </div>
+            // Ctrl+U (Ver código fuente)
+            if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) {
+                e.preventDefault();
+            }
+        });
+    </script>
 </body>
 </html>
