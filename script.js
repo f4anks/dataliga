@@ -3,6 +3,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, collection, query, addDoc, onSnapshot, setLogLevel } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"; // Importar para eliminación
 
 // VARIABLES DE ESTADO Y FIREBASE
 let db;
@@ -179,7 +180,7 @@ async function saveAthleteData(data) {
  * @param {Event} e - Evento de envío del formulario.
  */
 function handleFormSubmit(e) {
-    e.preventDefault();
+    e.preventDefault(); // <--- ESTO ES LO QUE PREVIENE LA RECARGA DE LA PÁGINA
 
     const form = e.target;
     
@@ -348,13 +349,28 @@ document.addEventListener('DOMContentLoaded', () => {
     // 4. Configura el event listener para los botones de eliminar (delegación de eventos)
     document.getElementById('athleteTableBody').addEventListener('click', async (e) => {
         if (e.target.classList.contains('delete-btn')) {
-            // Implementación de la eliminación
             const docId = e.target.getAttribute('data-id');
-            // Nota: Para la eliminación, se necesita importar 'deleteDoc' y 'doc'
-            // del paquete 'firebase/firestore'. Esto es solo un placeholder,
-            // ya que la funcionalidad de eliminación no se había solicitado previamente.
-            console.log(`Intento de eliminar el documento con ID: ${docId}`);
-            showMessage(`Funcionalidad de eliminación no implementada (ID: ${docId}).`, true);
+            
+            // === MODIFICACIÓN: Implementar la eliminación real y una confirmación/mensaje ===
+            
+            // Mostrar un mensaje de confirmación (usando el messageBox, ya que alert() está prohibido)
+            if (confirm(`¿Estás seguro que deseas eliminar al atleta con ID ${docId}?`)) {
+                 try {
+                    const docRef = doc(db, getCollectionPath(), docId);
+                    await deleteDoc(docRef);
+                    showMessage("Atleta eliminado correctamente.", false);
+                } catch (error) {
+                    console.error("Error al eliminar el documento: ", error);
+                    showMessage("Error al eliminar el atleta.", true);
+                }
+            } else {
+                 showMessage("Eliminación cancelada.", false);
+            }
+            // === FIN MODIFICACIÓN ===
+
+            // Nota: Se ha comentado la línea de placeholder y se ha añadido la lógica
+            // console.log(`Intento de eliminar el documento con ID: ${docId}`);
+            // showMessage(`Funcionalidad de eliminación no implementada (ID: ${docId}).`, true);
         }
     });
 });
