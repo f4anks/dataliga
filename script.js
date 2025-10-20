@@ -21,8 +21,25 @@ import {
 // Variables Globales de Firebase (PROPORCIONADAS)
 // ===============================================
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-// Aseguramos la inicialización segura, aunque puede seguir siendo un objeto vacío {}
-const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+
+/**
+ * Función segura para parsear __firebase_config.
+ * Soluciona el error si la variable no está definida o contiene JSON inválido.
+ */
+const parseFirebaseConfig = () => {
+    try {
+        if (typeof __firebase_config === 'string' && __firebase_config.length > 0) {
+            return JSON.parse(__firebase_config);
+        }
+    } catch (e) {
+        console.error("Error parsing __firebase_config JSON:", e);
+    }
+    return {};
+};
+
+// Se llama a la función para obtener la configuración de forma segura
+const firebaseConfig = parseFirebaseConfig(); 
+
 const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
 // Variables de estado global
@@ -53,12 +70,12 @@ const showMessage = (message, type = 'info') => {
 };
 
 // ===============================================
-// FIREBASE INICIALIZACIÓN Y AUTENTICACIÓN (CORREGIDO)
+// FIREBASE INICIALIZACIÓN Y AUTENTICACIÓN (REFORZADO)
 // ===============================================
 const initializeFirebase = async () => {
-    // CORRECCIÓN: Verificar si firebaseConfig es un objeto válido y contiene al menos una clave, 
-    // como la clave 'projectId', que es esencial.
-    if (!firebaseConfig || !firebaseConfig.projectId) {
+    // REFUERZO: Verificar si firebaseConfig es un objeto válido y contiene la clave esencial 'projectId'.
+    // Si esta verificación falla, no llamamos a initializeApp.
+    if (!firebaseConfig || !firebaseConfig.projectId || Object.keys(firebaseConfig).length === 0) {
         console.error("Firebase Initialization Error: firebaseConfig is missing or invalid.");
         showMessage("Error: La configuración de la base de datos no está disponible. No se puede guardar ni leer data.", 'error');
         return;
