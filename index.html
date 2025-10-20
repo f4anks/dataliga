@@ -1,263 +1,139 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulario Versión Anterior</title>
-    <!-- Carga de Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Configuración de la fuente Inter -->
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #1A1A1A; /* Fondo oscuro */
-        }
-        /* Definición del color principal revertido a un Indigo/Azul (Simulando el color anterior) */
-        .bg-primary { background-color: #4F46E5; } /* Indigo-600 */
-        .hover\:bg-primary-dark:hover { background-color: #4338CA; } /* Indigo-700 */
-        .text-primary { color: #4F46E5; }
-        .border-primary { border-color: #4F46E5; }
-
-        /* Estilos del Banner ANTERIOR que podrían haber causado el conflicto */
-        .banner-wrapper {
-            width: 100%;
-            height: 150px; 
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            /* Si esta sección tenía un color o regla de conflicto, aquí está de vuelta */
-            background-color: #1E3A8A; /* Color de fondo simulado (Blue-800) */
-        }
-        .banner-image {
-            width: 100%;
-            height: auto;
-            object-fit: cover;
-        }
-    </style>
+    <title>Data de Atletas - Liga de Voleibol</title>
+    <!-- Vincula el archivo de estilos CSS -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Vincula la fuente Montserrat de Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&amp;display=swap"
+          rel="stylesheet">
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body>
+    
+    <!-- BANNER DE ENCABEZADO -->
+    <div class="banner-wrapper">
+        <!-- RUTA DE IMAGEN LOCAL CORREGIDA: images/banner1.jpg -->
+        <img src="images/banner1.jpg" alt="LVMeL - Liga de Voleibol Menor del Estado Lara" class="banner-image">
+    </div>
+    <!-- FIN DEL BANNER -->
 
-    <!-- Contenedor Principal del Formulario -->
-    <div id="app-container" class="w-full max-w-lg bg-white rounded-xl shadow-2xl overflow-hidden">
+    <div class="container">
+        <div class="form-card">
+            <div class="form-header">
+                <h2>Data de Atletas</h2>
+                <h2>&nbsp;Liga de Voleibol Menor del Estado Lara</h2>
+                <p>Por favor, complete el siguiente formulario para registrar a un atleta.</p>
+            </div>
+            
+            <form id="athleteForm">
+                
+                <div class="form-group"> 
+                    <label for="club">Club <span class="required-star">*</span></label>
+                    <input id="club" name="club" required="" type="text"> 
+                </div>
 
-        <!-- Banner ANTERIOR (Reintroducido) -->
-        <div class="banner-wrapper">
-            <!-- Este placeholder simula la imagen que estaba en el banner -->
-            <img src="https://placehold.co/600x150/4F46E5/FFFFFF?text=BANNER+ANTERIOR" alt="Banner Antiguo" class="banner-image">
+                <div class="form-row">
+                    <div class="form-group"> 
+                        <label for="nombre">Nombre <span class="required-star">*</span></label>
+                        <input id="nombre" name="nombre" required="" type="text"> 
+                    </div>
+                    <div class="form-group"> 
+                        <label for="apellido">Apellido <span class="required-star">*</span></label>
+                        <input id="apellido" name="apellido" required="" type="text"> 
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group"> 
+                        <label for="categoria">Categoría <span class="required-star">*</span></label>
+                        <select id="categoria" name="categoria" required="">
+                            <option value="" disabled="disabled" selected="selected">Selecciona una Categoría</option>
+                            <option value="3ra División">3ra División</option>
+                            <option value="2da División">2da División</option>
+                            <option value="1era División">1era División</option>
+                            <option value="CIAR">CIAR</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group"> 
+                        <label for="talla">Talla (cm)</label> 
+                        <input id="talla" name="talla" type="number"> 
+                    </div>
+                    <div class="form-group"> 
+                        <label for="peso">Peso (kg)</label> 
+                        <input id="peso" name="peso" type="number"> 
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group"> 
+                        <label for="fechaNac">Fecha de Nacimiento <span class="required-star">*</span></label> 
+                        <input id="fechaNac" name="fechaNac" required="" pattern="\d{4}-\d{2}-\d{2}" type="date"> 
+                    </div>
+                    
+                    <div class="form-group"> 
+                        <label for="correo">Correo <span class="required-star">*</span></label>
+                        <input id="correo" name="correo" required="" type="email"> 
+                    </div>
+
+                    <div class="form-group"> 
+                        <label for="telefono">Teléfono <span class="required-star">*</span></label>
+                        <input id="telefono" name="telefono" required="" type="tel"> 
+                    </div>
+                </div>
+                
+                <p class="required-note"><span class="required-star">*</span> Campos obligatorios</p>
+
+                <button type="submit">Registrar Atleta</button> 
+            </form>
         </div>
 
-        <!-- Cabecera (Revertida al color anterior) -->
-        <header class="bg-primary text-white p-6 text-center">
-            <h1 class="text-3xl font-bold tracking-tight">Registro de Datos</h1>
-            <p class="text-sm mt-1 opacity-90">Persistencia con Firebase Firestore</p>
-        </header>
-
-        <!-- Contenido del Formulario -->
-        <main class="p-6 md:p-8">
-            <div id="auth-info" class="mb-4 text-xs text-gray-500 flex justify-between items-center">
-                <span>Estado: <span id="user-status" class="font-medium text-red-500">Cargando...</span></span>
-                <span>ID de Usuario: <span id="user-id" class="font-mono text-gray-700 text-[10px] truncate max-w-[150px] inline-block"></span></span>
+        <!-- SECCIÓN DONDE SE MOSTRARÁN LOS DATOS REGISTRADOS DINÁMICAMENTE -->
+        <div class="registered-athletes-section">
+            <h3>Atletas Registrados</h3>
+            <div id="registeredData" class="table-scroll-wrapper">
+                <p class="no-data-message">No hay atletas registrados aún. ¡Registra el primero!</p>
             </div>
-
-            <form id="data-form" class="space-y-6">
-                <div>
-                    <label for="message-input" class="block text-sm font-medium text-gray-700 mb-2">Mensaje</label>
-                    <input type="text" id="message-input" required
-                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition duration-150"
-                           placeholder="Ingresa un mensaje para guardar...">
-                </div>
-
-                <button type="submit" id="save-button"
-                        class="w-full bg-primary text-white font-semibold py-3 px-4 rounded-lg shadow-md hover:bg-primary-dark transition duration-200 focus:outline-none focus:ring-4 focus:ring-primary focus:ring-opacity-50 disabled:opacity-50">
-                    Guardar Mensaje
-                </button>
-            </form>
-
-            <div class="mt-8 pt-6 border-t border-gray-100">
-                <h2 class="text-xl font-semibold text-gray-800 mb-3">Último Dato Guardado:</h2>
-                <div id="latest-data-card" class="bg-gray-50 p-4 rounded-lg border-l-4 border-primary min-h-[60px] flex items-center">
-                    <p id="latest-message" class="text-gray-700 italic">No hay datos guardados aún.</p>
-                </div>
-                <div id="loading-spinner" class="hidden text-center mt-4">
-                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary inline-block"></div>
-                    <p class="text-sm text-gray-500 mt-2">Cargando...</p>
-                </div>
-            </div>
-
-            <!-- Área de Mensajes de Error/Éxito (Reemplazo de alert()) -->
-            <div id="message-box" class="mt-4 hidden p-3 rounded-lg text-sm" role="alert"></div>
-
-        </main>
+        </div>
+        
     </div>
+    
+    <!-- Vincula el archivo de JavaScript con soporte para módulos -->
+    <script type="module" src="script.js"></script>
 
-    <!-- Script de Firebase y Lógica de la Aplicación -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, query, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Establecer el nivel de log para depuración de Firestore
-        setLogLevel('Debug');
-
-        // Variables Globales (Proporcionadas por el entorno)
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        // Elementos del DOM
-        const messageInput = document.getElementById('message-input');
-        const dataForm = document.getElementById('data-form');
-        const latestMessageElement = document.getElementById('latest-message');
-        const saveButton = document.getElementById('save-button');
-        const messageBox = document.getElementById('message-box');
-        const userStatusElement = document.getElementById('user-status');
-        const userIdElement = document.getElementById('user-id');
-        const loadingSpinner = document.getElementById('loading-spinner');
-
-        let db, auth, userId = null;
-        let isAuthReady = false;
-
-        // Función para mostrar mensajes de estado (Reemplazo de alert)
-        function showMessage(text, type = 'success') {
-            messageBox.textContent = text;
-            messageBox.className = 'mt-4 p-3 rounded-lg text-sm'; // Resetear clases
-
-            if (type === 'success') {
-                messageBox.classList.add('bg-green-100', 'text-green-800', 'border', 'border-green-400');
-            } else if (type === 'error') {
-                messageBox.classList.add('bg-red-100', 'text-red-800', 'border', 'border-red-400');
-            } else { // info (azul)
-                messageBox.classList.add('bg-blue-100', 'text-blue-800', 'border', 'border-blue-400');
-            }
-
-            messageBox.classList.remove('hidden');
-            setTimeout(() => {
-                messageBox.classList.add('hidden');
-            }, 5000);
-        }
-
-        // --- INICIALIZACIÓN DE FIREBASE Y AUTENTICACIÓN ---
-        function initializeFirebase() {
-            try {
-                if (Object.keys(firebaseConfig).length === 0) {
-                    throw new Error("La configuración de Firebase no está disponible.");
-                }
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        userId = user.uid;
-                        userStatusElement.textContent = 'Conectado';
-                        userStatusElement.classList.remove('text-red-500', 'text-yellow-500');
-                        userStatusElement.classList.add('text-green-600');
-                        userIdElement.textContent = userId;
-                        isAuthReady = true;
-                        // Una vez autenticado, comenzamos a escuchar los datos
-                        listenForData();
-                    } else {
-                        // Intentar autenticación
-                        try {
-                            if (initialAuthToken) {
-                                await signInWithCustomToken(auth, initialAuthToken);
-                            } else {
-                                await signInAnonymously(auth);
-                            }
-                        } catch (error) {
-                            console.error("Error al autenticar:", error);
-                            userStatusElement.textContent = 'Error Auth';
-                            userIdElement.textContent = 'N/A';
-                            showMessage(`Error de autenticación: ${error.message}`, 'error');
-                        }
-                    }
-                });
-
-            } catch (error) {
-                console.error("Error al inicializar Firebase:", error);
-                userStatusElement.textContent = 'Error (Ver Consola)';
-                userStatusElement.classList.remove('text-red-500');
-                userStatusElement.classList.add('text-red-700');
-                showMessage(`Error grave al iniciar la app: ${error.message}`, 'error');
-            }
-        }
-
-        // --- LECTURA DE DATOS (onSnapshot) ---
-        function listenForData() {
-            if (!db || !userId || !isAuthReady) return;
-
-            // Ruta privada: /artifacts/{appId}/users/{userId}/messages/last_message
-            const docPath = `artifacts/${appId}/users/${userId}/messages/last_message`;
-            const docRef = doc(db, docPath);
-
-            loadingSpinner.classList.remove('hidden');
-
-            // Escuchador en tiempo real
-            onSnapshot(docRef, (docSnapshot) => {
-                loadingSpinner.classList.add('hidden');
-                if (docSnapshot.exists()) {
-                    const data = docSnapshot.data();
-                    const timestamp = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleString() : 'Fecha Desconocida';
-                    latestMessageElement.innerHTML = `
-                        <span class="font-bold">Mensaje:</span> ${data.message} <br>
-                        <span class="text-xs text-gray-500">Guardado el ${timestamp}</span>
-                    `;
-                    messageInput.value = data.message; // Cargar el último mensaje en el input
-                } else {
-                    latestMessageElement.textContent = 'No hay datos guardados aún.';
-                }
-            }, (error) => {
-                console.error("Error al escuchar datos:", error);
-                showMessage(`Error al cargar datos: ${error.message}`, 'error');
-                loadingSpinner.classList.add('hidden');
-            });
-        }
-
-        // --- ESCRITURA DE DATOS (setDoc) ---
-        async function saveData(message) {
-            if (!db || !userId || !isAuthReady) {
-                showMessage("La aplicación no está lista o no hay usuario autenticado.", 'error');
-                return;
-            }
-
-            const docPath = `artifacts/${appId}/users/${userId}/messages/last_message`;
-            const docRef = doc(db, docPath);
-            
-            saveButton.disabled = true;
-            saveButton.textContent = 'Guardando...';
-
-            try {
-                await setDoc(docRef, {
-                    message: message,
-                    userId: userId,
-                    timestamp: serverTimestamp() // Marca de tiempo del servidor
-                });
-                showMessage("¡Mensaje guardado con éxito!", 'success');
-            } catch (e) {
-                console.error("Error al añadir documento: ", e);
-                showMessage(`Error al guardar: ${e.message}`, 'error');
-            } finally {
-                saveButton.disabled = false;
-                saveButton.textContent = 'Guardar Mensaje';
-            }
-        }
-
-        // --- EVENT LISTENER DEL FORMULARIO ---
-        dataForm.addEventListener('submit', (e) => {
+    <!-- BLOQUE DE CÓDIGO DE SEGURIDAD PARA PROTEGER EL CÓDIGO FUENTE -->
+    <script>
+        // 1. Bloquea el botón derecho del ratón (menú contextual)
+        document.addEventListener('contextmenu', function(e) {
             e.preventDefault();
-            const message = messageInput.value.trim();
-            if (message) {
-                saveData(message);
-            } else {
-                showMessage("Por favor, ingrese un mensaje antes de guardar.", 'info');
-            }
+            // Opcional: Mostrar un mensaje si alguien intenta usar el botón derecho
+            // console.log("Acción bloqueada: No se permite el menú contextual.");
         });
 
-        // Iniciar la aplicación al cargar la ventana
-        window.onload = initializeFirebase;
+        // 2. Bloquea las combinaciones de teclas (Ctrl+Shift+I, F12, Ctrl+U, etc.)
+        document.addEventListener('keydown', function(e) {
+            // F12
+            if (e.key === 'F12' || e.keyCode === 123) {
+                e.preventDefault();
+            }
 
+            // Ctrl+Shift+I (o Cmd+Option+I en Mac)
+            if (e.ctrlKey && e.shiftKey && (e.key === 'i' || e.key === 'I')) {
+                e.preventDefault();
+            }
+
+            // Ctrl+Shift+J (o Cmd+Option+J en Mac) - Para la consola
+            if (e.ctrlKey && e.shiftKey && (e.key === 'j' || e.key === 'J')) {
+                e.preventDefault();
+            }
+
+            // Ctrl+U (Ver código fuente)
+            if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) {
+                e.preventDefault();
+            }
+        });
     </script>
 </body>
 </html>
