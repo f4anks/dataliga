@@ -438,8 +438,18 @@
         /**
          * Inicializa Firebase y establece el listener de autenticación.
          */
-        async function initApp() { // CAMBIADO DE initializeApp a initApp
+        async function initApp() { 
             setStatus("Inicializando Firebase y autenticando usuario...", 'warning');
+            
+            // --- INICIO DE VALIDACIÓN AÑADIDA PARA EL ERROR "projectId" ---
+            if (!firebaseConfig || !firebaseConfig.projectId) {
+                const errorMessage = 'Error crítico: La configuración de Firebase está incompleta. Falta el "projectId".';
+                console.error("FIREBASE CONFIG ERROR:", errorMessage, firebaseConfig);
+                setStatus(errorMessage, 'error');
+                return; 
+            }
+            // --- FIN DE VALIDACIÓN AÑADIDA ---
+
             try {
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
@@ -469,6 +479,7 @@
 
             } catch (error) {
                 console.error("FIREBASE ERROR: Error al inicializar o autenticar Firebase:", error);
+                // Si el error es de inicialización, mostrarlo al usuario
                 setStatus(`Error crítico de Firebase: ${error.message}`, 'error');
             }
         }
@@ -647,7 +658,7 @@
         form.addEventListener('submit', handleFormSubmit);
 
         // Iniciar la aplicación de Firebase
-        initApp(); // CAMBIADO DE initializeApp a initApp
+        initApp(); 
     </script>
 </body>
 </html>
