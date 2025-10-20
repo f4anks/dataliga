@@ -21,6 +21,7 @@ import {
 // Variables Globales de Firebase (PROPORCIONADAS)
 // ===============================================
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+// Aseguramos la inicialización segura, aunque puede seguir siendo un objeto vacío {}
 const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
 const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
@@ -52,9 +53,17 @@ const showMessage = (message, type = 'info') => {
 };
 
 // ===============================================
-// FIREBASE INICIALIZACIÓN Y AUTENTICACIÓN
+// FIREBASE INICIALIZACIÓN Y AUTENTICACIÓN (CORREGIDO)
 // ===============================================
 const initializeFirebase = async () => {
+    // CORRECCIÓN: Verificar si firebaseConfig es un objeto válido y contiene al menos una clave, 
+    // como la clave 'projectId', que es esencial.
+    if (!firebaseConfig || !firebaseConfig.projectId) {
+        console.error("Firebase Initialization Error: firebaseConfig is missing or invalid.");
+        showMessage("Error: La configuración de la base de datos no está disponible. No se puede guardar ni leer data.", 'error');
+        return;
+    }
+    
     try {
         // Habilitar logs para depuración (opcional)
         setLogLevel('Debug');
@@ -83,6 +92,7 @@ const initializeFirebase = async () => {
         });
     } catch (error) {
         console.error("Error initializing Firebase:", error);
+        // Si el error persiste, mostrar un mensaje al usuario
         showMessage("Error al conectar con la base de datos.", 'error');
     }
 };
@@ -117,6 +127,11 @@ const toggleEditMode = (isEditing, buttonText = "Registrar Atleta") => {
  * Busca un atleta en Firestore usando la Cédula.
  */
 const buscarAtletaPorCedula = async () => {
+    if (!db || !isAuthReady) {
+        showMessage("El sistema no está listo. Espere la conexión a la base de datos.", 'error');
+        return;
+    }
+
     const cedulaRaw = cedulaInput.value;
     if (!cedulaRaw) {
         showMessage("Por favor, ingrese una Cédula para buscar.", 'info');
@@ -172,8 +187,8 @@ searchButton.addEventListener('click', buscarAtletaPorCedula);
 athleteForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    if (!isAuthReady) {
-        showMessage("El sistema no está listo. Intente de nuevo en un momento.", 'error');
+    if (!isAuthReady || !db) {
+        showMessage("El sistema de base de datos no está listo. Intente de nuevo en un momento.", 'error');
         return;
     }
 
@@ -211,10 +226,11 @@ athleteForm.addEventListener('submit', async (e) => {
  * Función para borrar un atleta.
  */
 const deleteAthlete = async (cedulaId) => {
-    if (!isAuthReady) return;
+    if (!isAuthReady || !db) return;
 
     // TODO: Implementar un modal de confirmación aquí, NO USAR window.confirm()
-    if (!confirm(`¿Está seguro que desea eliminar al atleta con Cédula ${cedulaId}?`)) {
+    // Usaremos un simple 'confirm' por ahora, pero se recomienda una solución UI personalizada.
+    if (!window.confirm(`¿Está seguro que desea eliminar al atleta con Cédula ${cedulaId}?`)) {
         return;
     }
     
@@ -330,10 +346,8 @@ const handleSort = (field) => {
         currentSortField = field;
         currentSortDirection = 'asc';
     }
-    // No hay necesidad de re-renderizar aquí, el listener onSnapshot lo hará por nosotros
-    // pero debemos forzar el re-renderizado de los datos actuales si no estamos usando orderBy en la query.
-    // Como Firestore no usa orderBy en este ejemplo, re-renderizamos con los datos almacenados
-    // NOTA: Si se usa onSnapshot, la data debe ser manejada dentro de esa función.
+    // Forzamos el re-renderizado de los datos actuales con el nuevo orden
+    setupRealtimeListener(); 
 };
 
 const addTableListeners = () => {
@@ -357,9 +371,6 @@ const addTableListeners = () => {
         header.addEventListener('click', (e) => {
             const field = e.currentTarget.getAttribute('data-field');
             handleSort(field);
-            // Ya que no usamos orderBy en la query, volvemos a llamar al listener 
-            // (que se encarga de re-obtener la data ordenada)
-            setupRealtimeListener(); 
         });
     });
 };
