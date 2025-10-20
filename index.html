@@ -1,335 +1,443 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data de Atletas - LVMeL Vinotinto</title>
-    <!-- Carga de Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Carga de la fuente Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+// 1. IMPORTACIONES DE FIREBASE
+// Usamos versiones estables para evitar errores 404 al cargar desde CDN.
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, collection, query, addDoc, onSnapshot, setLogLevel, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    <!-- Configuración personalizada de Tailwind y estilos CSS (Vinotinto Theme) -->
-    <style>
-        /* Personalización de colores en Tailwind */
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'vinotinto-primary': '#800020', /* Vinotinto profundo */
-                        'vinotinto-dark': '#400010',   /* Vinotinto muy oscuro para texto */
-                        'accent-gold': '#FFC300',      /* Dorado para acentos y botones */
-                        'bg-dark': '#1a1a1a',          /* Fondo oscuro casi negro */
-                        'card-light': '#F3E9DD',       /* Beige claro/crema para tarjetas */
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    }
-                }
-            }
-        }
-        
-        /* Estilos CSS puros para la tabla responsiva (Necesario para el patrón Data-Label en móviles) */
-        .athlete-data-table {
-            width: 100%;
-            border-collapse: collapse;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-        }
-        
-        .athlete-data-table th, .athlete-data-table td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #c9c9c9; /* Línea de separación sutil */
-        }
+// VARIABLES DE ESTADO Y FIREBASE
+let app;
+let db;
+let auth;
+let userId = ''; 
+let athletesData = []; // Array que contendrá los datos sincronizados de Firestore
+let clubsData = []; // Array que contendrá los clubes sincronizados de Firestore
+let currentSortKey = 'apellido'; 
+let sortDirection = 'asc'; 
 
-        .athlete-data-table th {
-            cursor: pointer;
-            background-color: #800020; /* Vinotinto para encabezado */
-            color: #F3E9DD;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
+// Ajustar el nivel de log para depuración (opcional, útil para ver actividad de Firestore)
+setLogLevel('Debug');
 
-        .athlete-data-table tr:nth-child(even) {
-            background-color: #f7f3ed; /* Rayas ligeras */
-        }
-        
-        .athlete-data-table tr:hover {
-            background-color: #ffe08a; /* Efecto hover dorado */
-        }
+// Variables globales proporcionadas por el entorno (Canvas)
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        /* Estilos de tabla responsiva para móvil */
-        @media screen and (max-width: 768px) {
-            .athlete-data-table thead {
-                display: none; /* Oculta el encabezado en móvil */
-            }
+// =========================================================================
+// 2. UTILIDADES
+// =========================================================================
 
-            .athlete-data-table, .athlete-data-table tbody, .athlete-data-table tr, .athlete-data-table td {
-                display: block;
-                width: 100%;
-            }
-            
-            .athlete-data-table tr {
-                margin-bottom: 15px;
-                border: 1px solid #e0e0e0;
-                border-radius: 8px;
-                overflow: hidden;
-            }
-
-            .athlete-data-table td {
-                text-align: right;
-                padding-left: 50%;
-                position: relative;
-            }
-
-            .athlete-data-table td::before {
-                content: attr(data-label);
-                position: absolute;
-                left: 0;
-                width: 50%;
-                padding-left: 15px;
-                font-weight: 600;
-                text-align: left;
-                color: #800020; /* Vinotinto para las etiquetas */
-            }
-            
-            /* Clases de ocultar específicas para Tailwind (usadas en la tabla) */
-            .hidden-mobile { display: none; }
-            .hidden-desktop { display: block; }
-        }
-
-        /* Manejo de estados de ordenamiento */
-        .sorted-asc::after { content: " ▲"; }
-        .sorted-desc::after { content: " ▼"; }
-        
-        /* Aseguramos que la columna 'Correo' y 'Teléfono' se muestren solo en móvil */
-        @media (min-width: 769px) {
-            .table-hidden-desktop { display: none; }
-            .table-hidden-mobile { display: table-cell; }
-        }
-        @media (max-width: 768px) {
-            .table-hidden-desktop { display: block; } /* En móvil se muestran como bloque */
-            .table-hidden-mobile { display: none; }
-        }
-
-    </style>
-</head>
-<!-- Cuerpo con fondo oscuro para contrastar con el vinotinto y las tarjetas claras -->
-<body class="bg-bg-dark text-gray-800 font-sans min-h-screen pb-10">
+/**
+ * Calcula la categoría del atleta basada en su fecha de nacimiento.
+ * NOTA: Esta es una lógica simplificada, las categorías reales de voleibol son más complejas.
+ * Se basa en la edad en el año actual.
+ * @param {string} dateString Fecha de nacimiento en formato YYYY-MM-DD.
+ * @returns {string} Categoría (ej: Sub-13).
+ */
+function calculateCategory(dateString) {
+    if (!dateString) return 'N/A';
     
-    <!-- BANNER DE ENCABEZADO (Fondo Vinotinto) -->
-    <div class="banner-wrapper bg-vinotinto-primary shadow-xl">
-        <!-- 
-            SOLUCIÓN AL 404: 
-            Usamos 'onerror' para que si 'images/banner1.jpg' falla (el 404), 
-            se cargue automáticamente un placeholder con el color vinotinto de fondo. 
-        -->
-        <img src="images/banner1.jpg" 
-             alt="LVMeL - Liga de Voleibol Menor del Estado Lara" 
-             class="w-full h-40 object-cover opacity-80" 
-             onerror="this.onerror=null; this.src='https://placehold.co/1200x160/800020/FFFFFF?text=LVMeL+Vinotinto';"
-        >
-        <div class="absolute inset-0 bg-vinotinto-dark bg-opacity-30 flex items-center justify-center">
-            <h1 class="text-4xl sm:text-6xl font-extrabold text-white tracking-wider uppercase drop-shadow-lg p-4 text-center">
-                LVMeL
-            </h1>
-        </div>
-    </div>
-    <!-- FIN DEL BANNER -->
-
-    <div class="container mx-auto p-4 sm:p-8 max-w-7xl">
-        
-        <!-- Tarjeta de Formulario de Registro (Fondo claro) -->
-        <div class="form-card bg-card-light p-6 sm:p-10 rounded-xl shadow-2xl mb-12 border-t-8 border-accent-gold">
-            <div class="form-header mb-8 text-center">
-                <h2 class="text-3xl font-bold text-vinotinto-primary mb-2">Data de Atletas</h2>
-                <h3 class="text-xl font-semibold text-vinotinto-dark mb-4">Liga de Voleibol Menor del Estado Lara</h3>
-                <p class="text-gray-600">Por favor, complete el siguiente formulario para registrar a un atleta.</p>
-            </div>
-            
-            <form id="athleteForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                
-                <!-- CLUB -->
-                <div class="form-group"> 
-                    <label for="club" class="block text-sm font-medium text-vinotinto-dark mb-1">Club <span class="text-red-600">*</span></label>
-                    <select id="club" name="club" required 
-                            class="w-full p-3 border border-vinotinto-primary rounded-lg focus:ring-accent-gold focus:border-accent-gold transition duration-150">
-                        <option value="" disabled selected>Seleccione un Club</option>
-                        <option value="Club A">Club A</option>
-                        <option value="Club B">Club B</option>
-                        <option value="Club C">Club C</option>
-                    </select>
-                </div>
-                
-                <!-- NOMBRE -->
-                <div class="form-group">
-                    <label for="nombre" class="block text-sm font-medium text-vinotinto-dark mb-1">Nombre <span class="text-red-600">*</span></label>
-                    <input type="text" id="nombre" name="nombre" required 
-                           class="w-full p-3 border border-vinotinto-primary rounded-lg focus:ring-accent-gold focus:border-accent-gold transition duration-150">
-                </div>
-                
-                <!-- APELLIDO -->
-                <div class="form-group">
-                    <label for="apellido" class="block text-sm font-medium text-vinotinto-dark mb-1">Apellido <span class="text-red-600">*</span></label>
-                    <input type="text" id="apellido" name="apellido" required 
-                           class="w-full p-3 border border-vinotinto-primary rounded-lg focus:ring-accent-gold focus:border-accent-gold transition duration-150">
-                </div>
-                
-                <!-- FECHA DE NACIMIENTO -->
-                <div class="form-group">
-                    <label for="fechaNac" class="block text-sm font-medium text-vinotinto-dark mb-1">Fecha de Nacimiento <span class="text-red-600">*</span></label>
-                    <input type="date" id="fechaNac" name="fechaNac" required 
-                           class="w-full p-3 border border-vinotinto-primary rounded-lg focus:ring-accent-gold focus:border-accent-gold transition duration-150">
-                </div>
-
-                <!-- GÉNERO -->
-                <div class="form-group">
-                    <label for="genero" class="block text-sm font-medium text-vinotinto-dark mb-1">Género <span class="text-red-600">*</span></label>
-                    <select id="genero" name="genero" required
-                            class="w-full p-3 border border-vinotinto-primary rounded-lg focus:ring-accent-gold focus:border-accent-gold transition duration-150">
-                        <option value="" disabled selected>Seleccione</option>
-                        <option value="M">Masculino</option>
-                        <option value="F">Femenino</option>
-                    </select>
-                </div>
-                
-                <!-- TALLA (cm) -->
-                <div class="form-group">
-                    <label for="talla" class="block text-sm font-medium text-vinotinto-dark mb-1">Talla (cm) <span class="text-red-600">*</span></label>
-                    <input type="number" id="talla" name="talla" required min="100" max="250" 
-                           class="w-full p-3 border border-vinotinto-primary rounded-lg focus:ring-accent-gold focus:border-accent-gold transition duration-150">
-                </div>
-                
-                <!-- PESO (kg) -->
-                <div class="form-group">
-                    <label for="peso" class="block text-sm font-medium text-vinotinto-dark mb-1">Peso (kg) <span class="text-red-600">*</span></label>
-                    <input type="number" id="peso" name="peso" required min="20" max="200" step="0.1"
-                           class="w-full p-3 border border-vinotinto-primary rounded-lg focus:ring-accent-gold focus:border-accent-gold transition duration-150">
-                </div>
-                
-                <!-- CORREO -->
-                <div class="form-group">
-                    <label for="correo" class="block text-sm font-medium text-vinotinto-dark mb-1">Correo Electrónico</label>
-                    <input type="email" id="correo" name="correo" 
-                           class="w-full p-3 border border-vinotinto-primary rounded-lg focus:ring-accent-gold focus:border-accent-gold transition duration-150">
-                </div>
-                
-                <!-- TELÉFONO -->
-                <div class="form-group">
-                    <label for="telefono" class="block text-sm font-medium text-vinotinto-dark mb-1">Teléfono</label>
-                    <input type="tel" id="telefono" name="telefono" 
-                           class="w-full p-3 border border-vinotinto-primary rounded-lg focus:ring-accent-gold focus:border-accent-gold transition duration-150">
-                </div>
-                
-                <!-- Posición de Juego -->
-                <div class="form-group">
-                    <label for="posicion" class="block text-sm font-medium text-vinotinto-dark mb-1">Posición de Juego</label>
-                    <select id="posicion" name="posicion" 
-                            class="w-full p-3 border border-vinotinto-primary rounded-lg focus:ring-accent-gold focus:border-accent-gold transition duration-150">
-                        <option value="Libero">Líbero</option>
-                        <option value="Atacante">Atacante (Punta)</option>
-                        <option value="Central">Central (Medio)</option>
-                        <option value="Opuesto">Opuesto</option>
-                        <option value="Armador">Armador (Colocador)</option>
-                        <option value="" selected>No aplica / Genérica</option>
-                    </select>
-                </div>
-
-                <!-- Botón de Envío -->
-                <div class="md:col-span-2 mt-4">
-                    <button type="submit" 
-                            class="w-full bg-accent-gold text-vinotinto-dark font-bold py-3 px-6 rounded-lg hover:bg-yellow-400 
-                                   focus:outline-none focus:ring-4 focus:ring-accent-gold focus:ring-opacity-50 transition duration-300 transform hover:scale-[1.01] shadow-lg">
-                        Registrar Atleta
-                    </button>
-                </div>
-            </form>
-            
-            <!-- Mensaje de estado (se muestra si es necesario con JS) -->
-            <div id="statusMessage" class="mt-4 text-center text-sm font-semibold text-vinotinto-primary hidden"></div>
-        </div>
-        
-        <!-- Sección de Datos Registrados (Fondo claro) -->
-        <div class="data-card bg-card-light p-6 sm:p-10 rounded-xl shadow-2xl border-t-8 border-vinotinto-primary">
-            <div class="data-header mb-6 text-center">
-                <h2 class="text-3xl font-bold text-vinotinto-primary mb-2">Atletas Registrados</h2>
-                <p class="text-gray-600">Lista completa y filtrable de los atletas de la liga.</p>
-            </div>
-
-            <!-- Contenedor del campo de búsqueda -->
-            <div class="mb-6">
-                <input type="text" id="searchInput" placeholder="Buscar por Nombre, Apellido o Club..."
-                       class="w-full p-3 border border-vinotinto-dark rounded-lg focus:ring-accent-gold focus:border-accent-gold transition duration-150">
-            </div>
-
-            <!-- Contenedor para la Tabla (para scroll horizontal en caso de ser necesario) -->
-            <div class="overflow-x-auto rounded-lg shadow-inner">
-                <table id="athleteTable" class="athlete-data-table min-w-full">
-                    <thead>
-                        <tr>
-                            <!-- Usamos 'data-sort-key' para el script de ordenamiento -->
-                            <th data-sort-key="club" class="table-cell">Club</th>
-                            <th data-sort-key="nombre" class="table-cell">Nombre</th>
-                            <th data-sort-key="apellido" class="table-cell">Apellido</th>
-                            <th data-sort-key="fechaNac" class="table-cell table-hidden-mobile">F. Nac.</th>
-                            <th data-sort-key="categoria" class="table-cell">Categoría</th>
-                            <th data-sort-key="talla" class="table-cell table-hidden-mobile">Talla (cm)</th>
-                            <th data-sort-key="peso" class="table-cell table-hidden-mobile">Peso (kg)</th>
-                            <th data-sort-key="correo" class="table-cell table-hidden-desktop">Correo</th>
-                            <th data-sort-key="telefono" class="table-cell table-hidden-desktop">Teléfono</th>
-                        </tr>
-                    </thead>
-                    <tbody id="athleteTableBody">
-                        <!-- Los datos de la tabla se insertarán aquí por JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Mensaje de carga y vacío -->
-            <div id="loadingMessage" class="mt-4 text-center text-vinotinto-dark">Cargando datos...</div>
-            <div id="noDataMessage" class="mt-4 text-center text-vinotinto-dark hidden">
-                <p class="font-semibold">¡Aún no hay atletas registrados!</p>
-                <p class="text-sm text-gray-500">Sé el primero en registrar uno y verás la tabla llenarse con un atractivo diseño vinotinto.</p>
-            </div>
-        </div>
-        
-    </div>
+    const birthDate = new Date(dateString);
+    const today = new Date();
     
-    <!-- Vincula el archivo de JavaScript con soporte para módulos -->
-    <!-- Mantenemos el script.js separado para la lógica compleja (Firebase) -->
-    <script type="module" src="script.js"></script>
+    // Calcula la edad en base solo al año.
+    let age = today.getFullYear() - birthDate.getFullYear();
+    
+    // Ajuste por mes y día para mayor precisión (aunque la lógica de categorías suele ser anual)
+    const monthDifference = today.getMonth() - birthDate.getMonth();
+    if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
 
-    <!-- BLOQUE DE CÓDIGO DE SEGURIDAD PARA PROTEGER EL CÓDIGO FUENTE -->
-    <script>
-        // 1. Bloquea el botón derecho del ratón (menú contextual)
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
+    if (age <= 12) return 'Mini Voleibol (Sub-13)';
+    if (age <= 14) return 'Infantil (Sub-15)';
+    if (age <= 16) return 'Menor (Sub-17)';
+    if (age <= 18) return 'Juvenil (Sub-19)';
+    return 'Adulto';
+}
+
+/**
+ * Muestra mensajes de estado en la UI.
+ * @param {string} message Mensaje a mostrar.
+ * @param {boolean} isError Si es true, el mensaje se muestra en rojo.
+ */
+function showStatus(message, isError = false) {
+    const statusMessageEl = document.getElementById('statusMessage');
+    statusMessageEl.textContent = message;
+    statusMessageEl.classList.remove('hidden', 'text-vinotinto-primary', 'text-red-600');
+    statusMessageEl.classList.add(isError ? 'text-red-600' : 'text-vinotinto-primary');
+    
+    // Ocultar después de 5 segundos
+    setTimeout(() => {
+        statusMessageEl.classList.add('hidden');
+    }, 5000);
+}
+
+
+// =========================================================================
+// 3. FIREBASE Y AUTENTICACIÓN
+// =========================================================================
+
+async function initFirebaseAndAuth() {
+    if (!firebaseConfig) {
+        console.error("Firebase config is missing. Cannot initialize app.");
+        return;
+    }
+
+    // 1. Inicializar
+    app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    auth = getAuth(app);
+
+    // 2. Autenticación (con token si está disponible, sino anónima)
+    try {
+        if (initialAuthToken) {
+            await signInWithCustomToken(auth, initialAuthToken);
+        } else {
+            await signInAnonymously(auth);
+        }
+    } catch (error) {
+        console.error("Firebase Auth Error:", error);
+        showStatus("Error de autenticación. Verifica la consola.", true);
+    }
+    
+    // 3. Obtener el userId una vez autenticado
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // Usar el UID para identificar al usuario, incluso anónimo
+            userId = user.uid;
+            console.log("Usuario autenticado. UID:", userId);
+            
+            // 4. Iniciar la carga de datos después de la autenticación
+            setupDataListeners(); 
+            setupEventListeners(); // Configurar listeners que dependen del userId
+        } else {
+            console.warn("No user is signed in.");
+            // Si la autenticación falla por completo, usamos un ID temporal
+            userId = crypto.randomUUID();
+        }
+    });
+}
+
+// =========================================================================
+// 4. GESTIÓN DE CLUBES (NUEVA FUNCIONALIDAD)
+// =========================================================================
+
+/**
+ * Renderiza dinámicamente las opciones de clubes en el selector.
+ * Muestra/oculta la UI para añadir clubes si es necesario.
+ * @param {Array<Object>} clubs Array de objetos de clubes.
+ */
+function renderClubs(clubs) {
+    const clubSelect = document.getElementById('club');
+    const addClubContainer = document.getElementById('addClubContainer');
+    
+    // Limpiar opciones existentes
+    clubSelect.innerHTML = '';
+
+    // Añadir opción por defecto
+    const defaultOption = document.createElement('option');
+    defaultOption.value = "";
+    defaultOption.textContent = clubs.length > 0 ? "Seleccione un Club" : "Añadiendo Clubes...";
+    defaultOption.disabled = true;
+    defaultOption.selected = true;
+    clubSelect.appendChild(defaultOption);
+
+    // Añadir clubes del array
+    clubs.forEach(club => {
+        const option = document.createElement('option');
+        option.value = club.name; // Usamos el nombre como valor y texto
+        option.textContent = club.name;
+        clubSelect.appendChild(option);
+    });
+
+    // Controlar la visibilidad de la UI para añadir un club
+    if (clubs.length === 0) {
+        clubSelect.disabled = true;
+        addClubContainer.classList.remove('hidden');
+        showStatus("¡Necesitas añadir un club antes de registrar un atleta!", true);
+    } else {
+        clubSelect.disabled = false;
+        addClubContainer.classList.add('hidden');
+    }
+}
+
+/**
+ * Configura la escucha en tiempo real para la colección de clubes.
+ */
+function loadClubs() {
+    // Los clubes son datos públicos (compartidos)
+    const clubsCollectionRef = collection(db, `artifacts/${appId}/public/data/clubs`);
+    
+    onSnapshot(clubsCollectionRef, (snapshot) => {
+        clubsData = [];
+        snapshot.forEach((doc) => {
+            // Guardamos el ID del documento por si se necesitara borrar o editar
+            clubsData.push({ id: doc.id, ...doc.data() });
         });
+        
+        renderClubs(clubsData);
+        console.log("Clubes cargados:", clubsData);
+    }, (error) => {
+        console.error("Error al cargar clubes:", error);
+        showStatus("Error al cargar la lista de clubes.", true);
+    });
+}
 
-        // 2. Bloquea las combinaciones de teclas (Ctrl+Shift+I, F12, Ctrl+U, etc.)
-        document.addEventListener('keydown', function(e) {
-            // F12
-            if (e.key === 'F12' || e.keyCode === 123) {
-                e.preventDefault();
-            }
+/**
+ * Añade un nuevo club a la base de datos.
+ */
+async function addClub() {
+    const newClubInput = document.getElementById('newClubName');
+    const clubName = newClubInput.value.trim();
+    
+    if (!clubName) {
+        showStatus("Ingresa un nombre para el club.", true);
+        return;
+    }
+    
+    // Verificar si el club ya existe (simple, no estricto)
+    if (clubsData.some(club => club.name.toLowerCase() === clubName.toLowerCase())) {
+        showStatus(`El club '${clubName}' ya existe.`, true);
+        newClubInput.value = '';
+        return;
+    }
 
-            // Ctrl+Shift+I (o Cmd+Option+I en Mac)
-            if (e.ctrlKey && e.shiftKey && (e.key === 'i' || e.key === 'I')) {
-                e.preventDefault();
-            }
-
-            // Ctrl+Shift+J (o Cmd+Option+J en Mac) - Para la consola
-            if (e.ctrlKey && e.shiftKey && (e.key === 'j' || e.key === 'J')) {
-                e.preventDefault();
-            }
-
-            // Ctrl+U (Ver código fuente)
-            if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) {
-                e.preventDefault();
-            }
+    try {
+        const clubsCollectionRef = collection(db, `artifacts/${appId}/public/data/clubs`);
+        await addDoc(clubsCollectionRef, {
+            name: clubName,
+            createdAt: new Date().toISOString(),
+            registeredBy: userId // Para fines de auditoría
         });
-    </script>
+        
+        newClubInput.value = '';
+        showStatus(`¡Club '${clubName}' añadido exitosamente!`);
+    } catch (e) {
+        console.error("Error al añadir club:", e);
+        showStatus("Error al guardar el club. Intenta de nuevo.", true);
+    }
+}
 
-</body>
-</html>
+
+// =========================================================================
+// 5. GESTIÓN DE ATLETAS
+// =========================================================================
+
+/**
+ * Configura la escucha en tiempo real para la colección de atletas.
+ * Solo se llama una vez después de la autenticación.
+ */
+function loadAthletes() {
+    // Los atletas son datos privados para el usuario que los registra
+    const athletesCollectionPath = `artifacts/${appId}/users/${userId}/athletes`;
+    const athletesCollectionRef = collection(db, athletesCollectionPath);
+    
+    // Consulta para obtener todos los documentos en tiempo real
+    onSnapshot(athletesCollectionRef, (snapshot) => {
+        athletesData = [];
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            // Calcula la categoría antes de guardarla
+            data.categoria = calculateCategory(data.fechaNac);
+            athletesData.push({ id: doc.id, ...data });
+        });
+        
+        // Renderizar la tabla con los datos (y aplicar ordenamiento por defecto)
+        sortTable(currentSortKey, false); // El segundo argumento 'false' evita resetear la dirección
+        document.getElementById('loadingMessage').classList.add('hidden');
+        document.getElementById('noDataMessage').classList.toggle('hidden', athletesData.length > 0);
+        console.log("Atletas cargados:", athletesData);
+        
+    }, (error) => {
+        console.error("Error al cargar atletas:", error);
+        document.getElementById('loadingMessage').textContent = "Error al cargar los datos.";
+    });
+}
+
+/**
+ * Renderiza la tabla de atletas en el DOM.
+ * @param {Array<Object>} dataToRender Array de atletas a mostrar.
+ */
+function renderTable(dataToRender) {
+    const tableBody = document.getElementById('athleteTableBody');
+    tableBody.innerHTML = ''; // Limpia la tabla
+    
+    if (dataToRender.length === 0) {
+        return;
+    }
+
+    dataToRender.forEach(data => {
+        // Formateo de peso y talla para mejor presentación
+        data.pesoFormatted = `${data.peso} kg`;
+        data.tallaFormatted = `${data.talla} cm`;
+        
+        const row = tableBody.insertRow();
+        row.className = 'bg-card-light hover:bg-yellow-100 transition duration-150';
+        row.innerHTML = `
+            <td data-label="Club" class="table-data">${data.club}</td>
+            <td data-label="Nombre" class="table-data">${data.nombre}</td>
+            <td data-label="Apellido" class="table-data">${data.apellido}</td>
+            <td data-label="F. Nac." class="table-data table-hidden-mobile">${data.fechaNac}</td>
+            <td data-label="Categoría" class="table-data">${data.categoria}</td>
+            <td data-label="Talla" class="table-data table-hidden-mobile">${data.tallaFormatted}</td>
+            <td data-label="Peso" class="table-data table-hidden-mobile">${data.pesoFormatted}</td>
+            <td data-label="Correo" class="table-data table-hidden-desktop">${data.correo || 'N/A'}</td>
+            <td data-label="Teléfono" class="table-data table-hidden-desktop">${data.telefono || 'N/A'}</td>
+        `;
+    });
+
+    // Actualiza la clase CSS para indicar el ordenamiento actual
+    document.querySelectorAll('#athleteTable th').forEach(th => {
+        th.classList.remove('sorted-asc', 'sorted-desc');
+        if (th.getAttribute('data-sort-key') === currentSortKey) {
+            th.classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
+        }
+    });
+}
+
+/**
+ * Ordena la tabla de atletas por una clave específica.
+ * @param {string} key La clave del objeto por la cual ordenar (ej: 'apellido').
+ * @param {boolean} toggleDirection Si es true, invierte la dirección de ordenamiento.
+ */
+function sortTable(key, toggleDirection) {
+    const currentData = athletesData.slice(); // Copia para ordenar
+
+    if (toggleDirection) {
+        if (currentSortKey === key) {
+            sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSortKey = key;
+            sortDirection = 'asc';
+        }
+    }
+
+    currentData.sort((a, b) => {
+        let valA = a[key] || '';
+        let valB = b[key] || '';
+        
+        // Convertir a número si es talla o peso
+        if (key === 'talla' || key === 'peso') {
+            valA = parseFloat(valA);
+            valB = parseFloat(valB);
+        }
+        
+        // Manejo de valores nulos o indefinidos
+        if (valA === undefined || valA === null) valA = '';
+        if (valB === undefined || valB === null) valB = '';
+
+        if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+        if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    renderTable(currentData);
+}
+
+/**
+ * Filtra los datos de la tabla basándose en el texto de búsqueda.
+ * @param {string} searchTerm Texto de búsqueda.
+ */
+function filterTable(searchTerm) {
+    const lowerCaseSearch = searchTerm.toLowerCase();
+    
+    const filteredData = athletesData.filter(athlete => {
+        // Concatenar campos relevantes para la búsqueda
+        const searchableText = `${athlete.nombre} ${athlete.apellido} ${athlete.club} ${athlete.categoria} ${athlete.correo}`.toLowerCase();
+        return searchableText.includes(lowerCaseSearch);
+    });
+
+    renderTable(filteredData);
+    document.getElementById('noDataMessage').classList.toggle('hidden', filteredData.length > 0);
+}
+
+
+// =========================================================================
+// 6. SETUP DE EVENTOS Y FORMULARIO
+// =========================================================================
+
+/**
+ * Configura los listeners de datos de Firebase (Clubes y Atletas).
+ */
+function setupDataListeners() {
+    // 1. Inicia la escucha de clubes (debe ser primero para llenar el select)
+    loadClubs();
+    
+    // 2. Inicia la escucha de atletas
+    loadAthletes();
+}
+
+
+/**
+ * Configura todos los event listeners del DOM.
+ */
+function setupEventListeners() {
+    // Manejar el envío del formulario
+    document.getElementById('athleteForm').addEventListener('submit', handleFormSubmit);
+
+    // Configurar el ordenamiento de la tabla
+    document.querySelectorAll('#athleteTable th').forEach(header => {
+        const key = header.getAttribute('data-sort-key');
+        if (key) {
+            header.style.cursor = 'pointer'; 
+            header.addEventListener('click', () => sortTable(key, true)); 
+        }
+    });
+
+    // Configurar la búsqueda en tiempo real
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        filterTable(e.target.value);
+    });
+    
+    // NUEVO: Listener para el botón de añadir club
+    document.getElementById('addClubButton').addEventListener('click', addClub);
+}
+
+/**
+ * Maneja el envío del formulario de registro de atletas.
+ * @param {Event} e Evento de envío del formulario.
+ */
+async function handleFormSubmit(e) {
+    e.preventDefault();
+    
+    if (clubsData.length === 0) {
+        showStatus("No puedes registrar atletas sin antes registrar un club.", true);
+        return;
+    }
+    
+    const form = e.target;
+    const formData = {
+        club: form.club.value.trim(),
+        nombre: form.nombre.value.trim(),
+        apellido: form.apellido.value.trim(),
+        fechaNac: form.fechaNac.value,
+        genero: form.genero.value,
+        talla: parseFloat(form.talla.value),
+        peso: parseFloat(form.peso.value),
+        correo: form.correo.value.trim() || null, // Opcional
+        telefono: form.telefono.value.trim() || null, // Opcional
+        posicion: form.posicion.value || null, // Opcional
+        timestamp: new Date().toISOString()
+    };
+    
+    try {
+        const athletesCollectionPath = `artifacts/${appId}/users/${userId}/athletes`;
+        await addDoc(collection(db, athletesCollectionPath), formData);
+        
+        form.reset();
+        // Establecer el valor por defecto en el select club después de resetear
+        form.club.selectedIndex = 0; 
+        showStatus('¡Atleta registrado exitosamente!');
+    } catch (error) {
+        console.error("Error al añadir documento:", error);
+        showStatus('Error al registrar el atleta. Verifica la consola.', true);
+    }
+}
+
+
+// =========================================================================
+// 7. INICIO DE LA APLICACIÓN
+// =========================================================================
+
+// Inicia la aplicación cargando la configuración de Firebase
+initFirebaseAndAuth();
