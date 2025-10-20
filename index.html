@@ -3,24 +3,313 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data de Atletas - Liga de Voleibol</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Data de Atletas - Liga de Voleibol (Firebase)</title>
+    <!-- Incluir fuentes Montserrat -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Estilos generales del cuerpo */
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; 
+            min-height: 100vh;
+        }
+
+        /* Contenedor principal */
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        /* Mensaje de carga y estado */
+        #statusMessage {
+            text-align: center;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            /* Inicialmente oculto o con estado de advertencia */
+            background-color: #fff3cd;
+            color: #856404;
+            display: none; 
+        }
+        
+        /* Clases para tipos de mensaje */
+        .status-success {
+            background-color: #d4edda !important;
+            color: #155724 !important;
+        }
+
+        .status-error {
+            background-color: #f8d7da !important;
+            color: #721c24 !important;
+        }
+        
+
+        /* Tarjeta del formulario */
+        .form-card {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        /* Encabezado del formulario */
+        .form-header h2 {
+            margin: 0 0 10px 0;
+            color: #0056b3; 
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .form-header p {
+            margin: 0 0 25px 0;
+            color: #666;
+            text-align: center;
+            font-size: 1em;
+        }
+
+        /* Grupos y filas de formulario */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px; 
+        }
+
+        /* Hace que los grupos dentro de una fila ocupen el mismo espacio */
+        .form-row .form-group {
+            flex: 1; 
+        }
+
+        /* Estilos para las etiquetas (labels) */
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        /* Estrella para campos obligatorios */
+        .required-star {
+            color: #d9534f; 
+        }
+
+        /* Estilos para los campos de entrada y selección */
+        input[type="number"],
+        input[type="text"],
+        input[type="date"],
+        input[type="email"],
+        input[type="tel"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box; 
+            font-size: 1em;
+            font-family: 'Montserrat', sans-serif;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        /* Efecto al enfocar un campo */
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
+        }
+
+        /* Nota de campos obligatorios */
+        .required-note {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 0;
+        }
+
+        /* Botón de envío */
+        button[type="submit"] {
+            width: 100%;
+            padding: 15px;
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0056b3; 
+        }
+
+        /* --- ESTILOS DE BÚSQUEDA --- */
+        .search-area {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end; 
+            gap: 10px;
+            padding: 10px 0;
+            margin-bottom: 20px;
+        }
+
+        #searchCedula {
+            flex-grow: 0; 
+            width: 250px; 
+        }
+
+        #searchButton {
+            width: auto;
+            padding: 10px;
+            background-color: #28a745; 
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #searchButton:hover {
+            background-color: #1e7e34;
+        }
+
+        /* Contenedor de resultados de búsqueda */
+        .search-result-area {
+            padding: 10px;
+            min-height: 50px;
+        }
+
+        .search-message {
+            text-align: center;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .search-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .search-message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        /* Resaltar tarjeta de búsqueda */
+        .athlete-card.search-highlight {
+            border: 2px solid #28a745;
+            background-color: #e6ffed;
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.4);
+        }
+        /* --- FIN ESTILOS DE BÚSQUEDA --- */
+
+        /* Sección de atletas registrados */
+        .registered-athletes-section {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .registered-athletes-section h3 {
+            text-align: center;
+            color: #0056b3;
+            margin-top: 0;
+        }
+
+        /* Mensaje cuando no hay datos */
+        .no-data-message {
+            text-align: center;
+            color: #888;
+            padding: 20px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+        }
+
+        /* Tarjeta para cada atleta registrado */
+        .athlete-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+            background-color: #f9f9f9;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .athlete-card p {
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+
+        .athlete-card p strong {
+            color: #333;
+            min-width: 120px; 
+            display: inline-block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Diseño responsivo para pantallas pequeñas */
+        @media (max-width: 600px) {
+            .form-row {
+                flex-direction: column; 
+                gap: 0;
+            }
+            /* En móviles, la búsqueda ocupa todo el ancho */
+            .search-area {
+                flex-direction: row; 
+                justify-content: space-between;
+            }
+            #searchCedula {
+                flex-grow: 1;
+                width: auto;
+            }
+        }
+    </style>
 </head>
 <body>
 
     <div class="container">
+        <!-- Mensaje de estado (Cargando / Error) -->
+        <div id="statusMessage">Cargando datos de Firebase...</div>
+        
         <div class="form-card">
             <div class="form-header">
                 <h2>Data de Atletas participantes en la liga de voleibol del Estado Lara</h2>
-                <p>Por favor, complete el siguiente formulario para registrar a un atleta.</p>
+                <p>Por favor, complete el siguiente formulario para registrar a un atleta. (Datos guardados en Firebase)</p>
             </div>
             
-            <form id="athleteForm" onsubmit="return handleFormSubmit(event)">
+            <form id="athleteForm">
                 
                 <div class="form-group">
                     <label for="cedula">Cédula de Identidad <span class="required-star">*</span></label>
-                    <input type="text" id="cedula" name="cedula" required placeholder="V12345678">
+                    <input type="number" id="cedula" name="cedula" required placeholder="12345678">
                 </div>
 
                 <div class="form-row">
@@ -56,12 +345,12 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="talla">Talla (cm)</label>
-                        <input type="number" id="talla" name="talla">
+                        <label for="talla">Talla (Mt)</label>
+                        <input type="number" id="talla" name="talla" step="0.01" placeholder="1.75">
                     </div>
                     <div class="form-group">
-                        <label for="peso">Peso (kg)</label>
-                        <input type="number" id="peso" name="peso">
+                        <label for="peso">Peso (Kg)</label>
+                        <input type="number" id="peso" name="peso" step="0.01" placeholder="65.50">
                     </div>
                 </div>
 
@@ -73,25 +362,292 @@
 
                     <div class="form-group">
                         <label for="telefono">Teléfono <span class="required-star">*</span></label>
-                        <input type="tel" id="telefono" name="telefono" required>
+                        <input type="tel" id="telefono" name="telefono" required placeholder="04241234455">
                     </div>
                 </div>
                 
                 <p class="required-note"><span class="required-star">*</span> Campos obligatorios</p>
 
-                <button type="submit">Registrar Atleta</button>
+                <button type="submit" id="submitButton">Registrar Atleta</button>
             </form>
+        </div>
+        
+        <!-- Área de búsqueda -->
+        <div class="search-area">
+            <input type="number" id="searchCedula" placeholder="Buscar por Cédula (12345678)">
+            <button id="searchButton" onclick="searchAthlete()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                </svg>
+            </button>
         </div>
 
         <div class="registered-athletes-section">
             <h3>Atletas Registrados</h3>
-            <div id="registeredData">
-                <p class="no-data-message">No hay atletas registrados aún. ¡Registra el primero!</p>
+            <div id="registeredData" style="display: none;">
+                <!-- Aquí se inyecta la lista o el mensaje de 'No hay datos' -->
             </div>
+            <!-- Contenedor para el resultado de la búsqueda individual -->
+            <div id="searchResult" class="search-result-area"></div>
+            <p style="text-align: center; font-size: 0.8em; color: #aaa;" id="userIDDisplay"></p>
         </div>
         
     </div>
     
-    <script src="script.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, where, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Variables globales del entorno (OBLIGATORIAS para este entorno)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        let db;
+        let auth;
+        let userId = null;
+        let athletesData = []; // Caché local de los datos
+        let isAuthReady = false; // Bandera para saber si la autenticación está lista
+        
+        const statusMessage = document.getElementById('statusMessage');
+        const registeredDataDiv = document.getElementById('registeredData');
+        const searchResultDiv = document.getElementById('searchResult');
+        const form = document.getElementById('athleteForm');
+
+        /**
+         * Muestra y da estilo a los mensajes de estado, con auto-ocultamiento si es un éxito.
+         */
+        function setStatus(message, type = 'warning', autoHide = false) {
+            statusMessage.style.display = 'block';
+            statusMessage.textContent = message;
+            statusMessage.className = type === 'success' ? 'status-success' : (type === 'error' ? 'status-error' : '');
+            
+            if (autoHide) {
+                setTimeout(() => {
+                    statusMessage.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        function getCollectionPath(uid) {
+            // Path obligatorio: /artifacts/{appId}/users/{userId}/atletas
+            return `artifacts/${appId}/users/${uid}/atletas`;
+        }
+
+        /**
+         * Inicializa Firebase y establece el listener de autenticación.
+         */
+        async function initApp() { // CAMBIADO DE initializeApp a initApp
+            setStatus("Inicializando Firebase y autenticando usuario...", 'warning');
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                // 1. Manejar la autenticación
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                // 2. Esperar el estado de autenticación
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        isAuthReady = true;
+                        document.getElementById('userIDDisplay').textContent = `ID de Usuario (Ruta: ${getCollectionPath(userId)}): ${userId}`;
+                        setStatus("¡Conexión a Firebase exitosa! Sincronizando datos.", 'success', true);
+                        // 3. Iniciar el listener de datos en tiempo real
+                        setupRealtimeListener(userId);
+                    } else {
+                        console.error("FIREBASE ERROR: No se pudo autenticar al usuario.");
+                        setStatus("Error de autenticación. No se puede cargar ni guardar datos.", 'error');
+                    }
+                });
+
+            } catch (error) {
+                console.error("FIREBASE ERROR: Error al inicializar o autenticar Firebase:", error);
+                setStatus(`Error crítico de Firebase: ${error.message}`, 'error');
+            }
+        }
+
+        /**
+         * Configura el listener de Firestore para actualizaciones en tiempo real.
+         */
+        function setupRealtimeListener(uid) {
+            const collectionRef = collection(db, getCollectionPath(uid));
+            onSnapshot(collectionRef, (snapshot) => {
+                athletesData = [];
+                snapshot.forEach(doc => {
+                    athletesData.push({ id: doc.id, ...doc.data() });
+                });
+                renderAthleteList(athletesData);
+            }, (error) => {
+                console.error("FIREBASE ERROR: Error al escuchar cambios en Firestore (onSnapshot):", error);
+                setStatus("Error al cargar datos en tiempo real. Revise la consola.", 'error');
+            });
+        }
+
+
+        /**
+         * Dibuja la lista de atletas en el DOM.
+         */
+        function renderAthleteList(data) {
+            // 1. Limpiar áreas
+            searchResultDiv.innerHTML = ''; // Limpia resultados de búsqueda
+            registeredDataDiv.innerHTML = ''; // Limpia lista general
+            
+            // 2. Asegurar que el contenedor general esté visible
+            registeredDataDiv.style.display = 'block'; 
+
+            if (data.length === 0) {
+                registeredDataDiv.innerHTML = '<p class="no-data-message">No hay atletas registrados aún. ¡Registra el primero!</p>';
+                return;
+            }
+            
+            // 3. Renderizar cada atleta
+            data.forEach(athlete => {
+                const athleteCard = document.createElement('div');
+                athleteCard.classList.add('athlete-card'); 
+                
+                const docId = athlete.id ? `<span style="font-size: 0.7em; color: #007bff; float: right;">(Doc ID: ${athlete.id})</span>` : '';
+
+                // Usar valores predeterminados si los campos son nulos/vacíos
+                const tallaDisplay = athlete.talla && athlete.talla !== '' ? `${athlete.talla} m` : 'No especificada';
+                const pesoDisplay = athlete.peso && athlete.peso !== '' ? `${athlete.peso} kg` : 'No especificado';
+
+                athleteCard.innerHTML = `
+                    <p><strong>Cédula:</strong> ${athlete.cedula} ${docId}</p>
+                    <p><strong>Nombre completo:</strong> ${athlete.nombre} ${athlete.apellido}</p>
+                    <p><strong>Club:</strong> ${athlete.club}</p>
+                    <p><strong>Categoría:</strong> ${athlete.categoria}</p>
+                    <p><strong>Fecha de Nac.:</strong> ${athlete.fechaNac}</p>
+                    <p><strong>Talla:</strong> ${tallaDisplay}</p>
+                    <p><strong>Peso:</strong> ${pesoDisplay}</p>
+                    <p><strong>Correo:</strong> ${athlete.correo}</p>
+                    <p><strong>Teléfono:</strong> ${athlete.telefono}</p>
+                `;
+                registeredDataDiv.appendChild(athleteCard);
+            });
+        }
+
+        /**
+         * Maneja el envío del formulario y guarda el atleta en Firestore.
+         */
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+
+            if (!isAuthReady) {
+                setStatus("La conexión a la base de datos no está lista. Intente en un momento.", 'warning', false);
+                return;
+            }
+
+            // 1. Obtener los valores del formulario
+            const cedula = document.getElementById('cedula').value; 
+            // ... resto de campos
+
+            // 2. Validación de duplicidad (Revisión rápida contra el caché local)
+            if (athletesData.some(athlete => athlete.cedula === cedula)) {
+                setStatus(`La cédula ${cedula} ya está registrada.`, 'error', true);
+                return; 
+            }
+
+            const newAthlete = {
+                cedula,
+                nombre: document.getElementById('nombre').value,
+                apellido: document.getElementById('apellido').value,
+                club: document.getElementById('club').value,
+                fechaNac: document.getElementById('fechaNac').value,
+                categoria: document.getElementById('categoria').value,
+                talla: document.getElementById('talla').value ? parseFloat(document.getElementById('talla').value).toFixed(2) : '',
+                peso: document.getElementById('peso').value ? parseFloat(document.getElementById('peso').value).toFixed(2) : '',
+                correo: document.getElementById('correo').value,
+                // Quitar guiones del teléfono
+                telefono: document.getElementById('telefono').value.replace(/[^\d]/g, ''), 
+                timestamp: new Date().toISOString()
+            };
+
+            // 3. Guardar en Firestore
+            try {
+                const collectionRef = collection(db, getCollectionPath(userId));
+                await addDoc(collectionRef, newAthlete);
+                
+                setStatus(`Atleta ${newAthlete.nombre} registrado exitosamente!`, 'success', true);
+                
+                // 4. Limpiar el formulario
+                document.getElementById('athleteForm').reset();
+
+            } catch (error) {
+                console.error("FIREBASE ERROR: Error al añadir documento a Firestore:", error);
+                setStatus(`Error al registrar atleta: ${error.message}`, 'error');
+            }
+        }
+
+        /**
+         * Función que busca un atleta por su cédula en Firestore y muestra el resultado.
+         */
+        window.searchAthlete = async function() {
+            const searchCedulaInput = document.getElementById('searchCedula');
+            searchResultDiv.innerHTML = '';
+            
+            const cedulaToSearch = searchCedulaInput.value;
+            
+            if (!cedulaToSearch) {
+                // Si el campo de búsqueda está vacío, volvemos a mostrar la lista completa
+                registeredDataDiv.style.display = 'block'; // Asegurar visibilidad
+                renderAthleteList(athletesData);
+                return;
+            }
+
+            // Ocultar el listado general al realizar una búsqueda
+            registeredDataDiv.style.display = 'none';
+
+            try {
+                const collectionRef = collection(db, getCollectionPath(userId));
+                // Nota: Usamos '==' para que la búsqueda sea exacta.
+                const q = query(collectionRef, where("cedula", "==", cedulaToSearch));
+                
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    const foundAthlete = querySnapshot.docs[0].data();
+                    
+                    const athleteCard = document.createElement('div');
+                    athleteCard.classList.add('athlete-card', 'search-highlight'); 
+
+                    const tallaDisplay = foundAthlete.talla ? `${foundAthlete.talla} m` : 'No especificada';
+                    const pesoDisplay = foundAthlete.peso ? `${foundAthlete.peso} kg` : 'No especificado';
+
+                    athleteCard.innerHTML = `
+                        <p class="search-message success">¡Atleta Encontrado! Resultados de búsqueda:</p>
+                        <p><strong>Cédula:</strong> ${foundAthlete.cedula}</p>
+                        <p><strong>Nombre completo:</strong> ${foundAthlete.nombre} ${foundAthlete.apellido}</p>
+                        <p><strong>Club:</strong> ${foundAthlete.club}</p>
+                        <p><strong>Categoría:</strong> ${foundAthlete.categoria}</p>
+                        <p><strong>Fecha de Nac.:</strong> ${foundAthlete.fechaNac}</p>
+                        <p><strong>Talla:</strong> ${tallaDisplay}</p>
+                        <p><strong>Peso:</strong> ${pesoDisplay}</p>
+                        <p><strong>Correo:</strong> ${foundAthlete.correo}</p>
+                        <p><strong>Teléfono:</strong> ${foundAthlete.telefono}</p>
+                    `;
+                    searchResultDiv.appendChild(athleteCard);
+                    
+                } else {
+                    searchResultDiv.innerHTML = '<p class="search-message error">¡Este Atleta no se encuentra Registrado!</p>';
+                }
+            } catch (error) {
+                console.error("FIREBASE ERROR: Error al buscar documento en Firestore:", error);
+                searchResultDiv.innerHTML = `<p class="search-message error">Error de búsqueda: ${error.message}</p>`;
+            }
+        }
+        
+        // Asignar el listener del formulario
+        form.addEventListener('submit', handleFormSubmit);
+
+        // Iniciar la aplicación de Firebase
+        initApp(); // CAMBIADO DE initializeApp a initApp
+    </script>
 </body>
 </html>
