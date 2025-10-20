@@ -3,561 +3,262 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data de Atletas - Liga de Voleibol</title>
-    <!-- Carga la librería Tailwind CSS para estilos modernos y responsive -->
+    <title>Formulario Versión Anterior</title>
+    <!-- Carga de Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Carga la fuente Inter (similar a Montserrat) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Configuración de la fuente Inter -->
     <style>
-        /* Estilos base de Tailwind */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f4f7f9; /* Gris claro de fondo */
+            background-color: #1A1A1A; /* Fondo oscuro */
         }
-        
-        /* Estilos personalizados para la tabla y la responsividad */
-        /* Eliminamos el enfoque "table-scroll-wrapper" y usamos overflow-x-auto de Tailwind */
-        .athlete-data-table {
-            min-width: 100%;
-        }
+        /* Definición del color principal revertido a un Indigo/Azul */
+        .bg-primary { background-color: #4F46E5; } /* Indigo-600 */
+        .hover\:bg-primary-dark:hover { background-color: #4338CA; } /* Indigo-700 */
+        .text-primary { color: #4F46E5; }
+        .border-primary { border-color: #4F46E5; }
 
-        /* Estilo para el ícono de ordenamiento */
-        .sorted-asc::after {
-            content: " \25B2"; /* Triángulo hacia arriba */
-            font-size: 0.8rem;
+        /* Estilos del Banner ANTERIOR reintroducidos */
+        .banner-wrapper {
+            width: 100%;
+            height: 150px; /* Altura original del banner */
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Si esta sección tenía un color o regla de conflicto, aquí está de vuelta */
+            background-color: #1E3A8A; /* Color de fondo simulado (Blue-800) */
         }
-        .sorted-desc::after {
-            content: " \25BC"; /* Triángulo hacia abajo */
-            font-size: 0.8rem;
+        .banner-image {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
         }
-        
-        /* Estilo para los mensajes de estado (Éxito/Error) */
-        #statusMessage {
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-        }
-
-        /* Responsive Table: Mostrar como bloques en pantallas muy pequeñas (< 768px) */
-        @media screen and (max-width: 767px) {
-            .athlete-data-table thead {
-                display: none; /* Oculta el encabezado en móvil */
-            }
-            .athlete-data-table, .athlete-data-table tbody, .athlete-data-table tr, .athlete-data-table td {
-                display: block;
-            }
-            .athlete-data-table tr {
-                margin-bottom: 0.5rem;
-                border-bottom: 2px solid #e0e0e0;
-                padding: 0.5rem 0;
-            }
-            .athlete-data-table td {
-                text-align: right;
-                padding-left: 50%;
-                position: relative;
-                border: none;
-                padding-top: 0.25rem;
-                padding-bottom: 0.25rem;
-            }
-            .athlete-data-table td::before {
-                content: attr(data-label);
-                position: absolute;
-                left: 0;
-                width: 50%;
-                padding-left: 1rem;
-                font-weight: 600;
-                text-align: left;
-                color: #4b5563;
-            }
-            /* Clases de utilidad para visibilidad responsive */
-            .table-hidden-mobile { display: none; }
-            .table-hidden-desktop { display: block; }
-        }
-        /* Para escritorio (>= 768px) */
-        @media screen and (min-width: 768px) {
-            .table-hidden-desktop { display: none !important; }
-            .table-hidden-mobile { display: table-cell !important; }
-        }
-
     </style>
 </head>
-<body>
-    <!-- Mensaje de estado (se inyecta aquí o se crea dinámicamente) -->
-    <div id="statusMessage" class="fixed top-4 right-4 p-4 rounded-lg shadow-lg text-white font-semibold z-50 transition-opacity duration-500" style="opacity: 0;"></div>
+<body class="min-h-screen flex items-center justify-center p-4">
 
-    <!-- BANNER DE ENCABEZADO -->
-    <div class="banner-wrapper w-full bg-cover bg-center h-32 md:h-48 flex items-center justify-center shadow-md"
-        style="background-image: url('https://placehold.co/1200x200/4c4187/ffffff?text=LVMeL+%7C+Liga+de+Voleibol'); background-color: #4c4187;">
-        <h1 class="text-white text-3xl md:text-5xl font-bold tracking-tight text-center p-2 bg-black bg-opacity-30 rounded-lg">LVMeL - Data de Atletas</h1>
-    </div>
-    <!-- FIN DEL BANNER -->
+    <!-- Contenedor Principal del Formulario -->
+    <div id="app-container" class="w-full max-w-lg bg-white rounded-xl shadow-2xl overflow-hidden">
 
-    <div class="container mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-        
-        <!-- Tarjeta del Formulario -->
-        <div class="form-card bg-white p-6 md:p-8 rounded-xl shadow-2xl border-t-4 border-indigo-600">
-            <div class="form-header text-center mb-6">
-                <h2 class="text-3xl font-extrabold text-gray-900 mb-2">Registro de Atletas</h2>
-                <p class="text-gray-500">Por favor, complete el siguiente formulario para registrar un atleta.</p>
+        <!-- Banner ANTERIOR (Reintroducido) -->
+        <div class="banner-wrapper">
+            <!-- Este placeholder simula la imagen que estaba en el banner -->
+            <img src="https://placehold.co/600x150/4F46E5/FFFFFF?text=BANNER+ANTERIOR" alt="Banner Antiguo" class="banner-image">
+        </div>
+
+        <!-- Cabecera (Revertida al color anterior) -->
+        <header class="bg-primary text-white p-6 text-center">
+            <h1 class="text-3xl font-bold tracking-tight">Registro de Datos</h1>
+            <p class="text-sm mt-1 opacity-90">Persistencia con Firebase Firestore</p>
+        </header>
+
+        <!-- Contenido del Formulario -->
+        <main class="p-6 md:p-8">
+            <div id="auth-info" class="mb-4 text-xs text-gray-500 flex justify-between items-center">
+                <span>Estado: <span id="user-status" class="font-medium text-red-500">Cargando...</span></span>
+                <span>ID de Usuario: <span id="user-id" class="font-mono text-gray-700 text-[10px] truncate max-w-[150px] inline-block"></span></span>
             </div>
-            
-            <form id="athleteForm" class="space-y-4">
-                
-                <!-- Club -->
-                <div class="form-group"> 
-                    <label for="club" class="block text-sm font-medium text-gray-700 mb-1">Club <span class="text-red-500">*</span></label>
-                    <input id="club" name="club" required type="text" placeholder="Ej: Barquisimeto Voleibol Club"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150"> 
+
+            <form id="data-form" class="space-y-6">
+                <div>
+                    <label for="message-input" class="block text-sm font-medium text-gray-700 mb-2">Mensaje</label>
+                    <input type="text" id="message-input" required
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition duration-150"
+                           placeholder="Ingresa un mensaje para guardar...">
                 </div>
 
-                <!-- Nombre y Apellido -->
-                <div class="flex flex-col md:flex-row gap-4">
-                    <div class="form-group w-full"> 
-                        <label for="nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre <span class="text-red-500">*</span></label>
-                        <input id="nombre" name="nombre" required type="text" placeholder="Ej: Juan"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150"> 
-                    </div>
-                    <div class="form-group w-full"> 
-                        <label for="apellido" class="block text-sm font-medium text-gray-700 mb-1">Apellido <span class="text-red-500">*</span></label>
-                        <input id="apellido" name="apellido" required type="text" placeholder="Ej: Pérez"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150"> 
-                    </div>
-                </div>
-
-                <!-- Categoría, Talla y Peso -->
-                <div class="flex flex-col md:flex-row gap-4">
-                    <div class="form-group w-full md:w-1/2"> 
-                        <label for="categoria" class="block text-sm font-medium text-gray-700 mb-1">Categoría <span class="text-red-500">*</span></label>
-                        <select id="categoria" name="categoria" required 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white appearance-none transition duration-150">
-                            <option value="" disabled selected>Selecciona una Categoría</option>
-                            <option value="3ra División">3ra División</option>
-                            <option value="2da División">2da División</option>
-                            <option value="1era División">1era División</option>
-                            <option value="CIAR">CIAR</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group w-full md:w-1/4"> 
-                        <label for="talla" class="block text-sm font-medium text-gray-700 mb-1">Talla (cm)</label> 
-                        <input id="talla" name="talla" type="number" placeholder="Ej: 180" min="50" max="300"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150"> 
-                    </div>
-                    <div class="form-group w-full md:w-1/4"> 
-                        <label for="peso" class="block text-sm font-medium text-gray-700 mb-1">Peso (kg)</label> 
-                        <input id="peso" name="peso" type="number" placeholder="Ej: 75" min="20" max="250"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150"> 
-                    </div>
-                </div>
-
-                <!-- Fecha Nacimiento, Correo y Teléfono -->
-                <div class="flex flex-col md:flex-row gap-4">
-                    <div class="form-group w-full md:w-1/3"> 
-                        <label for="fechaNac" class="block text-sm font-medium text-gray-700 mb-1">F. Nacimiento <span class="text-red-500">*</span></label> 
-                        <input id="fechaNac" name="fechaNac" required type="date"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150"> 
-                    </div>
-                    
-                    <div class="form-group w-full md:w-1/3"> 
-                        <label for="correo" class="block text-sm font-medium text-gray-700 mb-1">Correo <span class="text-red-500">*</span></label>
-                        <input id="correo" name="correo" required type="email" placeholder="Ej: atleta@correo.com"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150"> 
-                    </div>
-
-                    <div class="form-group w-full md:w-1/3"> 
-                        <label for="telefono" class="block text-sm font-medium text-gray-700 mb-1">Teléfono <span class="text-red-500">*</span></label>
-                        <input id="telefono" name="telefono" required type="tel" placeholder="Ej: 0412-1234567"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150"> 
-                    </div>
-                </div>
-                
-                <p class="text-xs text-gray-500 mt-4"><span class="text-red-500">*</span> Campos obligatorios</p>
-
-                <button type="submit"
-                        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-md transition duration-200 transform hover:scale-[1.01] focus:outline-none focus:ring-4 focus:ring-indigo-300 mt-6">
-                    Registrar Atleta
+                <button type="submit" id="save-button"
+                        class="w-full bg-primary text-white font-semibold py-3 px-4 rounded-lg shadow-md hover:bg-primary-dark transition duration-200 focus:outline-none focus:ring-4 focus:ring-primary focus:ring-opacity-50 disabled:opacity-50">
+                    Guardar Mensaje
                 </button>
             </form>
-        </div>
 
-        <!-- Sección de Atletas Registrados -->
-        <div class="registered-athletes-section lg:col-span-1 bg-white p-6 md:p-8 rounded-xl shadow-2xl border-t-4 border-indigo-600">
-            <h3 class="text-2xl font-extrabold text-gray-900 mb-4 text-center">Atletas Registrados (Real-Time)</h3>
-            <div id="registeredData" class="overflow-x-auto shadow-inner rounded-lg p-1">
-                <p class="text-gray-500 text-center py-4 no-data-message">Cargando datos...</p>
+            <div class="mt-8 pt-6 border-t border-gray-100">
+                <h2 class="text-xl font-semibold text-gray-800 mb-3">Último Dato Guardado:</h2>
+                <div id="latest-data-card" class="bg-gray-50 p-4 rounded-lg border-l-4 border-primary min-h-[60px] flex items-center">
+                    <p id="latest-message" class="text-gray-700 italic">No hay datos guardados aún.</p>
+                </div>
+                <div id="loading-spinner" class="hidden text-center mt-4">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary inline-block"></div>
+                    <p class="text-sm text-gray-500 mt-2">Cargando...</p>
+                </div>
             </div>
-            <p class="text-xs text-gray-500 mt-4 text-center table-note-message hidden">
-                Haz clic en cualquier encabezado de la tabla para ordenar los resultados (por ejemplo, por Apellido o Categoría).
-            </p>
-        </div>
-        
+
+            <!-- Área de Mensajes de Error/Éxito (Reemplazo de alert()) -->
+            <div id="message-box" class="mt-4 hidden p-3 rounded-lg text-sm" role="alert"></div>
+
+        </main>
     </div>
-    
-    <!-- Scripts de Seguridad y Firebase -->
+
+    <!-- Script de Firebase y Lógica de la Aplicación -->
     <script type="module">
-        // 1. IMPORTACIONES DE FIREBASE (Usamos la última versión estable)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, query, addDoc, onSnapshot, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, query, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // VARIABLES DE ESTADO Y FIREBASE
-        let db;
-        let auth;
-        let userId = ''; 
-        let athletesData = []; // Array que contendrá los datos sincronizados de Firestore
-        let currentSortKey = 'apellido'; 
-        let sortDirection = 'asc'; 
-        const DEFAULT_APP_ID = 'lvmel-default-app'; // ID de respaldo
-
-        // Configuración de Logging de Firebase (útil para la depuración)
+        // Establecer el nivel de log para depuración de Firestore
         setLogLevel('Debug');
 
-        /**
-         * Muestra un mensaje temporal de estado en la interfaz.
-         * @param {string} message - El texto a mostrar.
-         * @param {string} type - 'success' o 'error'.
-         */
-        function displayStatusMessage(message, type) {
-            const statusEl = document.getElementById('statusMessage');
-            if (!statusEl) return;
-            
-            statusEl.textContent = message;
-            statusEl.className = 'fixed top-4 right-4 p-4 rounded-lg shadow-lg text-white font-semibold z-50 transition-opacity duration-500';
+        // Variables Globales (Proporcionadas por el entorno)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-            statusEl.style.backgroundColor = type === 'success' ? '#10b981' : '#ef4444'; // Tailwind: emerald-500 vs red-500
-            statusEl.style.opacity = '1';
+        // Elementos del DOM
+        const messageInput = document.getElementById('message-input');
+        const dataForm = document.getElementById('data-form');
+        const latestMessageElement = document.getElementById('latest-message');
+        const saveButton = document.getElementById('save-button');
+        const messageBox = document.getElementById('message-box');
+        const userStatusElement = document.getElementById('user-status');
+        const userIdElement = document.getElementById('user-id');
+        const loadingSpinner = document.getElementById('loading-spinner');
 
-            // Ocultar después de 4 segundos
+        let db, auth, userId = null;
+        let isAuthReady = false;
+
+        // Función para mostrar mensajes de estado (Reemplazo de alert)
+        function showMessage(text, type = 'success') {
+            messageBox.textContent = text;
+            messageBox.className = 'mt-4 p-3 rounded-lg text-sm'; // Resetear clases
+
+            // Usando clases neutrales de Tailwind que pueden haber sido el "problema azul"
+            if (type === 'success') {
+                messageBox.classList.add('bg-green-100', 'text-green-800', 'border', 'border-green-400');
+            } else if (type === 'error') {
+                messageBox.classList.add('bg-red-100', 'text-red-800', 'border', 'border-red-400');
+            } else { // info (azul)
+                messageBox.classList.add('bg-blue-100', 'text-blue-800', 'border', 'border-blue-400');
+            }
+
+            messageBox.classList.remove('hidden');
             setTimeout(() => {
-                statusEl.style.opacity = '0';
-            }, 4000);
+                messageBox.classList.add('hidden');
+            }, 5000);
         }
 
-        /**
-         * 2. INICIALIZACIÓN Y AUTENTICACIÓN
-         * Inicializa Firebase, autentica al usuario y configura el listener en tiempo real.
-         */
-        async function initFirebaseAndLoadData() {
-            console.log("Iniciando Firebase y autenticación...");
+        // --- INICIALIZACIÓN DE FIREBASE Y AUTENTICACIÓN ---
+        function initializeFirebase() {
             try {
-                // Leer variables globales obligatorias del entorno Canvas
-                const appId = typeof __app_id !== 'undefined' ? __app_id : DEFAULT_APP_ID;
-                const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-                const tokenToUse = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : '';
-
                 if (Object.keys(firebaseConfig).length === 0) {
-                    displayStatusMessage("Error: Configuración de Firebase no cargada.", 'error');
-                    console.error("Configuración de Firebase vacía o no disponible.");
-                    return;
+                    throw new Error("La configuración de Firebase no está disponible.");
                 }
-
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
-                // Autenticación: Usar token personalizado (si existe) o anónimo
-                if (tokenToUse.length > 0) {
-                    await signInWithCustomToken(auth, tokenToUse);
-                } else {
-                    await signInAnonymously(auth);
-                }
-                
-                // Esperar el cambio de estado de autenticación
-                onAuthStateChanged(auth, (user) => {
+                onAuthStateChanged(auth, async (user) => {
                     if (user) {
                         userId = user.uid;
-                        console.log("Usuario autenticado. UID:", userId);
-                        setupRealtimeListener(appId);
+                        userStatusElement.textContent = 'Conectado';
+                        userStatusElement.classList.remove('text-red-500', 'text-yellow-500');
+                        userStatusElement.classList.add('text-green-600');
+                        userIdElement.textContent = userId;
+                        isAuthReady = true;
+                        // Una vez autenticado, comenzamos a escuchar los datos
+                        listenForData();
                     } else {
-                        console.error("No se pudo autenticar. Usando ID aleatorio temporal.");
-                        userId = crypto.randomUUID(); // Fallback ID
-                        setupRealtimeListener(appId);
+                        // Intentar autenticación
+                        try {
+                            if (initialAuthToken) {
+                                await signInWithCustomToken(auth, initialAuthToken);
+                            } else {
+                                await signInAnonymously(auth);
+                            }
+                        } catch (error) {
+                            console.error("Error al autenticar:", error);
+                            userStatusElement.textContent = 'Error Auth';
+                            userIdElement.textContent = 'N/A';
+                            showMessage(`Error de autenticación: ${error.message}`, 'error');
+                        }
                     }
                 });
 
-            } catch (e) {
-                console.error("Error al inicializar Firebase:", e);
-                displayStatusMessage(`Error crítico de Firebase: ${e.message}`, 'error');
+            } catch (error) {
+                console.error("Error al inicializar Firebase:", error);
+                userStatusElement.textContent = 'Error (Ver Consola)';
+                userStatusElement.classList.remove('text-red-500');
+                userStatusElement.classList.add('text-red-700');
+                showMessage(`Error grave al iniciar la app: ${error.message}`, 'error');
             }
         }
 
-        /**
-         * 3. ESCUCHA EN TIEMPO REAL (onSnapshot)
-         * Configura la escucha en tiempo real para la colección de atletas (Datos Públicos).
-         */
-        function setupRealtimeListener(appId) {
-            // La ruta pública es: artifacts/{appId}/public/data/athletes
-            const collectionPath = `artifacts/${appId}/public/data/athletes`;
-            console.log(`Configurando listener para: ${collectionPath}`);
-            const athletesColRef = collection(db, collectionPath);
-            const q = query(athletesColRef);
+        // --- LECTURA DE DATOS (onSnapshot) ---
+        function listenForData() {
+            if (!db || !userId || !isAuthReady) return;
 
-            onSnapshot(q, (snapshot) => {
-                console.log("Datos de Firestore actualizados. Sincronizando tabla...");
-                const fetchedData = [];
-                snapshot.forEach((doc) => {
-                    fetchedData.push({ 
-                        id: doc.id, // ID del documento
-                        ...doc.data() 
-                    });
-                });
-                
-                // Reemplazamos los datos locales y forzamos el ordenamiento inicial
-                athletesData = fetchedData;
-                
-                // Ordena sin cambiar la dirección (mantiene el estado)
-                sortTable(currentSortKey, false); 
-                
-            }, (error) => {
-                console.error("Error en la escucha en tiempo real (Permiso denegado si reglas incorrectas):", error);
-                // No mostramos error de permiso en el UI a menos que sea después del envío.
-                document.getElementById('registeredData').innerHTML = '<p class="text-center text-red-500 py-4">Error al cargar datos. Verifique los permisos de lectura de Firestore.</p>';
-            });
-        }
+            // Ruta privada: /artifacts/{appId}/users/{userId}/messages/last_message
+            const docPath = `artifacts/${appId}/users/${userId}/messages/last_message`;
+            const docRef = doc(db, docPath);
 
-        function setupFormListener() {
-            const form = document.getElementById('athleteForm');
-            if (form) {
-                form.addEventListener('submit', handleFormSubmit);
-                console.log("Listener de formulario de atleta adjunto.");
-            } else {
-                console.error("Error: No se encontró el formulario con ID 'athleteForm'.");
-            }
-        }
+            loadingSpinner.classList.remove('hidden');
 
-
-        /**
-         * 4. FUNCIÓN DE GUARDADO (handleFormSubmit)
-         * Maneja el envío del formulario y guarda los datos en Firestore.
-         */
-        async function handleFormSubmit(event) {
-            // CRÍTICO: Detiene la recarga de la página
-            event.preventDefault(); 
-
-            if (!db) {
-                console.error("Base de datos no inicializada. No se pudo guardar.");
-                displayStatusMessage("Error: La base de datos no está inicializada.", 'error');
-                return false;
-            }
-
-            const form = document.getElementById('athleteForm');
-
-            // 1. Recolectar datos y preparar el objeto (documento)
-            const tallaValue = form.talla.value;
-            const pesoValue = form.peso.value;
-            
-            const newAthlete = {
-                club: form.club.value.trim(),
-                nombre: form.nombre.value.trim(),
-                apellido: form.apellido.value.trim(),
-                fechaNac: form.fechaNac.value,
-                categoria: form.categoria.value, 
-                // Almacenar valores raw para ordenamiento numérico
-                tallaRaw: tallaValue ? parseFloat(tallaValue) : null, 
-                pesoRaw: pesoValue ? parseFloat(pesoValue) : null,
-                // Almacenar valores formateados para visualización
-                tallaFormatted: tallaValue ? `${tallaValue} cm` : 'N/A',
-                pesoFormatted: pesoValue ? `${pesoValue} kg` : 'N/A',
-                correo: form.correo.value.trim(),
-                telefono: form.telefono.value.trim(),
-                timestamp: Date.now() 
-            };
-            
-            try {
-                // 2. OBTENER EL APP ID PARA LA RUTA DE GUARDADO
-                const appIdToUse = typeof __app_id !== 'undefined' ? __app_id : DEFAULT_APP_ID;
-
-                // 3. GUARDAR DATOS EN FIRESTORE (Colección pública)
-                const athletesColRef = collection(db, `artifacts/${appIdToUse}/public/data/athletes`);
-                await addDoc(athletesColRef, newAthlete); 
-                console.log("Atleta registrado y guardado en Firestore con éxito.");
-                displayStatusMessage("¡Atleta registrado con éxito! (Sincronizando tabla...)", 'success');
-                
-            } catch(error) {
-                console.error("!!! ERROR CRÍTICO AL INTENTAR GUARDAR !!!", error.message);
-                
-                let userErrorMessage = "❌ ERROR: No se pudo guardar el atleta.";
-                if (error.code === 'permission-denied') {
-                    userErrorMessage = "❌ ERROR DE PERMISO: No se pudo guardar. Revisa tus Reglas de Firestore.";
-                } else if (error.message.includes('No document to set')) {
-                     userErrorMessage = "❌ ERROR: Base de datos no inicializada correctamente.";
-                }
-
-                displayStatusMessage(userErrorMessage, 'error');
-
-            } finally {
-                // 4. Resetear el formulario.
-                form.reset();
-            }
-            
-            return false; 
-        }
-
-        /**
-         * LÓGICA DE ORDENAMIENTO Y RENDERIZADO
-         */
-        function sortTable(key, toggleDirection = true) {
-            if (currentSortKey === key && toggleDirection) {
-                sortDirection = (sortDirection === 'asc') ? 'desc' : 'asc';
-            } else if (currentSortKey !== key) {
-                currentSortKey = key;
-                sortDirection = 'asc';
-            }
-
-            athletesData.sort((a, b) => {
-                let valA = a[key];
-                let valB = b[key];
-
-                // Manejo de valores nulos o no definidos para Talla/Peso
-                if (key === 'tallaRaw' || key === 'pesoRaw') {
-                    // Trata nulos (N/A) como 0 o el valor más bajo para ordenación
-                    valA = a[key] !== null ? a[key] : (sortDirection === 'asc' ? -Infinity : Infinity);
-                    valB = b[key] !== null ? b[key] : (sortDirection === 'asc' ? -Infinity : Infinity);
-                } else if (key === 'fechaNac') {
-                    valA = new Date(valA);
-                    valB = new Date(valB);
+            // Escuchador en tiempo real
+            onSnapshot(docRef, (docSnapshot) => {
+                loadingSpinner.classList.add('hidden');
+                if (docSnapshot.exists()) {
+                    const data = docSnapshot.data();
+                    const timestamp = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleString() : 'Fecha Desconocida';
+                    latestMessageElement.innerHTML = `
+                        <span class="font-bold">Mensaje:</span> ${data.message} <br>
+                        <span class="text-xs text-gray-500">Guardado el ${timestamp}</span>
+                    `;
+                    messageInput.value = data.message; // Cargar el último mensaje en el input
                 } else {
-                    valA = String(valA).toLowerCase();
-                    valB = String(valB).toLowerCase();
+                    latestMessageElement.textContent = 'No hay datos guardados aún.';
                 }
-
-                let comparison = 0;
-                if (valA > valB) { comparison = 1; } 
-                else if (valA < valB) { comparison = -1; }
-                
-                return (sortDirection === 'desc') ? (comparison * -1) : comparison;
+            }, (error) => {
+                console.error("Error al escuchar datos:", error);
+                showMessage(`Error al cargar datos: ${error.message}`, 'error');
+                loadingSpinner.classList.add('hidden');
             });
-
-            renderTable();
         }
 
-        function renderTable() {
-            const registeredDataContainer = document.getElementById('registeredData');
-            const noteMessage = document.querySelector('.table-note-message');
-            
-            if (athletesData.length === 0) {
-                registeredDataContainer.innerHTML = '<p class="text-gray-500 text-center py-4 no-data-message">No hay atletas registrados aún. ¡Registra el primero!</p>';
-                if(noteMessage) noteMessage.classList.add('hidden');
+        // --- ESCRITURA DE DATOS (setDoc) ---
+        async function saveData(message) {
+            if (!db || !userId || !isAuthReady) {
+                showMessage("La aplicación no está lista o no hay usuario autenticado.", 'error');
                 return;
             }
 
-            if(noteMessage) noteMessage.classList.remove('hidden');
-
-            let table = document.getElementById('athleteTable');
-            let tableBody = document.getElementById('athleteTableBody');
-
-            if (!table) {
-                // Crear la estructura de la tabla con estilos de Tailwind
-                registeredDataContainer.innerHTML = `
-                    <div class="table-responsive-wrapper">
-                        <table id="athleteTable" class="athlete-data-table w-full text-sm text-left text-gray-500 rounded-lg overflow-hidden">
-                            <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
-                                <tr class="table-header-row">
-                                    <th scope="col" class="px-6 py-3 cursor-pointer" data-sort-key="club">Club</th>
-                                    <th scope="col" class="px-6 py-3 cursor-pointer" data-sort-key="nombre">Nombre</th>
-                                    <th scope="col" class="px-6 py-3 cursor-pointer" data-sort-key="apellido">Apellido</th>
-                                    <th scope="col" class="px-6 py-3 cursor-pointer table-hidden-mobile" data-sort-key="fechaNac">F. Nac.</th>
-                                    <th scope="col" class="px-6 py-3 cursor-pointer" data-sort-key="categoria">Categoría</th>
-                                    <th scope="col" class="px-6 py-3 cursor-pointer table-hidden-mobile" data-sort-key="tallaRaw">Talla</th>
-                                    <th scope="col" class="px-6 py-3 cursor-pointer table-hidden-mobile" data-sort-key="pesoRaw">Peso</th>
-                                    <th scope="col" class="px-6 py-3 cursor-pointer table-hidden-desktop" data-sort-key="correo">Correo</th>
-                                    <th scope="col" class="px-6 py-3 cursor-pointer table-hidden-desktop" data-sort-key="telefono">Teléfono</th>
-                                </tr>
-                            </thead>
-                            <tbody id="athleteTableBody">
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-                tableBody = document.getElementById('athleteTableBody');
-                setupSorting(); 
-            } else {
-                tableBody.innerHTML = '';
-            }
+            const docPath = `artifacts/${appId}/users/${userId}/messages/last_message`;
+            const docRef = doc(db, docPath);
             
-            // Rellenar la tabla con los datos
-            athletesData.forEach((data, index) => {
-                const newRow = tableBody.insertRow(-1); 
-                newRow.classList.add('athlete-table-row', index % 2 === 0 ? 'bg-white' : 'bg-gray-50', 'hover:bg-indigo-100/50', 'transition-colors', 'duration-150');
-                
-                newRow.innerHTML = `
-                    <td data-label="Club" class="px-6 py-2 font-medium text-gray-900 whitespace-nowrap table-data">${data.club}</td>
-                    <td data-label="Nombre" class="px-6 py-2 table-data">${data.nombre}</td>
-                    <td data-label="Apellido" class="px-6 py-2 table-data">${data.apellido}</td>
-                    <td data-label="F. Nac." class="px-6 py-2 table-data table-hidden-mobile">${data.fechaNac}</td>
-                    <td data-label="Categoría" class="px-6 py-2 table-data">${data.categoria}</td>
-                    <td data-label="Talla" class="px-6 py-2 table-data table-hidden-mobile">${data.tallaFormatted}</td>
-                    <td data-label="Peso" class="px-6 py-2 table-data table-hidden-mobile">${data.pesoFormatted}</td>
-                    <td data-label="Correo" class="px-6 py-2 table-data table-hidden-desktop text-xs">${data.correo}</td>
-                    <td data-label="Teléfono" class="px-6 py-2 table-data table-hidden-desktop text-xs">${data.telefono}</td>
-                `;
-            });
+            saveButton.disabled = true;
+            saveButton.textContent = 'Guardando...';
 
-            // Actualizar la indicación de ordenamiento en el encabezado
-            document.querySelectorAll('#athleteTable th').forEach(th => {
-                th.classList.remove('sorted-asc', 'sorted-desc');
-                if (th.getAttribute('data-sort-key') === currentSortKey) {
-                    th.classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
-                }
-            });
+            try {
+                await setDoc(docRef, {
+                    message: message,
+                    userId: userId,
+                    timestamp: serverTimestamp() // Marca de tiempo del servidor
+                });
+                showMessage("¡Mensaje guardado con éxito!", 'success');
+            } catch (e) {
+                console.error("Error al añadir documento: ", e);
+                showMessage(`Error al guardar: ${e.message}`, 'error');
+            } finally {
+                saveButton.disabled = false;
+                saveButton.textContent = 'Guardar Mensaje';
+            }
         }
 
-        function setupSorting() {
-            // Elimina listeners antiguos antes de re-adjuntar para evitar duplicados
-            document.querySelectorAll('#athleteTable th').forEach(header => {
-                header.removeEventListener('click', handleSortClick);
-            });
-
-            // Adjuntar nuevos listeners
-            document.querySelectorAll('#athleteTable th').forEach(header => {
-                const key = header.getAttribute('data-sort-key');
-                if (key) {
-                    header.addEventListener('click', handleSortClick); 
-                }
-            });
-        }
-
-        function handleSortClick(event) {
-            const key = event.currentTarget.getAttribute('data-sort-key');
-            sortTable(key, true);
-        }
-
-
-        // Inicializar Firebase y los Listeners al cargar el contenido
-        document.addEventListener('DOMContentLoaded', () => {
-            initFirebaseAndLoadData();
-            setupFormListener();
-        });
-    </script>
-
-    <!-- BLOQUE DE CÓDIGO DE SEGURIDAD ORIGINAL -->
-    <script>
-        // 1. Bloquea el botón derecho del ratón (menú contextual)
-        document.addEventListener('contextmenu', function(e) {
+        // --- EVENT LISTENER DEL FORMULARIO ---
+        dataForm.addEventListener('submit', (e) => {
             e.preventDefault();
-        });
-
-        // 2. Bloquea las combinaciones de teclas (Ctrl+Shift+I, F12, Ctrl+U, etc.)
-        document.addEventListener('keydown', function(e) {
-            // F12
-            if (e.key === 'F12' || e.keyCode === 123) {
-                e.preventDefault();
-            }
-
-            // Ctrl+Shift+I (o Cmd+Option+I en Mac)
-            if (e.ctrlKey && e.shiftKey && (e.key === 'i' || e.key === 'I')) {
-                e.preventDefault();
-            }
-
-            // Ctrl+Shift+J (o Cmd+Option+J en Mac) - Para la consola
-            if (e.ctrlKey && e.shiftKey && (e.key === 'j' || e.key === 'J')) {
-                e.preventDefault();
-            }
-
-            // Ctrl+U (Ver código fuente)
-            if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) {
-                e.preventDefault();
+            const message = messageInput.value.trim();
+            if (message) {
+                saveData(message);
+            } else {
+                showMessage("Por favor, ingrese un mensaje antes de guardar.", 'info');
             }
         });
+
+        // Iniciar la aplicación al cargar la ventana
+        window.onload = initializeFirebase;
+
     </script>
 </body>
 </html>
