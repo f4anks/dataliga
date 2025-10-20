@@ -1,11 +1,11 @@
 :root {
-    /* Paleta de Colores Vivos y Profesionales */
+    /* Paleta de Colores Vivos */
     --vinotinto: #800020; /* Vinotinto principal */
     --vinotinto-claro: #A3002A; /* Tono más brillante para acentos */
     --gris-oscuro: #1A1A1A; /* Negro muy oscuro para texto/fondo */
     --negro: #000000;
     --blanco: #ffffff;
-    --gris-claro: #f5f5f5; /* Fondo del formulario (muy sutil) */
+    --gris-claro: #f5f5f5; /* Fondo del formulario */
     --sombra: rgba(0, 0, 0, 0.4);
     --sombra-fuerte: rgba(0, 0, 0, 0.65); /* Sombra más intensa para contraste */
     --borde: #cccccc;
@@ -58,7 +58,7 @@ body {
 
 /* Estilos de la tarjeta del formulario (fondo claro y sombras) */
 .form-card {
-    background-color: var(--blanco); /* Cambiado a blanco puro para más contraste profesional */
+    background-color: var(--blanco); /* Blanco puro para más contraste */
     border-radius: 15px;
     padding: 40px;
     box-shadow: 0 10px 30px var(--sombra-fuerte);
@@ -97,7 +97,6 @@ body {
     margin-top: 15px;
 }
 
-
 /* Campos de formulario */
 .form-group { margin-bottom: 20px; }
 .form-row { display: flex; flex-wrap: wrap; gap: 20px; }
@@ -107,7 +106,7 @@ label { display: block; margin-bottom: 8px; font-weight: 700; color: var(--gris-
 .required-star { color: var(--vinotinto-claro); font-size: 1.1em; margin-left: 3px; }
 .required-note { 
     font-size: 0.9em; 
-    color: var(--gris-oscuro); /* Cambiado para mejor visibilidad en el fondo blanco del form */
+    color: var(--gris-oscuro); 
     text-align: right; 
     margin-top: -10px; 
     opacity: 0.8; 
@@ -178,7 +177,7 @@ button[type="submit"]:hover {
 }
 
 .registered-athletes-section h3 {
-    /* NUEVO: Título de la sección de datos con estilo vinotinto */
+    /* Título de la sección de datos con estilo vinotinto */
     text-align: center;
     color: var(--blanco); /* Texto blanco */
     font-size: 1.8em;
