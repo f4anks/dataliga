@@ -1,12 +1,13 @@
 :root {
-    /* Paleta de Colores Vivos */
+    /* Paleta de Colores Vivos y Profesionales */
     --vinotinto: #800020; /* Vinotinto principal */
-    --gris-oscuro: #333333;
+    --vinotinto-claro: #A3002A; /* Tono más brillante para acentos */
+    --gris-oscuro: #1A1A1A; /* Negro muy oscuro para texto/fondo */
     --negro: #000000;
     --blanco: #ffffff;
-    --gris-claro: #f5f5f5; /* Fondo del formulario */
-    --sombra: rgba(0, 0, 0, 0.2);
-    --sombra-fuerte: rgba(0, 0, 0, 0.5); 
+    --gris-claro: #f5f5f5; /* Fondo del formulario (muy sutil) */
+    --sombra: rgba(0, 0, 0, 0.4);
+    --sombra-fuerte: rgba(0, 0, 0, 0.65); /* Sombra más intensa para contraste */
     --borde: #cccccc;
     --transicion-rapida: all 0.3s ease;
 }
@@ -55,11 +56,9 @@ body {
     z-index: 1; /* Asegura que el contenido esté sobre el fondo */
 }
 
-/* NOTA: Se eliminan aquí los selectores .banner-wrapper y .banner-image */
-
 /* Estilos de la tarjeta del formulario (fondo claro y sombras) */
 .form-card {
-    background-color: var(--gris-claro); /* Fondo claro para el formulario */
+    background-color: var(--blanco); /* Cambiado a blanco puro para más contraste profesional */
     border-radius: 15px;
     padding: 40px;
     box-shadow: 0 10px 30px var(--sombra-fuerte);
@@ -73,18 +72,31 @@ body {
     transform: translateY(-5px) scale(1.005);
 }
 
+/* NUEVO: Contenedor para el encabezado con fondo vinotinto */
 .form-header {
     text-align: center;
-    margin-bottom: 30px;
+    margin: -40px -40px 30px -40px; /* Margen negativo para expandirse al ancho de la tarjeta */
+    padding: 30px 40px;
+    background-color: var(--vinotinto); /* Fondo vinotinto */
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    box-shadow: 0 5px 15px var(--sombra);
+    color: var(--blanco); /* Texto blanco */
 }
 
 .form-header h2 {
     font-size: 2.4em;
     font-weight: 700;
-    color: var(--vinotinto); 
-    text-shadow: 1px 1px 2px var(--sombra);
+    color: var(--blanco); /* Título en blanco sobre vinotinto */
+    text-shadow: 1px 1px 2px var(--negro);
     margin-bottom: 5px;
 }
+
+.form-header p {
+    color: rgba(255, 255, 255, 0.9); /* Texto descriptivo en blanco sutil */
+    margin-top: 15px;
+}
+
 
 /* Campos de formulario */
 .form-group { margin-bottom: 20px; }
@@ -92,9 +104,14 @@ body {
 .form-row .form-group { flex: 1; min-width: 200px; }
 
 label { display: block; margin-bottom: 8px; font-weight: 700; color: var(--gris-oscuro); transition: color 0.2s; }
-.required-star { color: var(--vinotinto); font-size: 1.1em; margin-left: 3px; }
-.required-note { font-size: 0.9em; color: var(--blanco); 
-    text-align: right; margin-top: -10px; opacity: 0.8; }
+.required-star { color: var(--vinotinto-claro); font-size: 1.1em; margin-left: 3px; }
+.required-note { 
+    font-size: 0.9em; 
+    color: var(--gris-oscuro); /* Cambiado para mejor visibilidad en el fondo blanco del form */
+    text-align: right; 
+    margin-top: -10px; 
+    opacity: 0.8; 
+}
 
 /* ESTILOS UNIFICADOS PARA INPUTS Y SELECT */
 input[type="text"], input[type="email"], input[type="number"], input[type="tel"], input[type="date"], select {
@@ -121,8 +138,8 @@ input[type="text"], input[type="email"], input[type="number"], input[type="tel"]
 
 input:focus, select:focus {
     outline: none;
-    border-color: var(--vinotinto);
-    box-shadow: 0 0 12px rgba(128, 0, 32, 0.6);
+    border-color: var(--vinotinto-claro);
+    box-shadow: 0 0 12px rgba(163, 0, 42, 0.6);
     background-color: var(--blanco);
 }
 
@@ -146,7 +163,7 @@ button[type="submit"] {
 }
 
 button[type="submit"]:hover {
-    background-color: #a3002a;
+    background-color: var(--vinotinto-claro);
     box-shadow: 0 12px 30px var(--sombra-fuerte);
     transform: translateY(-4px);
 }
@@ -154,19 +171,23 @@ button[type="submit"]:hover {
 /* --- ESTILOS PARA LA SECCIÓN DE DATOS REGISTRADOS (TABLA) --- */
 .registered-athletes-section {
     margin-top: 40px;
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: var(--blanco); /* Fondo blanco para la tabla */
     border-radius: 15px;
     padding: 30px;
     box-shadow: 0 5px 20px var(--sombra-fuerte);
 }
 
 .registered-athletes-section h3 {
+    /* NUEVO: Título de la sección de datos con estilo vinotinto */
     text-align: center;
-    color: var(--gris-oscuro);
+    color: var(--blanco); /* Texto blanco */
     font-size: 1.8em;
-    border-bottom: 3px solid var(--vinotinto);
-    padding-bottom: 10px;
-    margin-bottom: 25px;
+    padding: 15px 20px;
+    margin: -30px -30px 25px -30px; /* Margen negativo para expandirse */
+    background-color: var(--vinotinto-claro); /* Fondo vinotinto más brillante */
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    box-shadow: 0 3px 10px var(--sombra);
 }
 
 .no-data-message {
@@ -198,7 +219,7 @@ button[type="submit"]:hover {
 
 /* Estilos de la cabecera de la tabla */
 .athlete-data-table thead th {
-    background-color: var(--vinotinto);
+    background-color: var(--vinotinto); /* Vinotinto en cabecera de tabla */
     color: var(--blanco);
     padding: 12px 10px;
     font-weight: 700;
@@ -211,13 +232,13 @@ button[type="submit"]:hover {
 
 /* Indicador visual de que la columna es clickeable/ordenable */
 .athlete-data-table thead th[data-sort-key]:hover {
-    background-color: #a3002a; /* Color un poco más oscuro al pasar el ratón */
+    background-color: var(--vinotinto-claro); /* Tono más claro al pasar el ratón */
     cursor: pointer;
 }
 
 /* Estilos para indicar la columna actualmente ordenada */
 .athlete-data-table thead th.sorted-asc {
-    background-color: #c90035; /* Color más claro para el encabezado ordenado */
+    background-color: var(--vinotinto-claro); 
     /* Triángulo ASC (flecha hacia arriba) */
     position: relative;
 }
@@ -227,7 +248,7 @@ button[type="submit"]:hover {
 }
 
 .athlete-data-table thead th.sorted-desc {
-    background-color: #c90035;
+    background-color: var(--vinotinto-claro);
     /* Triángulo DESC (flecha hacia abajo) */
     position: relative;
 }
@@ -239,14 +260,14 @@ button[type="submit"]:hover {
 
 /* Estilos de las filas de datos */
 .athlete-table-row {
-    background-color: var(--blanco);
+    background-color: var(--gris-claro); /* Fondo gris muy claro para filas (rayado) */
     box-shadow: 0 2px 5px var(--sombra);
     transition: all 0.2s ease;
 }
 
 .athlete-table-row:hover {
-    background-color: var(--gris-claro);
-    box-shadow: 0 4px 10px var(--sombra-fuerte);
+    background-color: #e0e0e0; /* Un poco más oscuro al pasar el ratón */
+    box-shadow: 0 4px 10px var(--sombra);
 }
 
 .athlete-table-row td {
@@ -260,7 +281,7 @@ button[type="submit"]:hover {
 .athlete-data-table thead tr th:last-child { border-top-right-radius: 8px; }
 
 /* Bordes redondeados para la primera y última celda de cada fila de datos */
-.athlete-table-row td:first-child { border-bottom-left-radius: 8px; border-top-left-radius: 8px; border-left: 4px solid var(--vinotinto); }
+.athlete-table-row td:first-child { border-bottom-left-radius: 8px; border-top-left-radius: 8px; border-left: 4px solid var(--vinotinto-claro); }
 .athlete-table-row td:last-child { border-bottom-right-radius: 8px; border-top-right-radius: 8px; }
 
 /* --- Responsividad de la Tabla (Mobile First) --- */
@@ -296,7 +317,7 @@ button[type="submit"]:hover {
     content: attr(data-label);
     float: left;
     font-weight: 700;
-    color: var(--vinotinto);
+    color: var(--vinotinto); /* Color vinotinto para las etiquetas en móvil */
 }
 
 /* Ocultar / Mostrar columnas específicas en móvil */
