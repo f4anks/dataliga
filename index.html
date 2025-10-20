@@ -3,138 +3,294 @@
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data de Atletas - Liga de Voleibol</title>
-    
-    <!-- Vincula el archivo de estilos CSS -->
-    <link rel="stylesheet" href="styles.css">
-    <!-- Vincula la fuente Montserrat de Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&amp;display=swap"
-          rel="stylesheet">
-</head>
-<body>
-    
-    <!-- El banner de encabezado ha sido eliminado según la solicitud del usuario. -->
+    <title>Data de Atletas - LVMeL Vinotinto</title>
+    <!-- Carga de Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carga de la fuente Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-    <div class="container">
-        <!-- SECCIÓN DE REGISTRO DE ATLETAS -->
-        <div class="form-card">
-            <div class="form-header">
-                <h2>Data de Atletas</h2>
-                <h2>Liga de Voleibol Menor del Estado Lara</h2>
-                <p>Por favor, complete el siguiente formulario para registrar a un atleta.</p>
+    <!-- Configuración personalizada de Tailwind y estilos CSS (Vinotinto Theme) -->
+    <style>
+        /* Personalización de colores en Tailwind */
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'vinotinto-primary': '#800020', /* Vinotinto profundo */
+                        'vinotinto-dark': '#400010',   /* Vinotinto muy oscuro para texto */
+                        'accent-gold': '#FFC300',      /* Dorado para acentos y botones */
+                        'bg-dark': '#1a1a1a',          /* Fondo oscuro casi negro */
+                        'card-light': '#F3E9DD',       /* Beige claro/crema para tarjetas */
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+        
+        /* Estilos CSS puros para la tabla responsiva (Necesario para el patrón Data-Label en móviles) */
+        .athlete-data-table {
+            width: 100%;
+            border-collapse: collapse;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .athlete-data-table th, .athlete-data-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #c9c9c9; /* Línea de separación sutil */
+        }
+
+        .athlete-data-table th {
+            cursor: pointer;
+            background-color: #800020; /* Vinotinto para encabezado */
+            color: #F3E9DD;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .athlete-data-table tr:nth-child(even) {
+            background-color: #f7f3ed; /* Rayas ligeras */
+        }
+        
+        .athlete-data-table tr:hover {
+            background-color: #ffe08a; /* Efecto hover dorado */
+        }
+
+        /* Estilos de tabla responsiva para móvil */
+        @media screen and (max-width: 768px) {
+            .athlete-data-table thead {
+                display: none; /* Oculta el encabezado en móvil */
+            }
+
+            .athlete-data-table, .athlete-data-table tbody, .athlete-data-table tr, .athlete-data-table td {
+                display: block;
+                width: 100%;
+            }
+            
+            .athlete-data-table tr {
+                margin-bottom: 15px;
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+
+            .athlete-data-table td {
+                text-align: right;
+                padding-left: 50%;
+                position: relative;
+            }
+
+            .athlete-data-table td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 0;
+                width: 50%;
+                padding-left: 15px;
+                font-weight: 600;
+                text-align: left;
+                color: #800020; /* Vinotinto para las etiquetas */
+            }
+            
+            /* Clases de ocultar específicas para Tailwind (usadas en la tabla) */
+            .hidden-mobile { display: none; }
+            .hidden-desktop { display: block; }
+        }
+
+        /* Manejo de estados de ordenamiento */
+        .sorted-asc::after { content: " ▲"; }
+        .sorted-desc::after { content: " ▼"; }
+        
+        /* Aseguramos que la columna 'Correo' y 'Teléfono' se muestren solo en móvil */
+        @media (min-width: 769px) {
+            .table-hidden-desktop { display: none; }
+            .table-hidden-mobile { display: table-cell; }
+        }
+        @media (max-width: 768px) {
+            .table-hidden-desktop { display: block; } /* En móvil se muestran como bloque */
+            .table-hidden-mobile { display: none; }
+        }
+
+    </style>
+</head>
+<!-- Cuerpo con fondo oscuro para contrastar con el vinotinto y las tarjetas claras -->
+<body class="bg-bg-dark text-gray-800 font-sans min-h-screen pb-10">
+    
+    <!-- BANNER DE ENCABEZADO (Fondo Vinotinto) -->
+    <div class="banner-wrapper bg-vinotinto-primary shadow-xl">
+        <img src="images/banner1.jpg" alt="LVMeL - Liga de Voleibol Menor del Estado Lara" 
+             class="w-full h-40 object-cover opacity-80" onerror="this.onerror=null; this.src='https://placehold.co/1200x160/800020/FFFFFF?text=LVMeL+Vinotinto';"
+             >
+        <div class="absolute inset-0 bg-vinotinto-dark bg-opacity-30 flex items-center justify-center">
+            <h1 class="text-4xl sm:text-6xl font-extrabold text-white tracking-wider uppercase drop-shadow-lg p-4 text-center">
+                LVMeL
+            </h1>
+        </div>
+    </div>
+    <!-- FIN DEL BANNER -->
+
+    <div class="container mx-auto p-4 sm:p-8 max-w-7xl">
+        
+        <!-- Tarjeta de Formulario de Registro (Fondo claro) -->
+        <div class="form-card bg-card-light p-6 sm:p-10 rounded-xl shadow-2xl mb-12 border-t-8 border-accent-gold">
+            <div class="form-header mb-8 text-center">
+                <h2 class="text-3xl font-bold text-vinotinto-primary mb-2">Data de Atletas</h2>
+                <h3 class="text-xl font-semibold text-vinotinto-dark mb-4">Liga de Voleibol Menor del Estado Lara</h3>
+                <p class="text-gray-600">Por favor, complete el siguiente formulario para registrar a un atleta.</p>
             </div>
             
-            <form id="athleteForm">
-                <p class="required-note">Campos obligatorios marcados con (*)</p>
-                <div class="form-row">
-                    <!-- CLUB -->
-                    <div class="form-group"> 
-                        <label for="club">Club <span class="required-star">*</span></label>
-                        <input type="text" id="club" name="club" required>
-                    </div>
-                    <!-- CÉDULA -->
-                    <div class="form-group">
-                        <label for="cedula">Cédula <span class="required-star">*</span></label>
-                        <input type="number" id="cedula" name="cedula" required>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <!-- NOMBRE -->
-                    <div class="form-group">
-                        <label for="nombre">Nombre <span class="required-star">*</span></label>
-                        <input type="text" id="nombre" name="nombre" required>
-                    </div>
-                    <!-- APELLIDO -->
-                    <div class="form-group">
-                        <label for="apellido">Apellido <span class="required-star">*</span></label>
-                        <input type="text" id="apellido" name="apellido" required>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <!-- FECHA DE NACIMIENTO -->
-                    <div class="form-group">
-                        <label for="fechaNac">Fecha de Nacimiento <span class="required-star">*</span></label>
-                        <input type="date" id="fechaNac" name="fechaNac" required>
-                    </div>
-                    <!-- CATEGORÍA -->
-                    <div class="form-group">
-                        <label for="categoria">Categoría <span class="required-star">*</span></label>
-                        <select id="categoria" name="categoria" required>
-                            <option value="" disabled selected>Seleccione la Categoría</option>
-                            <option value="Mini-Voleibol">Mini-Voleibol</option>
-                            <option value="Infantil">Infantil</option>
-                            <option value="Juvenil">Juvenil</option>
-                            <option value="Sub-21">Sub-21</option>
-                        </select>
-                    </div>
+            <form id="athleteForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- CLUB -->
+                <div class="form-group"> 
+                    <label for="club" class="block text-sm font-medium text-vinotinto-dark mb-1">Club <span class="text-red-600">*</span></label>
+                    <select id="club" name="club" required 
+                            class="w-full p-3 border border-vinotinto-primary rounded-lg focus:ring-accent-gold focus:border-accent-gold transition duration-150">
+                        <option value="" disabled selected>Seleccione un Club</option>
+                        <option value="Club A">Club A</option>
+                        <option value="Club B">Club B</option>
+                        <option value="Club C">Club C</option>
+                    </select>
                 </div>
                 
-                <div class="form-row">
-                    <!-- TALLA (CM) -->
-                    <div class="form-group">
-                        <label for="talla">Talla (cm)</label>
-                        <input type="number" id="talla" name="talla" min="0" placeholder="Ej. 175">
-                    </div>
-                    <!-- PESO (KG) -->
-                    <div class="form-group">
-                        <label for="peso">Peso (kg)</label>
-                        <input type="number" id="peso" name="peso" min="0" step="0.1" placeholder="Ej. 68.5">
-                    </div>
+                <!-- NOMBRE -->
+                <div class="form-group">
+                    <label for="nombre" class="block text-sm font-medium text-vinotinto-dark mb-1">Nombre <span class="text-red-600">*</span></label>
+                    <input type="text" id="nombre" name="nombre" required 
+                           class="w-full p-3 border border-vinotinto-primary rounded-lg focus:ring-accent-gold focus:border-accent-gold transition duration-150">
+                </div>
+                
+                <!-- APELLIDO -->
+                <div class="form-group">
+                    <label for="apellido" class="block text-sm font-medium text-vinotinto-dark mb-1">Apellido <span class="text-red-600">*</span></label>
+                    <input type="text" id="apellido" name="apellido" required 
+                           class="w-full p-3 border border-vinotinto-primary rounded-lg focus:ring-accent-gold focus:border-accent-gold transition duration-150">
+                </div>
+                
+                <!-- FECHA DE NACIMIENTO -->
+                <div class="form-group">
+                    <label for="fechaNac" class="block text-sm font-medium text-vinotinto-dark mb-1">Fecha de Nacimiento <span class="text-red-600">*</span></label>
+                    <input type="date" id="fechaNac" name="fechaNac" required 
+                           class="w-full p-3 border border-vinotinto-primary rounded-lg focus:ring-accent-gold focus:border-accent-gold transition duration-150">
                 </div>
 
-                <div class="form-row">
-                    <!-- CORREO -->
-                    <div class="form-group">
-                        <label for="correo">Correo Electrónico</label>
-                        <input type="email" id="correo" name="correo" placeholder="ejemplo@dominio.com">
-                    </div>
-                    <!-- TELÉFONO -->
-                    <div class="form-group">
-                        <label for="telefono">Teléfono</label>
-                        <input type="tel" id="telefono" name="telefono" placeholder="Ej. 0412-1234567">
-                    </div>
+                <!-- GÉNERO -->
+                <div class="form-group">
+                    <label for="genero" class="block text-sm font-medium text-vinotinto-dark mb-1">Género <span class="text-red-600">*</span></label>
+                    <select id="genero" name="genero" required
+                            class="w-full p-3 border border-vinotinto-primary rounded-lg focus:ring-accent-gold focus:border-accent-gold transition duration-150">
+                        <option value="" disabled selected>Seleccione</option>
+                        <option value="M">Masculino</option>
+                        <option value="F">Femenino</option>
+                    </select>
+                </div>
+                
+                <!-- TALLA (cm) -->
+                <div class="form-group">
+                    <label for="talla" class="block text-sm font-medium text-vinotinto-dark mb-1">Talla (cm) <span class="text-red-600">*</span></label>
+                    <input type="number" id="talla" name="talla" required min="100" max="250" 
+                           class="w-full p-3 border border-vinotinto-primary rounded-lg focus:ring-accent-gold focus:border-accent-gold transition duration-150">
+                </div>
+                
+                <!-- PESO (kg) -->
+                <div class="form-group">
+                    <label for="peso" class="block text-sm font-medium text-vinotinto-dark mb-1">Peso (kg) <span class="text-red-600">*</span></label>
+                    <input type="number" id="peso" name="peso" required min="20" max="200" step="0.1"
+                           class="w-full p-3 border border-vinotinto-primary rounded-lg focus:ring-accent-gold focus:border-accent-gold transition duration-150">
+                </div>
+                
+                <!-- CORREO -->
+                <div class="form-group">
+                    <label for="correo" class="block text-sm font-medium text-vinotinto-dark mb-1">Correo Electrónico</label>
+                    <input type="email" id="correo" name="correo" 
+                           class="w-full p-3 border border-vinotinto-primary rounded-lg focus:ring-accent-gold focus:border-accent-gold transition duration-150">
+                </div>
+                
+                <!-- TELÉFONO -->
+                <div class="form-group">
+                    <label for="telefono" class="block text-sm font-medium text-vinotinto-dark mb-1">Teléfono</label>
+                    <input type="tel" id="telefono" name="telefono" 
+                           class="w-full p-3 border border-vinotinto-primary rounded-lg focus:ring-accent-gold focus:border-accent-gold transition duration-150">
+                </div>
+                
+                <!-- Posición de Juego -->
+                <div class="form-group">
+                    <label for="posicion" class="block text-sm font-medium text-vinotinto-dark mb-1">Posición de Juego</label>
+                    <select id="posicion" name="posicion" 
+                            class="w-full p-3 border border-vinotinto-primary rounded-lg focus:ring-accent-gold focus:border-accent-gold transition duration-150">
+                        <option value="Libero">Líbero</option>
+                        <option value="Atacante">Atacante (Punta)</option>
+                        <option value="Central">Central (Medio)</option>
+                        <option value="Opuesto">Opuesto</option>
+                        <option value="Armador">Armador (Colocador)</option>
+                        <option value="" selected>No aplica / Genérica</option>
+                    </select>
                 </div>
 
-                <button type="submit">Registrar Atleta</button>
+                <!-- Botón de Envío -->
+                <div class="md:col-span-2 mt-4">
+                    <button type="submit" 
+                            class="w-full bg-accent-gold text-vinotinto-dark font-bold py-3 px-6 rounded-lg hover:bg-yellow-400 
+                                   focus:outline-none focus:ring-4 focus:ring-accent-gold focus:ring-opacity-50 transition duration-300 transform hover:scale-[1.01] shadow-lg">
+                        Registrar Atleta
+                    </button>
+                </div>
             </form>
+            
+            <!-- Mensaje de estado (se muestra si es necesario con JS) -->
+            <div id="statusMessage" class="mt-4 text-center text-sm font-semibold text-vinotinto-primary hidden"></div>
         </div>
+        
+        <!-- Sección de Datos Registrados (Fondo claro) -->
+        <div class="data-card bg-card-light p-6 sm:p-10 rounded-xl shadow-2xl border-t-8 border-vinotinto-primary">
+            <div class="data-header mb-6 text-center">
+                <h2 class="text-3xl font-bold text-vinotinto-primary mb-2">Atletas Registrados</h2>
+                <p class="text-gray-600">Lista completa y filtrable de los atletas de la liga.</p>
+            </div>
 
-        <!-- SECCIÓN DE DATOS REGISTRADOS -->
-        <div class="registered-athletes-section">
-            <h3>Atletas Registrados</h3>
-            
-            <p class="table-note-message" id="currentUserId">ID de Sesión: Cargando...</p>
-            
-            <div class="table-responsive-wrapper">
-                <table id="athleteTable" class="athlete-data-table">
+            <!-- Contenedor del campo de búsqueda -->
+            <div class="mb-6">
+                <input type="text" id="searchInput" placeholder="Buscar por Nombre, Apellido o Club..."
+                       class="w-full p-3 border border-vinotinto-dark rounded-lg focus:ring-accent-gold focus:border-accent-gold transition duration-150">
+            </div>
+
+            <!-- Contenedor para la Tabla (para scroll horizontal en caso de ser necesario) -->
+            <div class="overflow-x-auto rounded-lg shadow-inner">
+                <table id="athleteTable" class="athlete-data-table min-w-full">
                     <thead>
                         <tr>
-                            <!-- Columnas ordenables (data-sort-key) -->
-                            <th data-sort-key="club">Club</th>
-                            <th data-sort-key="cedula">Cédula</th>
-                            <th data-sort-key="nombre">Nombre</th>
-                            <th data-sort-key="apellido">Apellido</th>
-                            <th data-sort-key="fechaNac" class="table-hidden-mobile">F. Nac.</th>
-                            <th data-sort-key="categoria">Categoría</th>
-                            <th data-sort-key="talla" class="table-hidden-mobile">Talla</th>
-                            <th data-sort-key="peso" class="table-hidden-mobile">Peso</th>
-                            <th class="table-hidden-desktop">Correo</th>
-                            <th class="table-hidden-desktop">Teléfono</th>
+                            <!-- Usamos 'data-sort-key' para el script de ordenamiento -->
+                            <th data-sort-key="club" class="table-cell">Club</th>
+                            <th data-sort-key="nombre" class="table-cell">Nombre</th>
+                            <th data-sort-key="apellido" class="table-cell">Apellido</th>
+                            <th data-sort-key="fechaNac" class="table-cell table-hidden-mobile">F. Nac.</th>
+                            <th data-sort-key="categoria" class="table-cell">Categoría</th>
+                            <th data-sort-key="talla" class="table-cell table-hidden-mobile">Talla (cm)</th>
+                            <th data-sort-key="peso" class="table-cell table-hidden-mobile">Peso (kg)</th>
+                            <th data-sort-key="correo" class="table-cell table-hidden-desktop">Correo</th>
+                            <th data-sort-key="telefono" class="table-cell table-hidden-desktop">Teléfono</th>
                         </tr>
                     </thead>
                     <tbody id="athleteTableBody">
-                        <!-- Las filas de datos se insertarán aquí por JavaScript -->
+                        <!-- Los datos de la tabla se insertarán aquí por JavaScript -->
                     </tbody>
                 </table>
             </div>
-            <p id="noDataMessage" class="no-data-message">No hay atletas registrados aún. ¡Registra el primero!</p>
+
+            <!-- Mensaje de carga y vacío -->
+            <div id="loadingMessage" class="mt-4 text-center text-vinotinto-dark">Cargando datos...</div>
+            <div id="noDataMessage" class="mt-4 text-center text-vinotinto-dark hidden">
+                <p class="font-semibold">¡Aún no hay atletas registrados!</p>
+                <p class="text-sm text-gray-500">Sé el primero en registrar uno y verás la tabla llenarse con un atractivo diseño vinotinto.</p>
+            </div>
         </div>
         
     </div>
     
     <!-- Vincula el archivo de JavaScript con soporte para módulos -->
+    <!-- Mantenemos el script.js separado para la lógica compleja (Firebase) -->
     <script type="module" src="script.js"></script>
 
     <!-- BLOQUE DE CÓDIGO DE SEGURIDAD PARA PROTEGER EL CÓDIGO FUENTE -->
@@ -167,5 +323,6 @@
             }
         });
     </script>
+
 </body>
 </html>
