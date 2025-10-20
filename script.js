@@ -59,8 +59,12 @@ function calculateCategory(dateString) {
  */
 function showStatus(message, isError = false) {
     const statusMessageEl = document.getElementById('statusMessage');
+    // Aseguramos que se muestra
+    statusMessageEl.classList.remove('hidden'); 
     statusMessageEl.textContent = message;
-    statusMessageEl.classList.remove('hidden', 'text-vinotinto-primary', 'text-red-600');
+    
+    // Limpieza de clases de color
+    statusMessageEl.classList.remove('text-vinotinto-primary', 'text-red-600');
     statusMessageEl.classList.add(isError ? 'text-red-600' : 'text-vinotinto-primary');
     
     // Ocultar después de 5 segundos
@@ -111,7 +115,10 @@ async function initFirebaseAndAuth() {
         } else {
             // Esto solo debería pasar si la autenticación anónima falla
             userId = crypto.randomUUID();
-            document.getElementById('loadingMessage').textContent = "Error de autenticación. No se pueden cargar los datos.";
+            const loadingMessageEl = document.getElementById('loadingMessage');
+            if (loadingMessageEl) {
+                loadingMessageEl.textContent = "Error de autenticación. No se pueden cargar los datos.";
+            }
         }
     });
 }
@@ -121,37 +128,48 @@ async function initFirebaseAndAuth() {
 // =========================================================================
 
 /**
- * Renderiza dinámicamente las opciones de clubes en el selector.
+ * Renderiza dinámicamente las opciones de clubes en el selector y controla el estado.
  */
 function renderClubs(clubs) {
     const clubSelect = document.getElementById('club');
     const addClubContainer = document.getElementById('addClubContainer');
     
+    // Limpia las opciones existentes
     clubSelect.innerHTML = '';
 
-    const defaultOption = document.createElement('option');
-    defaultOption.value = "";
-    defaultOption.textContent = clubs.length > 0 ? "Seleccione un Club" : "Añadiendo Clubes...";
-    defaultOption.disabled = true;
-    defaultOption.selected = true;
-    clubSelect.appendChild(defaultOption);
-
-    clubs.forEach(club => {
-        const option = document.createElement('option');
-        option.value = club.name; 
-        option.textContent = club.name;
-        clubSelect.appendChild(option);
-    });
-
-    // Controlar la visibilidad y estado del selector
-    if (clubs.length === 0) {
-        clubSelect.disabled = true;
-        addClubContainer.classList.remove('hidden');
-        showStatus("¡Necesitas añadir un club antes de registrar un atleta!", true);
-    } else {
+    if (clubs.length > 0) {
+        // Si hay clubes, habilitamos el selector y lo ocultamos el campo de añadir
         clubSelect.disabled = false;
         addClubContainer.classList.add('hidden');
+        
+        const defaultOption = document.createElement('option');
+        defaultOption.value = "";
+        defaultOption.textContent = "Seleccione un Club";
+        defaultOption.disabled = true;
+        defaultOption.selected = true;
+        clubSelect.appendChild(defaultOption);
+
+        clubs.forEach(club => {
+            const option = document.createElement('option');
+            option.value = club.name; 
+            option.textContent = club.name;
+            clubSelect.appendChild(option);
+        });
+        
+    } else {
+        // Si NO hay clubes, deshabilitamos el selector y mostramos el campo de añadir
+        clubSelect.disabled = true;
+        addClubContainer.classList.remove('hidden');
+
+        const defaultOption = document.createElement('option');
+        defaultOption.value = "";
+        defaultOption.textContent = "¡Añada un club primero!";
+        defaultOption.disabled = true;
+        defaultOption.selected = true;
+        clubSelect.appendChild(defaultOption);
     }
+    
+    console.log("Clubes cargados:", clubsData);
 }
 
 /**
@@ -168,7 +186,6 @@ function loadClubs() {
         });
         
         renderClubs(clubsData);
-        console.log("Clubes cargados:", clubsData);
     }, (error) => {
         console.error("Error al cargar clubes:", error);
         showStatus("Error al cargar la lista de clubes.", true);
@@ -202,6 +219,7 @@ async function addClub() {
         });
         
         newClubInput.value = '';
+        // La tabla de clubes se actualizará automáticamente gracias a onSnapshot
         showStatus(`¡Club '${clubName}' añadido exitosamente!`);
     } catch (e) {
         console.error("Error al añadir club:", e);
@@ -211,7 +229,7 @@ async function addClub() {
 
 
 // =========================================================================
-// 5. GESTIÓN DE ATLETAS (EL BLOQUE CON EL FALLO REPORTADO)
+// 5. GESTIÓN DE ATLETAS (CARGA Y TABLA)
 // =========================================================================
 
 /**
@@ -225,26 +243,30 @@ function loadAthletes() {
     const loadingMessageEl = document.getElementById('loadingMessage');
     const noDataMessageEl = document.getElementById('noDataMessage');
 
+    // Inicialmente mostramos el mensaje de carga
+    if (loadingMessageEl) loadingMessageEl.classList.remove('hidden');
+
     onSnapshot(athletesCollectionRef, (snapshot) => {
         athletesData = [];
         snapshot.forEach((doc) => {
             const data = doc.data();
+            // Aseguramos que la categoría se calcule si falta el campo original
             data.categoria = calculateCategory(data.fechaNac);
             athletesData.push({ id: doc.id, ...data });
         });
         
-        // ** PUNTO CRÍTICO: Disparar el renderizado con ordenamiento **
+        // ** Disparar el renderizado con ordenamiento **
         sortTable(currentSortKey, false); 
         
         // Actualizar mensajes de estado
-        loadingMessageEl.classList.add('hidden');
-        noDataMessageEl.classList.toggle('hidden', athletesData.length > 0);
+        if (loadingMessageEl) loadingMessageEl.classList.add('hidden');
+        if (noDataMessageEl) noDataMessageEl.classList.toggle('hidden', athletesData.length > 0);
         console.log("Atletas cargados:", athletesData);
         
     }, (error) => {
         console.error("Error al cargar atletas:", error);
-        loadingMessageEl.textContent = "Error al cargar los datos.";
-        noDataMessageEl.classList.add('hidden');
+        if (loadingMessageEl) loadingMessageEl.textContent = "Error al cargar los datos.";
+        if (noDataMessageEl) noDataMessageEl.classList.add('hidden');
     });
 }
 
@@ -254,6 +276,8 @@ function loadAthletes() {
  */
 function renderTable(dataToRender) {
     const tableBody = document.getElementById('athleteTableBody');
+    if (!tableBody) return;
+    
     tableBody.innerHTML = ''; // Limpia la tabla COMPLETAMENTE
 
     dataToRender.forEach(data => {
@@ -307,12 +331,13 @@ function sortTable(key, toggleDirection) {
         let valA = a[key] || '';
         let valB = b[key] || '';
         
+        // Manejo de valores numéricos
         if (key === 'talla' || key === 'peso') {
             valA = parseFloat(valA);
             valB = parseFloat(valB);
         }
         
-        // Usamos localeCompare para ordenamiento de strings robusto
+        // Ordenamiento
         if (typeof valA === 'string' && typeof valB === 'string') {
             return sortDirection === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
         }
@@ -366,12 +391,17 @@ function setupEventListeners() {
 async function handleFormSubmit(e) {
     e.preventDefault();
     
-    if (clubsData.length === 0 || !document.getElementById('club').value) {
-        showStatus("Por favor, selecciona o añade un club antes de registrar.", true);
+    const clubSelect = document.getElementById('club');
+    
+    if (clubSelect.disabled || !clubSelect.value) {
+        showStatus("Por favor, selecciona un club de la lista (o añade uno si la lista está vacía).", true);
         return;
     }
     
     const form = e.target;
+    // La categoría se calculará en el lado del cliente y se guardará en Firestore
+    const categoriaCalculada = calculateCategory(form.fechaNac.value);
+    
     const formData = {
         club: form.club.value.trim(),
         nombre: form.nombre.value.trim(),
@@ -383,6 +413,8 @@ async function handleFormSubmit(e) {
         correo: form.correo.value.trim() || null, 
         telefono: form.telefono.value.trim() || null,
         posicion: form.posicion.value || null,
+        // Agregamos la categoría calculada y el timestamp
+        categoria: categoriaCalculada,
         timestamp: new Date().toISOString()
     };
     
@@ -391,7 +423,7 @@ async function handleFormSubmit(e) {
         await addDoc(collection(db, athletesCollectionPath), formData);
         
         form.reset();
-        form.club.selectedIndex = 0; 
+        clubSelect.selectedIndex = 0; 
         showStatus('¡Atleta registrado exitosamente!');
     } catch (error) {
         console.error("Error al añadir documento:", error);
@@ -408,7 +440,10 @@ function filterTable(searchTerm) {
     });
 
     renderTable(filteredData);
-    document.getElementById('noDataMessage').classList.toggle('hidden', filteredData.length > 0);
+    const noDataMessageEl = document.getElementById('noDataMessage');
+    if (noDataMessageEl) {
+        noDataMessageEl.classList.toggle('hidden', filteredData.length > 0);
+    }
 }
 
 
