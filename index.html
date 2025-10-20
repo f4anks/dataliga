@@ -1,443 +1,88 @@
-// 1. IMPORTACIONES DE FIREBASE
-// Usamos versiones estables para evitar errores 404 al cargar desde CDN.
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, collection, query, addDoc, onSnapshot, setLogLevel, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-// VARIABLES DE ESTADO Y FIREBASE
-let app;
-let db;
-let auth;
-let userId = ''; 
-let athletesData = []; // Array que contendrá los datos sincronizados de Firestore
-let clubsData = []; // Array que contendrá los clubes sincronizados de Firestore
-let currentSortKey = 'apellido'; 
-let sortDirection = 'asc'; 
-
-// Ajustar el nivel de log para depuración (opcional, útil para ver actividad de Firestore)
-setLogLevel('Debug');
-
-// Variables globales proporcionadas por el entorno (Canvas)
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-// =========================================================================
-// 2. UTILIDADES
-// =========================================================================
-
-/**
- * Calcula la categoría del atleta basada en su fecha de nacimiento.
- * NOTA: Esta es una lógica simplificada, las categorías reales de voleibol son más complejas.
- * Se basa en la edad en el año actual.
- * @param {string} dateString Fecha de nacimiento en formato YYYY-MM-DD.
- * @returns {string} Categoría (ej: Sub-13).
- */
-function calculateCategory(dateString) {
-    if (!dateString) return 'N/A';
+<html lang="es">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data de Atletas - Liga de Voleibol</title>
+    <!-- Vincula el archivo de estilos CSS -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Vincula la fuente Montserrat de Google Fonts (utilizada en styles.css) -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&amp;display=swap"
+          rel="stylesheet">
+</head>
+<body>
     
-    const birthDate = new Date(dateString);
-    const today = new Date();
-    
-    // Calcula la edad en base solo al año.
-    let age = today.getFullYear() - birthDate.getFullYear();
-    
-    // Ajuste por mes y día para mayor precisión (aunque la lógica de categorías suele ser anual)
-    const monthDifference = today.getMonth() - birthDate.getMonth();
-    if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-    }
+    <!-- El banner de encabezado fue eliminado de aquí -->
 
-    if (age <= 12) return 'Mini Voleibol (Sub-13)';
-    if (age <= 14) return 'Infantil (Sub-15)';
-    if (age <= 16) return 'Menor (Sub-17)';
-    if (age <= 18) return 'Juvenil (Sub-19)';
-    return 'Adulto';
-}
-
-/**
- * Muestra mensajes de estado en la UI.
- * @param {string} message Mensaje a mostrar.
- * @param {boolean} isError Si es true, el mensaje se muestra en rojo.
- */
-function showStatus(message, isError = false) {
-    const statusMessageEl = document.getElementById('statusMessage');
-    statusMessageEl.textContent = message;
-    statusMessageEl.classList.remove('hidden', 'text-vinotinto-primary', 'text-red-600');
-    statusMessageEl.classList.add(isError ? 'text-red-600' : 'text-vinotinto-primary');
-    
-    // Ocultar después de 5 segundos
-    setTimeout(() => {
-        statusMessageEl.classList.add('hidden');
-    }, 5000);
-}
-
-
-// =========================================================================
-// 3. FIREBASE Y AUTENTICACIÓN
-// =========================================================================
-
-async function initFirebaseAndAuth() {
-    if (!firebaseConfig) {
-        console.error("Firebase config is missing. Cannot initialize app.");
-        return;
-    }
-
-    // 1. Inicializar
-    app = initializeApp(firebaseConfig);
-    db = getFirestore(app);
-    auth = getAuth(app);
-
-    // 2. Autenticación (con token si está disponible, sino anónima)
-    try {
-        if (initialAuthToken) {
-            await signInWithCustomToken(auth, initialAuthToken);
-        } else {
-            await signInAnonymously(auth);
-        }
-    } catch (error) {
-        console.error("Firebase Auth Error:", error);
-        showStatus("Error de autenticación. Verifica la consola.", true);
-    }
-    
-    // 3. Obtener el userId una vez autenticado
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            // Usar el UID para identificar al usuario, incluso anónimo
-            userId = user.uid;
-            console.log("Usuario autenticado. UID:", userId);
-            
-            // 4. Iniciar la carga de datos después de la autenticación
-            setupDataListeners(); 
-            setupEventListeners(); // Configurar listeners que dependen del userId
-        } else {
-            console.warn("No user is signed in.");
-            // Si la autenticación falla por completo, usamos un ID temporal
-            userId = crypto.randomUUID();
-        }
-    });
-}
-
-// =========================================================================
-// 4. GESTIÓN DE CLUBES (NUEVA FUNCIONALIDAD)
-// =========================================================================
-
-/**
- * Renderiza dinámicamente las opciones de clubes en el selector.
- * Muestra/oculta la UI para añadir clubes si es necesario.
- * @param {Array<Object>} clubs Array de objetos de clubes.
- */
-function renderClubs(clubs) {
-    const clubSelect = document.getElementById('club');
-    const addClubContainer = document.getElementById('addClubContainer');
-    
-    // Limpiar opciones existentes
-    clubSelect.innerHTML = '';
-
-    // Añadir opción por defecto
-    const defaultOption = document.createElement('option');
-    defaultOption.value = "";
-    defaultOption.textContent = clubs.length > 0 ? "Seleccione un Club" : "Añadiendo Clubes...";
-    defaultOption.disabled = true;
-    defaultOption.selected = true;
-    clubSelect.appendChild(defaultOption);
-
-    // Añadir clubes del array
-    clubs.forEach(club => {
-        const option = document.createElement('option');
-        option.value = club.name; // Usamos el nombre como valor y texto
-        option.textContent = club.name;
-        clubSelect.appendChild(option);
-    });
-
-    // Controlar la visibilidad de la UI para añadir un club
-    if (clubs.length === 0) {
-        clubSelect.disabled = true;
-        addClubContainer.classList.remove('hidden');
-        showStatus("¡Necesitas añadir un club antes de registrar un atleta!", true);
-    } else {
-        clubSelect.disabled = false;
-        addClubContainer.classList.add('hidden');
-    }
-}
-
-/**
- * Configura la escucha en tiempo real para la colección de clubes.
- */
-function loadClubs() {
-    // Los clubes son datos públicos (compartidos)
-    const clubsCollectionRef = collection(db, `artifacts/${appId}/public/data/clubs`);
-    
-    onSnapshot(clubsCollectionRef, (snapshot) => {
-        clubsData = [];
-        snapshot.forEach((doc) => {
-            // Guardamos el ID del documento por si se necesitara borrar o editar
-            clubsData.push({ id: doc.id, ...doc.data() });
-        });
+    <div class="container">
+        <div class="form-card">
+            <div class="form-header">
+                <h2>Data de Atletas</h2>
+                <h2>&nbsp;Liga de Voleibol Menor del Estado Lara</h2>
+                <p>Por favor, complete el siguiente formulario para registrar a un
+                atleta.</p>
+            </div>
+            <!-- La acción del botón (submit) llama a esta función de JavaScript -->
+            <form id="athleteForm" onsubmit="return handleFormSubmit(event)">
+                
+                <!-- CLUB: Se mantiene como input de texto por ahora -->
+                <div class="form-group"> <label for="club">Club <span class="required-star">*</span></label>
+                    <input id="club" name="club" required="" type="text"> </div>
+                
+                <!-- NOMBRE Y APELLIDO -->
+                <div class="form-row">
+                    <div class="form-group"> <label for="nombre">Nombre <span class="required-star">*</span></label>
+                        <input id="nombre" name="nombre" required="" type="text"> </div>
+                    <div class="form-group"> <label for="apellido">Apellido <span class="required-star">*</span></label>
+                        <input id="apellido" name="apellido" required="" type="text"> </div>
+                </div>
+                
+                <!-- CATEGORIA, TALLA Y PESO -->
+                <div class="form-row">
+                    <div class="form-group"> <label for="categoria">Categoría <span class="required-star">*</span></label>
+                        <select id="categoria" name="categoria" required="">
+                            <option value="" disabled="disabled" selected="selected">Selecciona
+                            una Categoría</option>
+                            <option value="3ra División">3ra División</option>
+                            <option value="2da División">2da División</option>
+                            <option value="1era División">1era División</option>
+                            <option value="CIAR">CIAR</option>
+                        </select>
+                    </div>
+                    <div class="form-group"> <label for="talla">Talla (cm)</label> <input
+                            id="talla" name="talla" type="number" min="0"> </div>
+                    <div class="form-group"> <label for="peso">Peso (kg)</label> <input
+                            id="peso" name="peso" type="number" min="0" step="0.1"> </div>
+                </div>
+                
+                <!-- FECHA NAC., CORREO Y TELÉFONO -->
+                <div class="form-row">
+                    <div class="form-group"> <label for="fechaNac">Fecha de Nacimiento
+                        <span class="required-star">*</span></label> <input
+                            id="fechaNac" name="fechaNac" required="" pattern="\d{4}-\d{2}-\d{2}"
+                            type="date"> </div>
+                    <div class="form-group"> <label for="correo">Correo <span class="required-star">*</span></label>
+                        <input id="correo" name="correo" required="" type="email"> </div>
+                    <div class="form-group"> <label for="telefono">Teléfono <span class="required-star">*</span></label>
+                        <input id="telefono" name="telefono" required="" type="tel"> </div>
+                </div>
+                
+                <p class="required-note"><span class="required-star">*</span> Campos
+                obligatorios</p>
+                <button type="submit">Registrar Atleta</button> 
+            </form>
+        </div>
         
-        renderClubs(clubsData);
-        console.log("Clubes cargados:", clubsData);
-    }, (error) => {
-        console.error("Error al cargar clubes:", error);
-        showStatus("Error al cargar la lista de clubes.", true);
-    });
-}
-
-/**
- * Añade un nuevo club a la base de datos.
- */
-async function addClub() {
-    const newClubInput = document.getElementById('newClubName');
-    const clubName = newClubInput.value.trim();
-    
-    if (!clubName) {
-        showStatus("Ingresa un nombre para el club.", true);
-        return;
-    }
-    
-    // Verificar si el club ya existe (simple, no estricto)
-    if (clubsData.some(club => club.name.toLowerCase() === clubName.toLowerCase())) {
-        showStatus(`El club '${clubName}' ya existe.`, true);
-        newClubInput.value = '';
-        return;
-    }
-
-    try {
-        const clubsCollectionRef = collection(db, `artifacts/${appId}/public/data/clubs`);
-        await addDoc(clubsCollectionRef, {
-            name: clubName,
-            createdAt: new Date().toISOString(),
-            registeredBy: userId // Para fines de auditoría
-        });
-        
-        newClubInput.value = '';
-        showStatus(`¡Club '${clubName}' añadido exitosamente!`);
-    } catch (e) {
-        console.error("Error al añadir club:", e);
-        showStatus("Error al guardar el club. Intenta de nuevo.", true);
-    }
-}
-
-
-// =========================================================================
-// 5. GESTIÓN DE ATLETAS
-// =========================================================================
-
-/**
- * Configura la escucha en tiempo real para la colección de atletas.
- * Solo se llama una vez después de la autenticación.
- */
-function loadAthletes() {
-    // Los atletas son datos privados para el usuario que los registra
-    const athletesCollectionPath = `artifacts/${appId}/users/${userId}/athletes`;
-    const athletesCollectionRef = collection(db, athletesCollectionPath);
-    
-    // Consulta para obtener todos los documentos en tiempo real
-    onSnapshot(athletesCollectionRef, (snapshot) => {
-        athletesData = [];
-        snapshot.forEach((doc) => {
-            const data = doc.data();
-            // Calcula la categoría antes de guardarla
-            data.categoria = calculateCategory(data.fechaNac);
-            athletesData.push({ id: doc.id, ...data });
-        });
-        
-        // Renderizar la tabla con los datos (y aplicar ordenamiento por defecto)
-        sortTable(currentSortKey, false); // El segundo argumento 'false' evita resetear la dirección
-        document.getElementById('loadingMessage').classList.add('hidden');
-        document.getElementById('noDataMessage').classList.toggle('hidden', athletesData.length > 0);
-        console.log("Atletas cargados:", athletesData);
-        
-    }, (error) => {
-        console.error("Error al cargar atletas:", error);
-        document.getElementById('loadingMessage').textContent = "Error al cargar los datos.";
-    });
-}
-
-/**
- * Renderiza la tabla de atletas en el DOM.
- * @param {Array<Object>} dataToRender Array de atletas a mostrar.
- */
-function renderTable(dataToRender) {
-    const tableBody = document.getElementById('athleteTableBody');
-    tableBody.innerHTML = ''; // Limpia la tabla
-    
-    if (dataToRender.length === 0) {
-        return;
-    }
-
-    dataToRender.forEach(data => {
-        // Formateo de peso y talla para mejor presentación
-        data.pesoFormatted = `${data.peso} kg`;
-        data.tallaFormatted = `${data.talla} cm`;
-        
-        const row = tableBody.insertRow();
-        row.className = 'bg-card-light hover:bg-yellow-100 transition duration-150';
-        row.innerHTML = `
-            <td data-label="Club" class="table-data">${data.club}</td>
-            <td data-label="Nombre" class="table-data">${data.nombre}</td>
-            <td data-label="Apellido" class="table-data">${data.apellido}</td>
-            <td data-label="F. Nac." class="table-data table-hidden-mobile">${data.fechaNac}</td>
-            <td data-label="Categoría" class="table-data">${data.categoria}</td>
-            <td data-label="Talla" class="table-data table-hidden-mobile">${data.tallaFormatted}</td>
-            <td data-label="Peso" class="table-data table-hidden-mobile">${data.pesoFormatted}</td>
-            <td data-label="Correo" class="table-data table-hidden-desktop">${data.correo || 'N/A'}</td>
-            <td data-label="Teléfono" class="table-data table-hidden-desktop">${data.telefono || 'N/A'}</td>
-        `;
-    });
-
-    // Actualiza la clase CSS para indicar el ordenamiento actual
-    document.querySelectorAll('#athleteTable th').forEach(th => {
-        th.classList.remove('sorted-asc', 'sorted-desc');
-        if (th.getAttribute('data-sort-key') === currentSortKey) {
-            th.classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
-        }
-    });
-}
-
-/**
- * Ordena la tabla de atletas por una clave específica.
- * @param {string} key La clave del objeto por la cual ordenar (ej: 'apellido').
- * @param {boolean} toggleDirection Si es true, invierte la dirección de ordenamiento.
- */
-function sortTable(key, toggleDirection) {
-    const currentData = athletesData.slice(); // Copia para ordenar
-
-    if (toggleDirection) {
-        if (currentSortKey === key) {
-            sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            currentSortKey = key;
-            sortDirection = 'asc';
-        }
-    }
-
-    currentData.sort((a, b) => {
-        let valA = a[key] || '';
-        let valB = b[key] || '';
-        
-        // Convertir a número si es talla o peso
-        if (key === 'talla' || key === 'peso') {
-            valA = parseFloat(valA);
-            valB = parseFloat(valB);
-        }
-        
-        // Manejo de valores nulos o indefinidos
-        if (valA === undefined || valA === null) valA = '';
-        if (valB === undefined || valB === null) valB = '';
-
-        if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
-        if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
-        return 0;
-    });
-
-    renderTable(currentData);
-}
-
-/**
- * Filtra los datos de la tabla basándose en el texto de búsqueda.
- * @param {string} searchTerm Texto de búsqueda.
- */
-function filterTable(searchTerm) {
-    const lowerCaseSearch = searchTerm.toLowerCase();
-    
-    const filteredData = athletesData.filter(athlete => {
-        // Concatenar campos relevantes para la búsqueda
-        const searchableText = `${athlete.nombre} ${athlete.apellido} ${athlete.club} ${athlete.categoria} ${athlete.correo}`.toLowerCase();
-        return searchableText.includes(lowerCaseSearch);
-    });
-
-    renderTable(filteredData);
-    document.getElementById('noDataMessage').classList.toggle('hidden', filteredData.length > 0);
-}
-
-
-// =========================================================================
-// 6. SETUP DE EVENTOS Y FORMULARIO
-// =========================================================================
-
-/**
- * Configura los listeners de datos de Firebase (Clubes y Atletas).
- */
-function setupDataListeners() {
-    // 1. Inicia la escucha de clubes (debe ser primero para llenar el select)
-    loadClubs();
-    
-    // 2. Inicia la escucha de atletas
-    loadAthletes();
-}
-
-
-/**
- * Configura todos los event listeners del DOM.
- */
-function setupEventListeners() {
-    // Manejar el envío del formulario
-    document.getElementById('athleteForm').addEventListener('submit', handleFormSubmit);
-
-    // Configurar el ordenamiento de la tabla
-    document.querySelectorAll('#athleteTable th').forEach(header => {
-        const key = header.getAttribute('data-sort-key');
-        if (key) {
-            header.style.cursor = 'pointer'; 
-            header.addEventListener('click', () => sortTable(key, true)); 
-        }
-    });
-
-    // Configurar la búsqueda en tiempo real
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-        filterTable(e.target.value);
-    });
-    
-    // NUEVO: Listener para el botón de añadir club
-    document.getElementById('addClubButton').addEventListener('click', addClub);
-}
-
-/**
- * Maneja el envío del formulario de registro de atletas.
- * @param {Event} e Evento de envío del formulario.
- */
-async function handleFormSubmit(e) {
-    e.preventDefault();
-    
-    if (clubsData.length === 0) {
-        showStatus("No puedes registrar atletas sin antes registrar un club.", true);
-        return;
-    }
-    
-    const form = e.target;
-    const formData = {
-        club: form.club.value.trim(),
-        nombre: form.nombre.value.trim(),
-        apellido: form.apellido.value.trim(),
-        fechaNac: form.fechaNac.value,
-        genero: form.genero.value,
-        talla: parseFloat(form.talla.value),
-        peso: parseFloat(form.peso.value),
-        correo: form.correo.value.trim() || null, // Opcional
-        telefono: form.telefono.value.trim() || null, // Opcional
-        posicion: form.posicion.value || null, // Opcional
-        timestamp: new Date().toISOString()
-    };
-    
-    try {
-        const athletesCollectionPath = `artifacts/${appId}/users/${userId}/athletes`;
-        await addDoc(collection(db, athletesCollectionPath), formData);
-        
-        form.reset();
-        // Establecer el valor por defecto en el select club después de resetear
-        form.club.selectedIndex = 0; 
-        showStatus('¡Atleta registrado exitosamente!');
-    } catch (error) {
-        console.error("Error al añadir documento:", error);
-        showStatus('Error al registrar el atleta. Verifica la consola.', true);
-    }
-}
-
-
-// =========================================================================
-// 7. INICIO DE LA APLICACIÓN
-// =========================================================================
-
-// Inicia la aplicación cargando la configuración de Firebase
-initFirebaseAndAuth();
+        <!-- SECCIÓN DONDE SE MOSTRARÁN LOS DATOS REGISTRADOS DINÁMICAMENTE -->
+        <div class="registered-athletes-section">
+            <h3>Atletas Registrados</h3>
+            <div id="registeredData">
+                <p class="no-data-message">No hay atletas registrados aún. ¡Registra
+                el primero!</p>
+            </div>
+        </div>
+    </div>
+    <!-- Vincula el archivo de JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
