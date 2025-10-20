@@ -1,429 +1,354 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { 
-    getAuth, 
-    signInAnonymously, 
-    signInWithCustomToken, 
-    onAuthStateChanged 
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { 
-    getFirestore, 
-    doc, 
-    setDoc, 
-    onSnapshot, 
-    collection, 
-    query, 
-    getDoc, 
-    deleteDoc,
-    setLogLevel
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+// 1. IMPORTACIONES DE FIREBASE
+// Usamos versiones estables (10.12.0) para evitar errores 404 al cargar desde CDN.
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, query, addDoc, onSnapshot, setLogLevel } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// ===============================================
-// Variables Globales de Firebase (PROPORCIONADAS)
-// ===============================================
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-/**
- * Función segura para parsear __firebase_config.
- * Soluciona el error si la variable no está definida o contiene JSON inválido.
- */
-const parseFirebaseConfig = () => {
-    try {
-        if (typeof __firebase_config === 'string' && __firebase_config.length > 0) {
-            return JSON.parse(__firebase_config);
-        }
-    } catch (e) {
-        console.error("Error parsing __firebase_config JSON:", e);
-    }
-    return {};
-};
-
-// Se llama a la función para obtener la configuración de forma segura
-const firebaseConfig = parseFirebaseConfig(); 
-
-const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-// Variables de estado global
+// VARIABLES DE ESTADO Y FIREBASE
 let db;
 let auth;
-let userId = null;
-let isAuthReady = false;
-let isEditMode = false;
-let currentAthleteId = null; // ID del atleta si estamos en modo edición
+let userId = ''; 
+let athletesData = []; // Array que contendrá los datos sincronizados de Firestore
+let currentSortKey = 'apellido'; 
+let sortDirection = 'asc'; 
 
-// Elementos del DOM
-const athleteForm = document.getElementById('athleteForm');
-const registeredDataContainer = document.getElementById('registeredData');
-const submitButton = document.getElementById('submitButton');
-const searchButton = document.getElementById('searchButton');
-const cedulaInput = document.getElementById('cedula');
-const messageBox = document.getElementById('messageBox');
+// Ajustar el nivel de log para depuración (opcional)
+setLogLevel('Debug');
 
-// Utilerías
-const showMessage = (message, type = 'info') => {
-    messageBox.textContent = message;
-    messageBox.style.display = 'block';
-    messageBox.style.backgroundColor = type === 'error' ? '#fecaca' : (type === 'success' ? '#dcfce7' : '#e0f2fe');
-    messageBox.style.color = type === 'error' ? '#b91c1c' : (type === 'success' ? '#16a34a' : '#0369a1');
-    setTimeout(() => {
-        messageBox.style.display = 'none';
-    }, 5000);
+// =========================================================================
+// !!! ATENCIÓN: CONFIGURACIÓN PARA AMBIENTE EXTERNO (GitHub Pages) !!!
+// Se usa tu configuración real para que funcione fuera del Canvas.
+// =========================================================================
+const EXTERNAL_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyA5u1whBdu_fVb2Kw7SDRZbuyiM77RXVDE",
+  authDomain: "datalvmel.firebaseapp.com",
+  projectId: "datalvmel",
+  storageBucket: "datalvmel.firebasestorage.app",
+  messagingSenderId: "733536533303",
+  appId: "1:733536533303:web:3d2073504aefb2100378b2"
 };
 
-// ===============================================
-// FIREBASE INICIALIZACIÓN Y AUTENTICACIÓN (REFORZADO)
-// ===============================================
-const initializeFirebase = async () => {
-    // REFUERZO: Verificar si firebaseConfig es un objeto válido y contiene la clave esencial 'projectId'.
-    // Si esta verificación falla, no llamamos a initializeApp.
-    if (!firebaseConfig || !firebaseConfig.projectId || Object.keys(firebaseConfig).length === 0) {
-        console.error("Firebase Initialization Error: firebaseConfig is missing or invalid.");
-        showMessage("Error: La configuración de la base de datos no está disponible. No se puede guardar ni leer data.", 'error');
-        return;
+/**
+ * Muestra un mensaje temporal de estado en la interfaz.
+ * @param {string} message - El texto a mostrar.
+ * @param {string} type - 'success' o 'error'.
+ */
+function displayStatusMessage(message, type) {
+    let statusEl = document.getElementById('statusMessage');
+    if (!statusEl) {
+        // Crea el elemento si no existe (lo inyectamos en el cuerpo)
+        statusEl = document.createElement('div');
+        statusEl.id = 'statusMessage';
+        statusEl.style.position = 'fixed';
+        statusEl.style.top = '10px';
+        statusEl.style.right = '10px';
+        statusEl.style.padding = '10px 20px';
+        statusEl.style.borderRadius = '8px';
+        statusEl.style.zIndex = '1000';
+        statusEl.style.color = '#fff';
+        statusEl.style.transition = 'opacity 0.5s ease-in-out';
+        statusEl.style.opacity = '0';
+        document.body.appendChild(statusEl);
     }
     
-    try {
-        // Habilitar logs para depuración (opcional)
-        setLogLevel('Debug');
-        
-        const app = initializeApp(firebaseConfig);
-        db = getFirestore(app);
-        auth = getAuth(app);
+    statusEl.textContent = message;
+    statusEl.style.backgroundColor = type === 'success' ? '#10b981' : '#ef4444';
+    statusEl.style.opacity = '1';
 
-        // Intenta autenticar con el token o de forma anónima
-        if (initialAuthToken) {
-            await signInWithCustomToken(auth, initialAuthToken);
+    // Ocultar después de 4 segundos
+    setTimeout(() => {
+        statusEl.style.opacity = '0';
+    }, 4000);
+}
+
+
+/**
+ * 2. INICIALIZACIÓN Y AUTENTICACIÓN
+ * Inicializa Firebase, autentica al usuario y configura el listener en tiempo real.
+ */
+async function initFirebaseAndLoadData() {
+    console.log("Iniciando Firebase y autenticación...");
+    try {
+        // Determinamos la configuración y el App ID
+        let configToUse;
+        let appIdToUse;
+        let tokenToUse = '';
+
+        // Priorizamos las variables globales si estamos en el entorno Canvas
+        if (typeof __firebase_config !== 'undefined' && __firebase_config.length > 2) {
+            configToUse = JSON.parse(__firebase_config);
+            appIdToUse = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            tokenToUse = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : '';
         } else {
-            await signInAnonymously(auth);
+            // Usamos la configuración fija si estamos en un entorno externo (GitHub Pages)
+            configToUse = EXTERNAL_FIREBASE_CONFIG;
+            // Para la ruta de guardado, usamos el projectId como fallback para el appId
+            appIdToUse = configToUse.projectId; 
+            
+            // Nota: En GitHub Pages, NO hay token inicial, así que solo usamos la autenticación anónima.
         }
 
+        const app = initializeApp(configToUse);
+        db = getFirestore(app);
+        auth = getAuth(app);
+        
+        // Autenticación: Intentar con token personalizado (solo en Canvas) o usar anónimo
+        if (tokenToUse.length > 0) {
+            await signInWithCustomToken(auth, tokenToUse);
+        } else {
+            // Autenticación anónima para GitHub Pages
+            await signInAnonymously(auth);
+        }
+        
+        // Esperar el cambio de estado de autenticación
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 userId = user.uid;
-                isAuthReady = true;
-                console.log("Firebase Auth Ready. User ID:", userId);
-                // Una vez autenticado, comenzamos a escuchar la data
-                setupRealtimeListener();
+                console.log("Usuario autenticado. UID:", userId);
+                // Una vez autenticado, se puede empezar a escuchar los datos
+                setupRealtimeListener(appIdToUse);
             } else {
-                console.error("No user signed in.");
+                console.error("No se pudo autenticar al usuario.");
+                // Fallback para entornos sin autenticación
+                userId = crypto.randomUUID(); 
+                setupRealtimeListener(appIdToUse);
             }
         });
-    } catch (error) {
-        console.error("Error initializing Firebase:", error);
-        // Si el error persiste, mostrar un mensaje al usuario
-        showMessage("Error al conectar con la base de datos.", 'error');
-    }
-};
 
-// ===============================================
-// LÓGICA DE BÚSQUEDA Y EDICIÓN
-// ===============================================
+    } catch (e) {
+        console.error("Error al inicializar Firebase:", e);
+    }
+}
 
 /**
- * Normaliza la cédula para usarla como ID de documento (ej: v12345678).
- * @param {string} cedula 
- * @returns {string} Cédula normalizada.
+ * 3. ESCUCHA EN TIEMPO REAL (onSnapshot)
+ * Configura la escucha en tiempo real para la colección de atletas.
  */
-const normalizeCedula = (cedula) => {
-    return cedula.toUpperCase().replace(/[^VE0-9]/g, '');
-};
-
-/**
- * Cambia la UI al modo Edición/Actualización.
- * @param {boolean} isEditing 
- * @param {string} buttonText 
- */
-const toggleEditMode = (isEditing, buttonText = "Registrar Atleta") => {
-    isEditMode = isEditing;
-    submitButton.textContent = buttonText;
-    // La cédula es clave, se desactiva en modo edición para evitar cambios accidentales de ID
-    cedulaInput.disabled = isEditing;
-    cedulaInput.readOnly = isEditing; 
-};
-
-/**
- * Busca un atleta en Firestore usando la Cédula.
- */
-const buscarAtletaPorCedula = async () => {
-    if (!db || !isAuthReady) {
-        showMessage("El sistema no está listo. Espere la conexión a la base de datos.", 'error');
-        return;
-    }
-
-    const cedulaRaw = cedulaInput.value;
-    if (!cedulaRaw) {
-        showMessage("Por favor, ingrese una Cédula para buscar.", 'info');
-        return;
-    }
-
-    const cedulaId = normalizeCedula(cedulaRaw);
-    
-    // Ruta del documento: /artifacts/{appId}/public/data/athletes/{cedulaId}
-    const athleteDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'athletes', cedulaId);
-
-    try {
-        const docSnap = await getDoc(athleteDocRef);
-
-        if (docSnap.exists()) {
-            const data = docSnap.data();
-            currentAthleteId = cedulaId;
-            
-            // Cargar datos al formulario
-            document.getElementById('club').value = data.club || '';
-            document.getElementById('nombre').value = data.nombre || '';
-            document.getElementById('apellido').value = data.apellido || '';
-            document.getElementById('categoria').value = data.categoria || '';
-            document.getElementById('talla').value = data.talla || '';
-            document.getElementById('peso').value = data.peso || '';
-            document.getElementById('fechaNac').value = data.fechaNac || '';
-            document.getElementById('correo').value = data.correo || '';
-            document.getElementById('telefono').value = data.telefono || '';
-
-            toggleEditMode(true, "Actualizar Atleta");
-            showMessage(`Atleta con Cédula ${cedulaId} encontrado. Listo para actualizar.`, 'success');
-
-        } else {
-            // Si no se encuentra, limpiar el formulario (excepto la cédula) y prepararse para un nuevo registro
-            athleteForm.reset(); 
-            cedulaInput.value = cedulaRaw; // Mantiene la cédula ingresada
-            currentAthleteId = null;
-            toggleEditMode(false, "Registrar Atleta");
-            showMessage(`Cédula ${cedulaId} no encontrada. Continúe para registrar un nuevo atleta.`, 'info');
-        }
-    } catch (error) {
-        console.error("Error al buscar atleta:", error);
-        showMessage("Error al buscar atleta en la base de datos.", 'error');
-    }
-};
-
-searchButton.addEventListener('click', buscarAtletaPorCedula);
-
-// ===============================================
-// LÓGICA DEL FORMULARIO (CRUD)
-// ===============================================
-
-athleteForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    if (!isAuthReady || !db) {
-        showMessage("El sistema de base de datos no está listo. Intente de nuevo en un momento.", 'error');
-        return;
-    }
-
-    const formData = new FormData(athleteForm);
-    const athleteData = {};
-    for (const [key, value] of formData.entries()) {
-        athleteData[key] = value;
-    }
-
-    // Normalizar la Cédula como ID del documento
-    const cedulaId = normalizeCedula(athleteData.cedula);
-    const mode = isEditMode ? 'actualizar' : 'registrar';
-
-    try {
-        // Ruta: /artifacts/{appId}/public/data/athletes/{cedulaId}
-        const athleteDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'athletes', cedulaId);
-
-        // setDoc con merge: true permite crear o actualizar el documento
-        await setDoc(athleteDocRef, athleteData, { merge: true });
-
-        // Limpiar formulario y modo
-        athleteForm.reset();
-        toggleEditMode(false, "Registrar Atleta");
-        currentAthleteId = null;
-        
-        showMessage(`Atleta con Cédula ${cedulaId} ${mode === 'registrar' ? 'registrado' : 'actualizado'} con éxito.`, 'success');
-
-    } catch (error) {
-        console.error(`Error al ${mode} atleta:`, error);
-        showMessage(`Error al ${mode} atleta: ${error.message}`, 'error');
-    }
-});
-
-/**
- * Función para borrar un atleta.
- */
-const deleteAthlete = async (cedulaId) => {
-    if (!isAuthReady || !db) return;
-
-    // TODO: Implementar un modal de confirmación aquí, NO USAR window.confirm()
-    // Usaremos un simple 'confirm' por ahora, pero se recomienda una solución UI personalizada.
-    if (!window.confirm(`¿Está seguro que desea eliminar al atleta con Cédula ${cedulaId}?`)) {
-        return;
-    }
-    
-    try {
-        // Ruta: /artifacts/{appId}/public/data/athletes/{cedulaId}
-        const athleteDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'athletes', cedulaId);
-        await deleteDoc(athleteDocRef);
-        showMessage(`Atleta con Cédula ${cedulaId} eliminado.`, 'success');
-        // Si el atleta eliminado era el que se estaba editando, resetear el formulario
-        if (currentAthleteId === cedulaId) {
-            athleteForm.reset();
-            toggleEditMode(false);
-            currentAthleteId = null;
-        }
-    } catch (error) {
-        console.error("Error al eliminar atleta:", error);
-        showMessage("Error al eliminar atleta en la base de datos.", 'error');
-    }
-};
-
-// ===============================================
-// LECTURA DE DATOS EN TIEMPO REAL (onSnapshot)
-// ===============================================
-
-let currentSortField = 'cedula';
-let currentSortDirection = 'asc';
-
-/**
- * Dibuja la tabla con los datos recibidos.
- * @param {Array} data - Array de objetos atletas.
- */
-const renderTable = (data) => {
-    if (data.length === 0) {
-        registeredDataContainer.innerHTML = '<p class="no-data-message">No hay atletas registrados aún. ¡Registra el primero!</p>';
-        return;
-    }
-    
-    // Ordenar los datos en memoria
-    data.sort((a, b) => {
-        const aValue = a[currentSortField] || '';
-        const bValue = b[currentSortField] || '';
-
-        if (aValue < bValue) return currentSortDirection === 'asc' ? -1 : 1;
-        if (aValue > bValue) return currentSortDirection === 'asc' ? 1 : -1;
-        return 0;
-    });
-
-    const tableHTML = `
-        <table class="athlete-data-table">
-            <thead>
-                <tr>
-                    <th data-field="cedula" class="${currentSortField === 'cedula' ? 'sorted-' + currentSortDirection : ''}">Cédula</th>
-                    <th data-field="club" class="${currentSortField === 'club' ? 'sorted-' + currentSortDirection : ''}">Club</th>
-                    <th data-field="nombre" class="${currentSortField === 'nombre' ? 'sorted-' + currentSortDirection : ''}">Nombre</th>
-                    <th data-field="apellido" class="${currentSortField === 'apellido' ? 'sorted-' + currentSortDirection : ''}">Apellido</th>
-                    <th data-field="categoria" class="${currentSortField === 'categoria' ? 'sorted-' + currentSortDirection : ''}">Categoría</th>
-                    <th data-field="talla" class="${currentSortField === 'talla' ? 'sorted-' + currentSortDirection : ''}">Talla (cm)</th>
-                    <th data-field="peso" class="${currentSortField === 'peso' ? 'sorted-' + currentSortDirection : ''}">Peso (kg)</th>
-                    <th data-field="fechaNac" class="table-hidden-mobile ${currentSortField === 'fechaNac' ? 'sorted-' + currentSortDirection : ''}">Fecha Nac.</th>
-                    <th data-field="correo" class="table-hidden-mobile ${currentSortField === 'correo' ? 'sorted-' + currentSortDirection : ''}">Correo</th>
-                    <th data-field="telefono" class="${currentSortField === 'telefono' ? 'sorted-' + currentSortDirection : ''}">Teléfono</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${data.map(athlete => `
-                    <tr>
-                        <td data-label="Cédula" class="table-data">${athlete.cedula}</td>
-                        <td data-label="Club" class="table-data">${athlete.club}</td>
-                        <td data-label="Nombre" class="table-data">${athlete.nombre}</td>
-                        <td data-label="Apellido" class="table-data">${athlete.apellido}</td>
-                        <td data-label="Categoría" class="table-data">${athlete.categoria}</td>
-                        <td data-label="Talla" class="table-data">${athlete.talla}</td>
-                        <td data-label="Peso" class="table-data">${athlete.peso}</td>
-                        <td data-label="Fecha Nac." class="table-hidden-mobile table-data">${athlete.fechaNac}</td>
-                        <td data-label="Correo" class="table-hidden-mobile table-data">${athlete.correo}</td>
-                        <td data-label="Teléfono" class="table-data">${athlete.telefono}</td>
-                        <td class="table-data" style="width: 120px;">
-                            <div style="display: flex; gap: 8px;">
-                                <button data-id="${athlete.cedula}" class="edit-btn" title="Editar">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#720025;">
-                                        <path d="M12 20h9"></path>
-                                        <path d="M16.5 3.5l4 4L7 21l-4 1 1-4L16.5 3.5z"></path>
-                                    </svg>
-                                </button>
-                                <button data-id="${athlete.cedula}" class="delete-btn" title="Eliminar">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#ef4444;">
-                                        <polyline points="3 6 5 6 21 6"></polyline>
-                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
-    registeredDataContainer.innerHTML = tableHTML;
-    
-    // Añadir listeners para los botones de acción y ordenamiento
-    addTableListeners();
-};
-
-/**
- * Maneja el clic en los encabezados para ordenar la tabla.
- * @param {string} field - El campo por el que se debe ordenar.
- */
-const handleSort = (field) => {
-    if (currentSortField === field) {
-        currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-        currentSortField = field;
-        currentSortDirection = 'asc';
-    }
-    // Forzamos el re-renderizado de los datos actuales con el nuevo orden
-    setupRealtimeListener(); 
-};
-
-const addTableListeners = () => {
-    // Escuchar clics en los botones de editar/eliminar
-    registeredDataContainer.querySelectorAll('.delete-btn').forEach(button => {
-        button.addEventListener('click', () => deleteAthlete(button.getAttribute('data-id')));
-    });
-
-    // Escuchar clics en los botones de editar (carga el atleta al formulario)
-    registeredDataContainer.querySelectorAll('.edit-btn').forEach(button => {
-        button.addEventListener('click', async () => {
-            const cedulaId = button.getAttribute('data-id');
-            // Cargar datos al formulario para edición
-            cedulaInput.value = cedulaId;
-            await buscarAtletaPorCedula();
-        });
-    });
-
-    // Escuchar clics en los encabezados para ordenar
-    registeredDataContainer.querySelectorAll('th[data-field]').forEach(header => {
-        header.addEventListener('click', (e) => {
-            const field = e.currentTarget.getAttribute('data-field');
-            handleSort(field);
-        });
-    });
-};
-
-/**
- * Configura el listener de datos en tiempo real de Firestore.
- */
-const setupRealtimeListener = () => {
-    if (!db || !isAuthReady) return;
-    
-    // Obtener referencia a la colección de atletas (Public Data)
-    // Ruta: /artifacts/{appId}/public/data/athletes
-    const athletesColRef = collection(db, 'artifacts', appId, 'public', 'data', 'athletes');
-    
-    // Query simple (sin orderBy para evitar errores de índice en Canvas)
-    const q = query(athletesColRef); 
+function setupRealtimeListener(appId) {
+    // La ruta pública es: artifacts/{appId}/public/data/athletes
+    const athletesColRef = collection(db, `artifacts/${appId}/public/data/athletes`);
+    const q = query(athletesColRef);
 
     onSnapshot(q, (snapshot) => {
-        const athletes = [];
+        console.log("Datos de Firestore actualizados. Sincronizando tabla...");
+        const fetchedData = [];
         snapshot.forEach((doc) => {
-            athletes.push({
-                cedula: doc.id, // Usamos el ID del documento (la cédula)
-                ...doc.data()
+            fetchedData.push({ 
+                id: doc.id, // ID del documento
+                ...doc.data() 
             });
         });
         
-        renderTable(athletes);
-        console.log("Data de atletas actualizada en tiempo real.");
+        // Reemplazamos los datos locales y forzamos el ordenamiento
+        athletesData = fetchedData;
+        
+        if (athletesData.length > 0) {
+            // Ordena sin cambiar la dirección (mantiene el estado)
+            sortTable(currentSortKey, false); 
+        } else {
+             renderTable();
+        }
     }, (error) => {
-        console.error("Error en el listener de Firestore:", error);
-        showMessage("Error de conexión en tiempo real.", 'error');
+        // Si aparece "Permission Denied", la regla de seguridad de Firebase está incorrecta.
+        console.error("Error en la escucha en tiempo real:", error);
     });
-};
+}
 
-// ===============================================
-// INICIO DE LA APLICACIÓN
-// ===============================================
+// FUNCIÓN ACTUALIZADA: Asegura que el formulario esté en el DOM antes de adjuntar el listener.
+function setupFormListener() {
+    const form = document.getElementById('athleteForm');
+    if (form) {
+        // Adjunta el manejador de envío asíncrono directamente. Esto evita la recarga.
+        form.addEventListener('submit', handleFormSubmit);
+        console.log("Listener de formulario de atleta adjunto.");
+    } else {
+        console.error("Error: No se encontró el formulario con ID 'athleteForm'. ¿Está cargado el index.html?");
+    }
+}
 
-initializeFirebase();
+
+/**
+ * 4. FUNCIÓN DE GUARDADO (handleFormSubmit)
+ * Maneja el envío del formulario y guarda los datos en Firestore.
+ */
+async function handleFormSubmit(event) {
+    // ESTA ES LA LÍNEA CRÍTICA: Detiene la recarga de la página (el comportamiento por defecto del formulario).
+    event.preventDefault(); 
+
+    if (!db) {
+        console.error("Base de datos no inicializada. No se pudo guardar.");
+        displayStatusMessage("Error: La base de datos no está inicializada.", 'error');
+        return false;
+    }
+
+    const form = document.getElementById('athleteForm');
+
+    // 1. Recolectar datos y preparar el objeto (documento)
+    const tallaValue = form.talla.value;
+    const pesoValue = form.peso.value;
+    
+    const newAthlete = {
+        club: form.club.value,
+        nombre: form.nombre.value,
+        apellido: form.apellido.value,
+        fechaNac: form.fechaNac.value,
+        categoria: form.categoria.value, 
+        tallaRaw: tallaValue, 
+        pesoRaw: pesoValue,   
+        tallaFormatted: tallaValue ? `${tallaValue} cm` : 'N/A',
+        pesoFormatted: pesoValue ? `${pesoValue} kg` : 'N/A',
+        correo: form.correo.value,
+        telefono: form.telefono.value,
+        timestamp: Date.now() 
+    };
+    
+    try {
+        // 2. OBTENER EL APP ID PARA LA RUTA DE GUARDADO
+        let appIdToUse;
+        if (typeof __app_id !== 'undefined') {
+            appIdToUse = __app_id; // Si estamos en Canvas
+        } else {
+            appIdToUse = EXTERNAL_FIREBASE_CONFIG.projectId; // Si estamos en GitHub Pages
+        }
+
+        // 3. GUARDAR DATOS EN FIRESTORE
+        const athletesColRef = collection(db, `artifacts/${appIdToUse}/public/data/athletes`);
+        await addDoc(athletesColRef, newAthlete); 
+        console.log("Atleta registrado y guardado en Firestore con éxito.");
+        displayStatusMessage("¡Atleta registrado con éxito! (Sincronizando tabla...)", 'success');
+        
+    } catch(error) {
+        console.error("!!! ERROR CRÍTICO AL INTENTAR GUARDAR !!!", error.message);
+        console.error("CAUSA PROBABLE: REGLAS DE SEGURIDAD.", error);
+        // Mostrar error de permiso detallado para el usuario:
+        if (error.code === 'permission-denied') {
+             displayStatusMessage("❌ ERROR DE PERMISO: No se pudo guardar. Revisa tus Reglas de Firestore.", 'error');
+        } else {
+            displayStatusMessage(`❌ ERROR: ${error.message}`, 'error');
+        }
+
+    } finally {
+        console.log("handleFormSubmit ha finalizado. Reseteando formulario.");
+        // 4. Resetear el formulario.
+        form.reset();
+    }
+    
+    // Devolvemos false para asegurar que no se envíe el formulario, aunque event.preventDefault() ya lo hizo.
+    return false; 
+}
+
+/**
+ * LÓGICA DE ORDENAMIENTO Y RENDERIZADO (sin cambios)
+ */
+function sortTable(key, toggleDirection = true) {
+    if (currentSortKey === key && toggleDirection) {
+        sortDirection = (sortDirection === 'asc') ? 'desc' : 'asc';
+    } else if (currentSortKey !== key) {
+        currentSortKey = key;
+        sortDirection = 'asc';
+    }
+
+    athletesData.sort((a, b) => {
+        let valA = a[key];
+        let valB = b[key];
+
+        if (key === 'tallaRaw' || key === 'pesoRaw') {
+            valA = parseFloat(valA) || 0;
+            valB = parseFloat(valB) || 0;
+        } else if (key === 'fechaNac') {
+            valA = new Date(valA);
+            valB = new Date(valB);
+        } else {
+            valA = String(valA).toLowerCase();
+            valB = String(valB).toLowerCase();
+        }
+
+        let comparison = 0;
+        if (valA > valB) { comparison = 1; } 
+        else if (valA < valB) { comparison = -1; }
+        
+        return (sortDirection === 'desc') ? (comparison * -1) : comparison;
+    });
+
+    renderTable();
+}
+
+function renderTable() {
+    const registeredDataContainer = document.getElementById('registeredData');
+    
+    if (athletesData.length === 0) {
+        registeredDataContainer.innerHTML = '<p class="no-data-message">No hay atletas registrados aún. ¡Registra el primero!</p>';
+        return;
+    }
+
+    let table = document.getElementById('athleteTable');
+    let tableBody = document.getElementById('athleteTableBody');
+
+    if (!table) {
+        registeredDataContainer.innerHTML = `
+            <div class="table-responsive-wrapper">
+                <table id="athleteTable" class="athlete-data-table">
+                    <thead>
+                        <tr class="table-header-row">
+                            <th data-sort-key="club">Club</th>
+                            <th data-sort-key="nombre">Nombre</th>
+                            <th data-sort-key="apellido">Apellido</th>
+                            <th data-sort-key="fechaNac" class="table-hidden-mobile">F. Nac.</th>
+                            <th data-sort-key="categoria">Categoría</th>
+                            <th data-sort-key="tallaRaw" class="table-hidden-mobile">Talla</th>
+                            <th data-sort-key="pesoRaw" class="table-hidden-mobile">Peso</th>
+                            <th data-sort-key="correo" class="table-hidden-desktop">Correo</th>
+                            <th data-sort-key="telefono" class="table-hidden-desktop">Teléfono</th>
+                        </tr>
+                    </thead>
+                    <tbody id="athleteTableBody">
+                    </tbody>
+                </table>
+            </div>
+            <p class="table-note-message">Haz clic en cualquier encabezado de la tabla para ordenar los resultados (por ejemplo, por Apellido o Categoría).</p>
+        `;
+        tableBody = document.getElementById('athleteTableBody');
+        setupSorting(); 
+    } else {
+        tableBody.innerHTML = '';
+    }
+    
+    athletesData.forEach(data => {
+        const newRow = tableBody.insertRow(-1); 
+        newRow.classList.add('athlete-table-row');
+        newRow.innerHTML = `
+            <td data-label="Club" class="table-data">${data.club}</td>
+            <td data-label="Nombre" class="table-data">${data.nombre}</td>
+            <td data-label="Apellido" class="table-data">${data.apellido}</td>
+            <td data-label="F. Nac." class="table-data table-hidden-mobile">${data.fechaNac}</td>
+            <td data-label="Categoría" class="table-data">${data.categoria}</td>
+            <td data-label="Talla" class="table-data table-hidden-mobile">${data.tallaFormatted}</td>
+            <td data-label="Peso" class="table-data table-hidden-mobile">${data.pesoFormatted}</td>
+            <td data-label="Correo" class="table-data table-hidden-desktop">${data.correo}</td>
+            <td data-label="Teléfono" class="table-data table-hidden-desktop">${data.telefono}</td>
+        `;
+    });
+
+    document.querySelectorAll('#athleteTable th').forEach(th => {
+        th.classList.remove('sorted-asc', 'sorted-desc');
+        if (th.getAttribute('data-sort-key') === currentSortKey) {
+            th.classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
+        }
+    });
+}
+
+function setupSorting() {
+    document.querySelectorAll('#athleteTable th').forEach(header => {
+        const key = header.getAttribute('data-sort-key');
+        if (key) {
+            header.style.cursor = 'pointer'; 
+            header.addEventListener('click', () => sortTable(key, true)); 
+        }
+    });
+}
+
+// Inicializar Firebase y los Listeners al cargar el contenido
+document.addEventListener('DOMContentLoaded', () => {
+    initFirebaseAndLoadData();
+    setupFormListener();
+});
