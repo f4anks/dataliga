@@ -12,21 +12,6 @@
     --transicion-rapida: all 0.3s ease;
 }
 
-/* --- BANNER PRINCIPAL --- */
-.banner-wrapper {
-    width: 100%;
-    overflow: hidden;
-    max-height: 200px; /* Controla la altura del banner */
-    box-shadow: 0 5px 15px var(--sombra-fuerte);
-    margin-bottom: 20px;
-}
-.banner-image {
-    width: 100%;
-    height: auto;
-    display: block;
-    object-fit: cover;
-}
-
 /* FIX CRÍTICO: Aseguramos que BODY y HTML ocupen todo el viewport para el fondo */
 html, body {
     width: 100%;
@@ -39,11 +24,11 @@ html, body {
 body {
     font-family: 'Montserrat', sans-serif;
     display: flex;
-    flex-direction: column; /* Cambiado a columna para el banner */
+    flex-direction: column; 
     align-items: center; /* Centra el contenido horizontalmente */
     /* Usamos min-height y padding para el scroll si el contenido es largo */
     min-height: 100vh; 
-    padding-bottom: 40px; /* Solo padding inferior, el banner va arriba */
+    padding: 20px; /* Padding general ahora que no hay banner fijo arriba */
     color: var(--gris-oscuro);
     box-sizing: border-box;
 
@@ -66,7 +51,7 @@ body {
 .container {
     width: 100%;
     max-width: 950px; /* Aumento del ancho para darle más espacio al formulario y la tabla */
-    padding: 20px;
+    padding: 0; /* Ya tenemos padding en el body */
     box-sizing: border-box;
     position: relative; 
     z-index: 1; /* Asegura que el contenido esté sobre el fondo */
@@ -375,7 +360,7 @@ button[type="submit"]:hover {
     .form-card { padding: 20px; }
 }
 
-/* Estilos para el modal (agregados en script.js, pero mantenidos aquí por referencia estética si se cargara externamente) */
+/* Estilos para el modal */
 .custom-modal {
     position: fixed;
     z-index: 1000;
