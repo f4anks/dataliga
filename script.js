@@ -9,7 +9,7 @@ import {
     addDoc, 
     onSnapshot, 
     doc, 
-    deleteDoc, // Importado para eliminar documentos
+    deleteDoc, 
     setLogLevel 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -18,8 +18,8 @@ let db;
 let auth;
 let userId = ''; 
 let athletesData = []; // Array que contendrá los datos sincronizados de Firestore
-let currentSortKey = 'apellido'; 
-let sortDirection = 'asc'; 
+let currentSortKey = 'apellido'; // Clave de ordenamiento inicial
+let sortDirection = 'asc'; // Dirección de ordenamiento inicial
 
 // Ajustar el nivel de log para depuración (opcional, ayuda a ver la actividad de Firebase)
 setLogLevel('Debug');
@@ -28,7 +28,6 @@ setLogLevel('Debug');
 // CONFIGURACIÓN DE FIREBASE
 // Las variables __app_id, __firebase_config y __initial_auth_token
 // se proveen automáticamente por el entorno si están definidas.
-// Si no están definidas (ej. ambiente local), se usa la configuración externa.
 // =========================================================================
 const EXTERNAL_FIREBASE_CONFIG = {
     apiKey: "AIzaSyA5u1whBdu_fVb2Kw7SDRZbuyiM77RXVDE",
@@ -50,8 +49,6 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
 
 /**
  * Calcula la edad a partir de la fecha de nacimiento.
- * @param {string} dateString - Fecha de nacimiento en formato YYYY-MM-DD.
- * @returns {number} Edad en años.
  */
 function calculateAge(dateString) {
     const today = new Date();
@@ -67,8 +64,6 @@ function calculateAge(dateString) {
 
 /**
  * Determina la categoría de voleibol basada en la edad.
- * @param {number} age - Edad del atleta.
- * @returns {string} Categoría.
  */
 function determineCategory(age) {
     if (age >= 19) return "Mayor";
@@ -81,8 +76,6 @@ function determineCategory(age) {
 
 /**
  * Muestra un mensaje al usuario en el recuadro personalizado.
- * @param {string} message - Mensaje a mostrar.
- * @param {boolean} isError - Si es un mensaje de error.
  */
 function showMessage(message, isError = false) {
     const messageBox = document.getElementById('messageBox');
@@ -145,7 +138,7 @@ function getCollectionPath() {
  * Configura el listener en tiempo real de Firestore (onSnapshot).
  */
 function setupAthleteListener() {
-    if (!db) return; // Asegura que la BD esté inicializada
+    if (!db) return; 
     
     const athletesColRef = collection(db, getCollectionPath());
     const q = query(athletesColRef);
@@ -156,8 +149,13 @@ function setupAthleteListener() {
             tempAthletesData.push({ id: doc.id, ...doc.data() });
         });
         athletesData = tempAthletesData;
+        
+        // 1. Aplicar el ordenamiento después de obtener los datos
+        sortTable(currentSortKey, false); 
+        
+        // 2. Renderizar la tabla con los datos ya ordenados
         document.getElementById('totalAthletesCount').textContent = `${athletesData.length} Atletas registrados.`;
-        renderTable();
+        renderTable(); 
         console.log("Datos de atletas actualizados desde Firestore.");
     }, (error) => {
         console.error("Error al escuchar cambios en Firestore:", error);
@@ -167,7 +165,6 @@ function setupAthleteListener() {
 
 /**
  * Guarda un nuevo atleta en Firestore.
- * @param {Object} data - Datos del atleta a guardar.
  */
 async function saveAthleteData(data) {
     if (!db) {
@@ -187,7 +184,6 @@ async function saveAthleteData(data) {
 
 /**
  * Elimina un atleta de Firestore.
- * @param {string} docId - ID del documento a eliminar.
  */
 async function deleteAthleteData(docId) {
     if (!db) {
@@ -207,10 +203,9 @@ async function deleteAthleteData(docId) {
 
 /**
  * Maneja la presentación del formulario, PREVIENE LA RECARGA.
- * @param {Event} e - Evento de envío del formulario.
  */
 function handleFormSubmit(e) {
-    e.preventDefault(); // <--- CLAVE PARA EVITAR LA RECARGA DE LA PÁGINA
+    e.preventDefault(); // CLAVE PARA EVITAR LA RECARGA
 
     const form = e.target;
     
@@ -262,6 +257,7 @@ function handleFormSubmit(e) {
 
 /**
  * Ordena la lista de atletas.
+ * IMPORTANTE: Ya NO llama a renderTable().
  */
 function sortTable(key, toggleDirection = false) {
     if (currentSortKey === key && toggleDirection) {
@@ -291,19 +287,20 @@ function sortTable(key, toggleDirection = false) {
         return sortDirection === 'asc' ? comparison : comparison * -1;
     });
 
-    renderTable();
+    // ¡IMPORTANTE! QUITAR ESTA LÍNEA DE AQUÍ PARA ROMPER EL BUCLE:
+    // renderTable(); 
 }
 
 
 /**
  * Renderiza la tabla de atletas en el DOM.
+ * IMPORTANTE: Ya NO llama a sortTable().
  */
 function renderTable() {
     const tableBody = document.getElementById('athleteTableBody');
     let html = '';
 
-    // Ordena los datos antes de renderizar
-    sortTable(currentSortKey, false);
+    // No se llama a sortTable aquí. Asumimos que athletesData ya está ordenado.
 
     athletesData.forEach(data => {
         // Formatear valores
@@ -351,8 +348,13 @@ function setupSorting() {
         const key = header.getAttribute('data-sort-key');
         if (key) {
             header.style.cursor = 'pointer'; 
-            // Usamos un nombre de función para el handler para evitar duplicados si la función se llama varias veces
-            header.clickHandler = () => sortTable(key, true); 
+            
+            // Re-añadir el event listener que ahora llama a sortTable y luego a renderTable
+            header.removeEventListener('click', header.clickHandler); 
+            header.clickHandler = () => {
+                sortTable(key, true); // Ordena los datos
+                renderTable(); // Vuelve a dibujar la tabla con los datos ordenados
+            }; 
             header.addEventListener('click', header.clickHandler); 
         }
     });
@@ -363,7 +365,7 @@ function setupSorting() {
 // =========================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Inicializa Firebase y Auth (esto llama a setupAthleteListener cuando el usuario está listo)
+    // 1. Inicializa Firebase y Auth 
     initializeFirebase(); 
 
     // 2. Configura el envío del formulario
@@ -377,9 +379,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target.classList.contains('delete-btn')) {
             const docId = e.target.getAttribute('data-id');
             
-            // Usar una función personalizada para mostrar el mensaje de confirmación
-            // Nota: Se ha cambiado a un simple 'confirm' debido a la restricción de no usar 'alert/confirm' en el código final. 
-            // Sin embargo, si el entorno lo permite, es mejor usar un modal custom.
             if (window.confirm(`¿Estás seguro que deseas eliminar permanentemente al atleta con ID ${docId}?`)) {
                  await deleteAthleteData(docId);
             } else {
