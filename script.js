@@ -1,354 +1,344 @@
-// 1. IMPORTACIONES DE FIREBASE
-// Usamos versiones estables (10.12.0) para evitar errores 404 al cargar desde CDN.
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, query, addDoc, onSnapshot, setLogLevel } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+:root {
+    /* Paleta de Colores Vivos */
+    --vinotinto: #800020; /* Vinotinto principal */
+    --gris-oscuro: #333333;
+    --negro: #000000;
+    --blanco: #ffffff;
+    --gris-claro: #f5f5f5; /* Fondo del formulario */
+    --sombra: rgba(0, 0, 0, 0.2);
+    --sombra-fuerte: rgba(0, 0, 0, 0.5); 
+    --borde: #cccccc;
+    --transicion-rapida: all 0.3s ease;
+}
 
-// VARIABLES DE ESTADO Y FIREBASE
-let db;
-let auth;
-let userId = ''; 
-let athletesData = []; // Array que contendrá los datos sincronizados de Firestore
-let currentSortKey = 'apellido'; 
-let sortDirection = 'asc'; 
+/* FIX CRÍTICO: Aseguramos que BODY y HTML ocupen todo el viewport para el fondo */
+html, body {
+    width: 100%;
+    height: 100%; 
+    margin: 0;
+    padding: 0;
+}
 
-// Ajustar el nivel de log para depuración (opcional)
-setLogLevel('Debug');
+/* Estilos generales y FONDO DEGRADADO ANIMADO */
+body {
+    font-family: 'Montserrat', sans-serif;
+    display: flex;
+    justify-content: center;
+    /* Usamos min-height y padding para el scroll si el contenido es largo */
+    min-height: 100vh; 
+    padding: 40px 0;
+    color: var(--gris-oscuro);
+    box-sizing: border-box;
 
-// =========================================================================
-// !!! ATENCIÓN: CONFIGURACIÓN PARA AMBIENTE EXTERNO (GitHub Pages) !!!
-// Se usa tu configuración real para que funcione fuera del Canvas.
-// =========================================================================
-const EXTERNAL_FIREBASE_CONFIG = {
-    apiKey: "AIzaSyA5u1whBdu_fVb2Kw7SDRZbuyiM77RXVDE",
-  authDomain: "datalvmel.firebaseapp.com",
-  projectId: "datalvmel",
-  storageBucket: "datalvmel.firebasestorage.app",
-  messagingSenderId: "733536533303",
-  appId: "1:733536533303:web:3d2073504aefb2100378b2"
-};
-
-/**
- * Muestra un mensaje temporal de estado en la interfaz.
- * @param {string} message - El texto a mostrar.
- * @param {string} type - 'success' o 'error'.
- */
-function displayStatusMessage(message, type) {
-    let statusEl = document.getElementById('statusMessage');
-    if (!statusEl) {
-        // Crea el elemento si no existe (lo inyectamos en el cuerpo)
-        statusEl = document.createElement('div');
-        statusEl.id = 'statusMessage';
-        statusEl.style.position = 'fixed';
-        statusEl.style.top = '10px';
-        statusEl.style.right = '10px';
-        statusEl.style.padding = '10px 20px';
-        statusEl.style.borderRadius = '8px';
-        statusEl.style.zIndex = '1000';
-        statusEl.style.color = '#fff';
-        statusEl.style.transition = 'opacity 0.5s ease-in-out';
-        statusEl.style.opacity = '0';
-        document.body.appendChild(statusEl);
-    }
+    /* Degradado de Fondo Solicitado: Vinotinto, Gris Oscuro y Negro */
+    background: linear-gradient(135deg, var(--vinotinto) 0%, var(--gris-oscuro) 50%, var(--negro) 100%);
     
-    statusEl.textContent = message;
-    statusEl.style.backgroundColor = type === 'success' ? '#10b981' : '#ef4444';
-    statusEl.style.opacity = '1';
+    background-size: 400% 400%; /* Tamaño grande para la animación */
+    background-attachment: fixed; /* Fija el fondo al viewport */
+    background-repeat: no-repeat;
+    animation: background-animacion 15s infinite alternate; /* Animación de movimiento */
+}
 
-    // Ocultar después de 4 segundos
-    setTimeout(() => {
-        statusEl.style.opacity = '0';
-    }, 4000);
+/* Animación del fondo (movimiento sutil) */
+@keyframes background-animacion {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+}
+
+/* Contenedor principal */
+.container {
+    width: 100%;
+    max-width: 950px; /* Aumento del ancho para darle más espacio al formulario y la tabla */
+    padding: 20px;
+    box-sizing: border-box;
+    position: relative; 
+    z-index: 1; /* Asegura que el contenido esté sobre el fondo */
+}
+
+/* Estilos de la tarjeta del formulario (fondo claro y sombras) */
+.form-card {
+    background-color: var(--gris-claro); /* Fondo claro para el formulario */
+    border-radius: 15px;
+    padding: 40px;
+    box-shadow: 0 10px 30px var(--sombra-fuerte);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: var(--transicion-rapida);
+    margin-bottom: 30px;
+}
+
+.form-card:hover {
+    box-shadow: 0 18px 45px var(--sombra-fuerte);
+    transform: translateY(-5px) scale(1.005);
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.form-header h2 {
+    font-size: 2.4em;
+    font-weight: 700;
+    color: var(--vinotinto); 
+    text-shadow: 1px 1px 2px var(--sombra);
+    margin-bottom: 5px;
+}
+
+/* Campos de formulario */
+.form-group { margin-bottom: 20px; }
+.form-row { display: flex; flex-wrap: wrap; gap: 20px; }
+.form-row .form-group { flex: 1; min-width: 200px; }
+
+label { display: block; margin-bottom: 8px; font-weight: 700; color: var(--gris-oscuro); transition: color 0.2s; }
+.required-star { color: var(--vinotinto); font-size: 1.1em; margin-left: 3px; }
+.required-note { font-size: 0.9em; color: var(--blanco); 
+    text-align: right; margin-top: -10px; opacity: 0.8; }
+
+/* ESTILOS UNIFICADOS PARA INPUTS Y SELECT */
+input[type="text"], input[type="email"], input[type="number"], input[type="tel"], input[type="date"], select {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid var(--borde);
+    border-radius: 8px;
+    font-size: 1em;
+    background-color: var(--blanco);
+    color: var(--negro);
+    box-shadow: inset 0 1px 3px var(--sombra);
+    transition: var(--transicion-rapida);
+    box-sizing: border-box;
+    /* Estilos personalizados para SELECT */
+    -webkit-appearance: none; 
+    -moz-appearance: none; 
+    appearance: none; 
+    /* Flecha SVG de color vinotinto para el select */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23800020' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); 
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 35px; /* Espacio para el icono */
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--vinotinto);
+    box-shadow: 0 0 12px rgba(128, 0, 32, 0.6);
+    background-color: var(--blanco);
+}
+
+/* Estilos del botón de envío */
+button[type="submit"] {
+    display: block;
+    width: 100%;
+    padding: 18px;
+    margin-top: 30px;
+    background-color: var(--vinotinto);
+    color: var(--blanco);
+    border: none;
+    border-radius: 10px;
+    font-size: 1.3em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transicion-rapida);
+    box-shadow: 0 8px 20px var(--sombra-fuerte);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+button[type="submit"]:hover {
+    background-color: #a3002a;
+    box-shadow: 0 12px 30px var(--sombra-fuerte);
+    transform: translateY(-4px);
+}
+
+/* --- ESTILOS PARA LA SECCIÓN DE DATOS REGISTRADOS (TABLA) --- */
+.registered-athletes-section {
+    margin-top: 40px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 5px 20px var(--sombra-fuerte);
+}
+
+.registered-athletes-section h3 {
+    text-align: center;
+    color: var(--gris-oscuro);
+    font-size: 1.8em;
+    border-bottom: 3px solid var(--vinotinto);
+    padding-bottom: 10px;
+    margin-bottom: 25px;
+}
+
+.no-data-message {
+    text-align: center;
+    color: var(--gris-oscuro);
+    padding: 20px;
+    font-style: italic;
+    opacity: 0.7;
+}
+
+.table-note-message {
+    text-align: center;
+    font-size: 0.9em;
+    color: var(--gris-oscuro);
+    margin-top: 15px;
+    opacity: 0.7;
+}
+
+/* Contenedor de tabla responsivo */
+.table-responsive-wrapper {
+    overflow-x: auto; /* Permite scroll horizontal si la tabla es muy ancha */
+}
+
+.athlete-data-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px; /* Espacio entre filas */
+}
+
+/* Estilos de la cabecera de la tabla */
+.athlete-data-table thead th {
+    background-color: var(--vinotinto);
+    color: var(--blanco);
+    padding: 12px 10px;
+    font-weight: 700;
+    text-align: left;
+    position: sticky;
+    top: 0;
+    cursor: default; /* Por defecto no hay cursor de puntero */
+    transition: background-color 0.2s;
+}
+
+/* Indicador visual de que la columna es clickeable/ordenable */
+.athlete-data-table thead th[data-sort-key]:hover {
+    background-color: #a3002a; /* Color un poco más oscuro al pasar el ratón */
+    cursor: pointer;
+}
+
+/* Estilos para indicar la columna actualmente ordenada */
+.athlete-data-table thead th.sorted-asc {
+    background-color: #c90035; /* Color más claro para el encabezado ordenado */
+    /* Triángulo ASC (flecha hacia arriba) */
+    position: relative;
+}
+.athlete-data-table thead th.sorted-asc::after {
+    content: ' ▲'; 
+    font-size: 0.8em;
+}
+
+.athlete-data-table thead th.sorted-desc {
+    background-color: #c90035;
+    /* Triángulo DESC (flecha hacia abajo) */
+    position: relative;
+}
+.athlete-data-table thead th.sorted-desc::after {
+    content: ' ▼';
+    font-size: 0.8em;
 }
 
 
-/**
- * 2. INICIALIZACIÓN Y AUTENTICACIÓN
- * Inicializa Firebase, autentica al usuario y configura el listener en tiempo real.
- */
-async function initFirebaseAndLoadData() {
-    console.log("Iniciando Firebase y autenticación...");
-    try {
-        // Determinamos la configuración y el App ID
-        let configToUse;
-        let appIdToUse;
-        let tokenToUse = '';
-
-        // Priorizamos las variables globales si estamos en el entorno Canvas
-        if (typeof __firebase_config !== 'undefined' && __firebase_config.length > 2) {
-            configToUse = JSON.parse(__firebase_config);
-            appIdToUse = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-            tokenToUse = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : '';
-        } else {
-            // Usamos la configuración fija si estamos en un entorno externo (GitHub Pages)
-            configToUse = EXTERNAL_FIREBASE_CONFIG;
-            // Para la ruta de guardado, usamos el projectId como fallback para el appId
-            appIdToUse = configToUse.projectId; 
-            
-            // Nota: En GitHub Pages, NO hay token inicial, así que solo usamos la autenticación anónima.
-        }
-
-        const app = initializeApp(configToUse);
-        db = getFirestore(app);
-        auth = getAuth(app);
-        
-        // Autenticación: Intentar con token personalizado (solo en Canvas) o usar anónimo
-        if (tokenToUse.length > 0) {
-            await signInWithCustomToken(auth, tokenToUse);
-        } else {
-            // Autenticación anónima para GitHub Pages
-            await signInAnonymously(auth);
-        }
-        
-        // Esperar el cambio de estado de autenticación
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                userId = user.uid;
-                console.log("Usuario autenticado. UID:", userId);
-                // Una vez autenticado, se puede empezar a escuchar los datos
-                setupRealtimeListener(appIdToUse);
-            } else {
-                console.error("No se pudo autenticar al usuario.");
-                // Fallback para entornos sin autenticación
-                userId = crypto.randomUUID(); 
-                setupRealtimeListener(appIdToUse);
-            }
-        });
-
-    } catch (e) {
-        console.error("Error al inicializar Firebase:", e);
-    }
+/* Estilos de las filas de datos */
+.athlete-table-row {
+    background-color: var(--blanco);
+    box-shadow: 0 2px 5px var(--sombra);
+    transition: all 0.2s ease;
 }
 
-/**
- * 3. ESCUCHA EN TIEMPO REAL (onSnapshot)
- * Configura la escucha en tiempo real para la colección de atletas.
- */
-function setupRealtimeListener(appId) {
-    // La ruta pública es: artifacts/{appId}/public/data/athletes
-    const athletesColRef = collection(db, `artifacts/${appId}/public/data/athletes`);
-    const q = query(athletesColRef);
-
-    onSnapshot(q, (snapshot) => {
-        console.log("Datos de Firestore actualizados. Sincronizando tabla...");
-        const fetchedData = [];
-        snapshot.forEach((doc) => {
-            fetchedData.push({ 
-                id: doc.id, // ID del documento
-                ...doc.data() 
-            });
-        });
-        
-        // Reemplazamos los datos locales y forzamos el ordenamiento
-        athletesData = fetchedData;
-        
-        if (athletesData.length > 0) {
-            // Ordena sin cambiar la dirección (mantiene el estado)
-            sortTable(currentSortKey, false); 
-        } else {
-             renderTable();
-        }
-    }, (error) => {
-        // Si aparece "Permission Denied", la regla de seguridad de Firebase está incorrecta.
-        console.error("Error en la escucha en tiempo real:", error);
-    });
+.athlete-table-row:hover {
+    background-color: var(--gris-claro);
+    box-shadow: 0 4px 10px var(--sombra-fuerte);
 }
 
-// FUNCIÓN ACTUALIZADA: Asegura que el formulario esté en el DOM antes de adjuntar el listener.
-function setupFormListener() {
-    const form = document.getElementById('athleteForm');
-    if (form) {
-        // Adjunta el manejador de envío asíncrono directamente. Esto evita la recarga.
-        form.addEventListener('submit', handleFormSubmit);
-        console.log("Listener de formulario de atleta adjunto.");
-    } else {
-        console.error("Error: No se encontró el formulario con ID 'athleteForm'. ¿Está cargado el index.html?");
-    }
+.athlete-table-row td {
+    padding: 12px 10px;
+    border: none;
+    vertical-align: middle;
 }
 
+/* Bordes redondeados para la primera y última celda de la cabecera */
+.athlete-data-table thead tr th:first-child { border-top-left-radius: 8px; }
+.athlete-data-table thead tr th:last-child { border-top-right-radius: 8px; }
 
-/**
- * 4. FUNCIÓN DE GUARDADO (handleFormSubmit)
- * Maneja el envío del formulario y guarda los datos en Firestore.
- */
-async function handleFormSubmit(event) {
-    // ESTA ES LA LÍNEA CRÍTICA: Detiene la recarga de la página (el comportamiento por defecto del formulario).
-    event.preventDefault(); 
+/* Bordes redondeados para la primera y última celda de cada fila de datos */
+.athlete-table-row td:first-child { border-bottom-left-radius: 8px; border-top-left-radius: 8px; border-left: 4px solid var(--vinotinto); }
+.athlete-table-row td:last-child { border-bottom-right-radius: 8px; border-top-right-radius: 8px; }
 
-    if (!db) {
-        console.error("Base de datos no inicializada. No se pudo guardar.");
-        displayStatusMessage("Error: La base de datos no está inicializada.", 'error');
-        return false;
-    }
+/* --- Responsividad de la Tabla (Mobile First) --- */
 
-    const form = document.getElementById('athleteForm');
+/* Por defecto, ocultamos las celdas en dispositivos pequeños */
+.athlete-data-table {
+    display: block; /* Hacemos que la tabla se comporte como bloque */
+}
+.athlete-data-table thead {
+    display: none; /* Ocultamos la cabecera de la tabla en móvil */
+}
 
-    // 1. Recolectar datos y preparar el objeto (documento)
-    const tallaValue = form.talla.value;
-    const pesoValue = form.peso.value;
+/* Mobile View: Convertir cada fila en una tarjeta */
+.athlete-table-row {
+    display: block;
+    margin-bottom: 15px;
+    border-left: none !important; /* El borde pasa a la parte superior */
+    border-radius: 10px;
+}
+.athlete-table-row td {
+    display: block; /* Cada celda toma el ancho completo de la tarjeta */
+    text-align: right;
+    padding: 10px 15px;
+    border-bottom: 1px solid var(--borde);
     
-    const newAthlete = {
-        club: form.club.value,
-        nombre: form.nombre.value,
-        apellido: form.apellido.value,
-        fechaNac: form.fechaNac.value,
-        categoria: form.categoria.value, 
-        tallaRaw: tallaValue, 
-        pesoRaw: pesoValue,   
-        tallaFormatted: tallaValue ? `${tallaValue} cm` : 'N/A',
-        pesoFormatted: pesoValue ? `${pesoValue} kg` : 'N/A',
-        correo: form.correo.value,
-        telefono: form.telefono.value,
-        timestamp: Date.now() 
-    };
-    
-    try {
-        // 2. OBTENER EL APP ID PARA LA RUTA DE GUARDADO
-        let appIdToUse;
-        if (typeof __app_id !== 'undefined') {
-            appIdToUse = __app_id; // Si estamos en Canvas
-        } else {
-            appIdToUse = EXTERNAL_FIREBASE_CONFIG.projectId; // Si estamos en GitHub Pages
-        }
-
-        // 3. GUARDAR DATOS EN FIRESTORE
-        const athletesColRef = collection(db, `artifacts/${appIdToUse}/public/data/athletes`);
-        await addDoc(athletesColRef, newAthlete); 
-        console.log("Atleta registrado y guardado en Firestore con éxito.");
-        displayStatusMessage("¡Atleta registrado con éxito! (Sincronizando tabla...)", 'success');
-        
-    } catch(error) {
-        console.error("!!! ERROR CRÍTICO AL INTENTAR GUARDAR !!!", error.message);
-        console.error("CAUSA PROBABLE: REGLAS DE SEGURIDAD.", error);
-        // Mostrar error de permiso detallado para el usuario:
-        if (error.code === 'permission-denied') {
-             displayStatusMessage("❌ ERROR DE PERMISO: No se pudo guardar. Revisa tus Reglas de Firestore.", 'error');
-        } else {
-            displayStatusMessage(`❌ ERROR: ${error.message}`, 'error');
-        }
-
-    } finally {
-        console.log("handleFormSubmit ha finalizado. Reseteando formulario.");
-        // 4. Resetear el formulario.
-        form.reset();
-    }
-    
-    // Devolvemos false para asegurar que no se envíe el formulario, aunque event.preventDefault() ya lo hizo.
-    return false; 
+}
+.athlete-table-row td:last-child {
+    border-bottom: none;
 }
 
-/**
- * LÓGICA DE ORDENAMIENTO Y RENDERIZADO (sin cambios)
- */
-function sortTable(key, toggleDirection = true) {
-    if (currentSortKey === key && toggleDirection) {
-        sortDirection = (sortDirection === 'asc') ? 'desc' : 'asc';
-    } else if (currentSortKey !== key) {
-        currentSortKey = key;
-        sortDirection = 'asc';
-    }
-
-    athletesData.sort((a, b) => {
-        let valA = a[key];
-        let valB = b[key];
-
-        if (key === 'tallaRaw' || key === 'pesoRaw') {
-            valA = parseFloat(valA) || 0;
-            valB = parseFloat(valB) || 0;
-        } else if (key === 'fechaNac') {
-            valA = new Date(valA);
-            valB = new Date(valB);
-        } else {
-            valA = String(valA).toLowerCase();
-            valB = String(valB).toLowerCase();
-        }
-
-        let comparison = 0;
-        if (valA > valB) { comparison = 1; } 
-        else if (valA < valB) { comparison = -1; }
-        
-        return (sortDirection === 'desc') ? (comparison * -1) : comparison;
-    });
-
-    renderTable();
+/* Mostrar el nombre del campo (header) en la vista móvil usando el atributo data-label */
+.athlete-table-row td::before {
+    content: attr(data-label);
+    float: left;
+    font-weight: 700;
+    color: var(--vinotinto);
 }
 
-function renderTable() {
-    const registeredDataContainer = document.getElementById('registeredData');
-    
-    if (athletesData.length === 0) {
-        registeredDataContainer.innerHTML = '<p class="no-data-message">No hay atletas registrados aún. ¡Registra el primero!</p>';
-        return;
-    }
-
-    let table = document.getElementById('athleteTable');
-    let tableBody = document.getElementById('athleteTableBody');
-
-    if (!table) {
-        registeredDataContainer.innerHTML = `
-            <div class="table-responsive-wrapper">
-                <table id="athleteTable" class="athlete-data-table">
-                    <thead>
-                        <tr class="table-header-row">
-                            <th data-sort-key="club">Club</th>
-                            <th data-sort-key="nombre">Nombre</th>
-                            <th data-sort-key="apellido">Apellido</th>
-                            <th data-sort-key="fechaNac" class="table-hidden-mobile">F. Nac.</th>
-                            <th data-sort-key="categoria">Categoría</th>
-                            <th data-sort-key="tallaRaw" class="table-hidden-mobile">Talla</th>
-                            <th data-sort-key="pesoRaw" class="table-hidden-mobile">Peso</th>
-                            <th data-sort-key="correo" class="table-hidden-desktop">Correo</th>
-                            <th data-sort-key="telefono" class="table-hidden-desktop">Teléfono</th>
-                        </tr>
-                    </thead>
-                    <tbody id="athleteTableBody">
-                    </tbody>
-                </table>
-            </div>
-            <p class="table-note-message">Haz clic en cualquier encabezado de la tabla para ordenar los resultados (por ejemplo, por Apellido o Categoría).</p>
-        `;
-        tableBody = document.getElementById('athleteTableBody');
-        setupSorting(); 
-    } else {
-        tableBody.innerHTML = '';
-    }
-    
-    athletesData.forEach(data => {
-        const newRow = tableBody.insertRow(-1); 
-        newRow.classList.add('athlete-table-row');
-        newRow.innerHTML = `
-            <td data-label="Club" class="table-data">${data.club}</td>
-            <td data-label="Nombre" class="table-data">${data.nombre}</td>
-            <td data-label="Apellido" class="table-data">${data.apellido}</td>
-            <td data-label="F. Nac." class="table-data table-hidden-mobile">${data.fechaNac}</td>
-            <td data-label="Categoría" class="table-data">${data.categoria}</td>
-            <td data-label="Talla" class="table-data table-hidden-mobile">${data.tallaFormatted}</td>
-            <td data-label="Peso" class="table-data table-hidden-mobile">${data.pesoFormatted}</td>
-            <td data-label="Correo" class="table-data table-hidden-desktop">${data.correo}</td>
-            <td data-label="Teléfono" class="table-data table-hidden-desktop">${data.telefono}</td>
-        `;
-    });
-
-    document.querySelectorAll('#athleteTable th').forEach(th => {
-        th.classList.remove('sorted-asc', 'sorted-desc');
-        if (th.getAttribute('data-sort-key') === currentSortKey) {
-            th.classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
-        }
-    });
+/* Ocultar / Mostrar columnas específicas en móvil */
+.table-hidden-mobile {
+    display: none; /* Ocultar en móvil por defecto */
+}
+.table-hidden-desktop {
+    display: block; /* Mostrar los campos importantes en móvil (ej. Correo, Teléfono) */
 }
 
-function setupSorting() {
-    document.querySelectorAll('#athleteTable th').forEach(header => {
-        const key = header.getAttribute('data-sort-key');
-        if (key) {
-            header.style.cursor = 'pointer'; 
-            header.addEventListener('click', () => sortTable(key, true)); 
-        }
-    });
-}
 
-// Inicializar Firebase y los Listeners al cargar el contenido
-document.addEventListener('DOMContentLoaded', () => {
-    initFirebaseAndLoadData();
-    setupFormListener();
-});
+/* Vista de Escritorio (Desktop View) */
+@media (min-width: 768px) {
+    .athlete-data-table {
+        display: table;
+        border-spacing: 0 8px;
+    }
+    .athlete-data-table thead {
+        display: table-header-group;
+    }
+    .athlete-table-row {
+        display: table-row;
+        border-left: none;
+    }
+    .athlete-table-row td {
+        display: table-cell;
+        text-align: left;
+        border-bottom: none;
+    }
+    .athlete-table-row td::before {
+        content: none;
+    }
+
+    /* Mostrar / Ocultar columnas específicas en escritorio */
+    .table-hidden-mobile {
+        display: table-cell; /* Mostrar en escritorio */
+    }
+    .table-hidden-desktop {
+        display: table-cell; /* Mostrar campos importantes en escritorio */
+    }
+
+    /* NUEVO: Regla para darle más espacio a la columna F. Nac. (4ta columna) en escritorio */
+    .athlete-data-table thead tr th:nth-child(4),
+    .athlete-data-table tbody tr td:nth-child(4) {
+        min-width: 105px; /* Ajuste para asegurar que quepa el formato YYYY-MM-DD */
+    }
+}
