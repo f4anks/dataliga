@@ -1,344 +1,446 @@
-:root {
-    /* Paleta de Colores Vivos */
-    --vinotinto: #800020; /* Vinotinto principal */
-    --gris-oscuro: #333333;
-    --negro: #000000;
-    --blanco: #ffffff;
-    --gris-claro: #f5f5f5; /* Fondo del formulario */
-    --sombra: rgba(0, 0, 0, 0.2);
-    --sombra-fuerte: rgba(0, 0, 0, 0.5); 
-    --borde: #cccccc;
-    --transicion-rapida: all 0.3s ease;
+// 1. IMPORTACIONES DE FIREBASE
+// Usamos versiones estables (10.12.0) para evitar errores 404 al cargar desde CDN.
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, query, addDoc, onSnapshot, setLogLevel } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// VARIABLES DE ESTADO Y FIREBASE
+let db;
+let auth;
+let userId = ''; 
+let athletesData = []; // Array que contendrá los datos sincronizados de Firestore
+let currentSortKey = 'apellido'; 
+let sortDirection = 'asc'; 
+
+// Ajustar el nivel de log para depuración (opcional)
+setLogLevel('Debug');
+
+// =========================================================================
+// !!! ATENCIÓN: CONFIGURACIÓN FIREBASE !!!
+// Se usa la configuración inyectada por el ambiente (Canvas)
+// En caso de que no exista, se usa una configuración de ejemplo (EXTERNAL_FIREBASE_CONFIG)
+// =========================================================================
+const EXTERNAL_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyA5u1whBdu_fVb2Kw7SDRZbuyiM77RXVDE",
+    authDomain: "datalvmel.firebaseapp.com",
+    projectId: "datalvmel",
+    storageBucket: "datalvmel.appspot.com",
+    messagingSenderId: "338955214041",
+    appId: "1:338955214041:web:10e972f31d4516641e21b7"
+};
+
+// Intenta usar las variables globales provistas por el ambiente, si no existen, usa la configuración externa.
+const firebaseConfig = typeof __firebase_config !== 'undefined' 
+    ? JSON.parse(__firebase_config) 
+    : EXTERNAL_FIREBASE_CONFIG;
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+
+// =========================================================================
+// 2. UTILIDADES
+// =========================================================================
+
+/**
+ * Muestra un mensaje de error o éxito en un modal (reemplazo de alert())
+ * @param {string} message - Mensaje a mostrar.
+ * @param {string} type - Tipo de mensaje ('error' o 'success').
+ */
+function showModalMessage(message, type = 'info') {
+    const modal = document.createElement('div');
+    modal.className = `custom-modal ${type}`;
+    modal.innerHTML = `
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <p>${message}</p>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+
+    // Cierra el modal al hacer clic en el botón de cierre
+    modal.querySelector('.close-button').onclick = () => modal.remove();
+    // Cierra el modal al hacer clic fuera del contenido
+    modal.onclick = (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    };
+    
+    // Auto-cierre después de 5 segundos para mensajes de éxito
+    if (type === 'success') {
+        setTimeout(() => modal.remove(), 5000);
+    }
 }
 
-/* FIX CRÍTICO: Aseguramos que BODY y HTML ocupen todo el viewport para el fondo */
-html, body {
+// Estilos del Modal (Inyectados dinámicamente)
+const modalStyle = document.createElement('style');
+modalStyle.textContent = `
+.custom-modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
     width: 100%;
-    height: 100%; 
-    margin: 0;
-    padding: 0;
-}
-
-/* Estilos generales y FONDO DEGRADADO ANIMADO */
-body {
-    font-family: 'Montserrat', sans-serif;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
     display: flex;
     justify-content: center;
-    /* Usamos min-height y padding para el scroll si el contenido es largo */
-    min-height: 100vh; 
-    padding: 40px 0;
-    color: var(--gris-oscuro);
-    box-sizing: border-box;
-
-    /* Degradado de Fondo Solicitado: Vinotinto, Gris Oscuro y Negro */
-    background: linear-gradient(135deg, var(--vinotinto) 0%, var(--gris-oscuro) 50%, var(--negro) 100%);
-    
-    background-size: 400% 400%; /* Tamaño grande para la animación */
-    background-attachment: fixed; /* Fija el fondo al viewport */
-    background-repeat: no-repeat;
-    animation: background-animacion 15s infinite alternate; /* Animación de movimiento */
+    align-items: center;
+    transition: opacity 0.3s;
 }
 
-/* Animación del fondo (movimiento sutil) */
-@keyframes background-animacion {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 100% 50%; }
-}
-
-/* Contenedor principal */
-.container {
-    width: 100%;
-    max-width: 950px; /* Aumento del ancho para darle más espacio al formulario y la tabla */
-    padding: 20px;
-    box-sizing: border-box;
-    position: relative; 
-    z-index: 1; /* Asegura que el contenido esté sobre el fondo */
-}
-
-/* Estilos de la tarjeta del formulario (fondo claro y sombras) */
-.form-card {
-    background-color: var(--gris-claro); /* Fondo claro para el formulario */
-    border-radius: 15px;
-    padding: 40px;
-    box-shadow: 0 10px 30px var(--sombra-fuerte);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: var(--transicion-rapida);
-    margin-bottom: 30px;
-}
-
-.form-card:hover {
-    box-shadow: 0 18px 45px var(--sombra-fuerte);
-    transform: translateY(-5px) scale(1.005);
-}
-
-.form-header {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.form-header h2 {
-    font-size: 2.4em;
-    font-weight: 700;
-    color: var(--vinotinto); 
-    text-shadow: 1px 1px 2px var(--sombra);
-    margin-bottom: 5px;
-}
-
-/* Campos de formulario */
-.form-group { margin-bottom: 20px; }
-.form-row { display: flex; flex-wrap: wrap; gap: 20px; }
-.form-row .form-group { flex: 1; min-width: 200px; }
-
-label { display: block; margin-bottom: 8px; font-weight: 700; color: var(--gris-oscuro); transition: color 0.2s; }
-.required-star { color: var(--vinotinto); font-size: 1.1em; margin-left: 3px; }
-.required-note { font-size: 0.9em; color: var(--blanco); 
-    text-align: right; margin-top: -10px; opacity: 0.8; }
-
-/* ESTILOS UNIFICADOS PARA INPUTS Y SELECT */
-input[type="text"], input[type="email"], input[type="number"], input[type="tel"], input[type="date"], select {
-    width: 100%;
-    padding: 15px;
-    border: 2px solid var(--borde);
-    border-radius: 8px;
-    font-size: 1em;
-    background-color: var(--blanco);
-    color: var(--negro);
-    box-shadow: inset 0 1px 3px var(--sombra);
-    transition: var(--transicion-rapida);
-    box-sizing: border-box;
-    /* Estilos personalizados para SELECT */
-    -webkit-appearance: none; 
-    -moz-appearance: none; 
-    appearance: none; 
-    /* Flecha SVG de color vinotinto para el select */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23800020' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); 
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    padding-right: 35px; /* Espacio para el icono */
-}
-
-input:focus, select:focus {
-    outline: none;
-    border-color: var(--vinotinto);
-    box-shadow: 0 0 12px rgba(128, 0, 32, 0.6);
-    background-color: var(--blanco);
-}
-
-/* Estilos del botón de envío */
-button[type="submit"] {
-    display: block;
-    width: 100%;
-    padding: 18px;
-    margin-top: 30px;
-    background-color: var(--vinotinto);
-    color: var(--blanco);
-    border: none;
-    border-radius: 10px;
-    font-size: 1.3em;
-    font-weight: 700;
-    cursor: pointer;
-    transition: var(--transicion-rapida);
-    box-shadow: 0 8px 20px var(--sombra-fuerte);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
-
-button[type="submit"]:hover {
-    background-color: #a3002a;
-    box-shadow: 0 12px 30px var(--sombra-fuerte);
-    transform: translateY(-4px);
-}
-
-/* --- ESTILOS PARA LA SECCIÓN DE DATOS REGISTRADOS (TABLA) --- */
-.registered-athletes-section {
-    margin-top: 40px;
-    background-color: rgba(255, 255, 255, 0.9);
-    border-radius: 15px;
+.modal-content {
+    background-color: white;
     padding: 30px;
-    box-shadow: 0 5px 20px var(--sombra-fuerte);
-}
-
-.registered-athletes-section h3 {
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    max-width: 90%;
+    min-width: 300px;
+    position: relative;
+    font-family: 'Montserrat', sans-serif;
     text-align: center;
+}
+
+.custom-modal.error .modal-content {
+    border: 3px solid #D32F2F;
+}
+.custom-modal.success .modal-content {
+    border: 3px solid #388E3C;
+}
+.custom-modal.info .modal-content {
+    border: 3px solid #1976D2;
+}
+
+.modal-content p {
+    margin: 0;
+    font-size: 1.1em;
     color: var(--gris-oscuro);
-    font-size: 1.8em;
-    border-bottom: 3px solid var(--vinotinto);
-    padding-bottom: 10px;
-    margin-bottom: 25px;
 }
 
-.no-data-message {
-    text-align: center;
-    color: var(--gris-oscuro);
-    padding: 20px;
-    font-style: italic;
-    opacity: 0.7;
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    cursor: pointer;
+    transition: color 0.2s;
 }
 
-.table-note-message {
-    text-align: center;
-    font-size: 0.9em;
-    color: var(--gris-oscuro);
-    margin-top: 15px;
-    opacity: 0.7;
-}
-
-/* Contenedor de tabla responsivo */
-.table-responsive-wrapper {
-    overflow-x: auto; /* Permite scroll horizontal si la tabla es muy ancha */
-}
-
-.athlete-data-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 8px; /* Espacio entre filas */
-}
-
-/* Estilos de la cabecera de la tabla */
-.athlete-data-table thead th {
-    background-color: var(--vinotinto);
-    color: var(--blanco);
-    padding: 12px 10px;
-    font-weight: 700;
-    text-align: left;
-    position: sticky;
-    top: 0;
-    cursor: default; /* Por defecto no hay cursor de puntero */
-    transition: background-color 0.2s;
-}
-
-/* Indicador visual de que la columna es clickeable/ordenable */
-.athlete-data-table thead th[data-sort-key]:hover {
-    background-color: #a3002a; /* Color un poco más oscuro al pasar el ratón */
+.close-button:hover,
+.close-button:focus {
+    color: #000;
+    text-decoration: none;
     cursor: pointer;
 }
-
-/* Estilos para indicar la columna actualmente ordenada */
-.athlete-data-table thead th.sorted-asc {
-    background-color: #c90035; /* Color más claro para el encabezado ordenado */
-    /* Triángulo ASC (flecha hacia arriba) */
-    position: relative;
-}
-.athlete-data-table thead th.sorted-asc::after {
-    content: ' ▲'; 
-    font-size: 0.8em;
-}
-
-.athlete-data-table thead th.sorted-desc {
-    background-color: #c90035;
-    /* Triángulo DESC (flecha hacia abajo) */
-    position: relative;
-}
-.athlete-data-table thead th.sorted-desc::after {
-    content: ' ▼';
-    font-size: 0.8em;
-}
+`;
+document.head.appendChild(modalStyle);
 
 
-/* Estilos de las filas de datos */
-.athlete-table-row {
-    background-color: var(--blanco);
-    box-shadow: 0 2px 5px var(--sombra);
-    transition: all 0.2s ease;
-}
+// =========================================================================
+// 3. LÓGICA DE LA APLICACIÓN
+// =========================================================================
 
-.athlete-table-row:hover {
-    background-color: var(--gris-claro);
-    box-shadow: 0 4px 10px var(--sombra-fuerte);
-}
+/**
+ * Inicializa Firebase, autentica al usuario y comienza a escuchar los datos.
+ */
+async function initializeAppAndAuth() {
+    try {
+        const app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
 
-.athlete-table-row td {
-    padding: 12px 10px;
-    border: none;
-    vertical-align: middle;
-}
+        // Autenticación: usa el token inyectado o inicia anónimamente
+        if (initialAuthToken) {
+            await signInWithCustomToken(auth, initialAuthToken);
+        } else {
+            // Si el token no está definido, usamos signInAnonymously
+            await signInAnonymously(auth);
+        }
 
-/* Bordes redondeados para la primera y última celda de la cabecera */
-.athlete-data-table thead tr th:first-child { border-top-left-radius: 8px; }
-.athlete-data-table thead tr th:last-child { border-top-right-radius: 8px; }
+        // Listener de estado de autenticación
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                userId = user.uid;
+                console.log("Usuario autenticado. UID:", userId);
+                // Una vez autenticado, inicia la escucha de datos
+                startDataListener(); 
+                // Actualiza el UI con el ID de sesión
+                const userIdElement = document.getElementById('currentUserId');
+                if(userIdElement) {
+                    userIdElement.textContent = `ID de Sesión: ${userId}`;
+                }
+            } else {
+                userId = crypto.randomUUID(); // Usar un ID anónimo si falla la autenticación
+                console.log("Usuario no autenticado o cerrado sesión. Usando ID aleatorio.");
+                const userIdElement = document.getElementById('currentUserId');
+                if(userIdElement) {
+                    userIdElement.textContent = `ID de Sesión: ${userId} (Anónimo)`;
+                }
+            }
+        });
 
-/* Bordes redondeados para la primera y última celda de cada fila de datos */
-.athlete-table-row td:first-child { border-bottom-left-radius: 8px; border-top-left-radius: 8px; border-left: 4px solid var(--vinotinto); }
-.athlete-table-row td:last-child { border-bottom-right-radius: 8px; border-top-right-radius: 8px; }
-
-/* --- Responsividad de la Tabla (Mobile First) --- */
-
-/* Por defecto, ocultamos las celdas en dispositivos pequeños */
-.athlete-data-table {
-    display: block; /* Hacemos que la tabla se comporte como bloque */
-}
-.athlete-data-table thead {
-    display: none; /* Ocultamos la cabecera de la tabla en móvil */
+    } catch (error) {
+        console.error("Error al inicializar Firebase o autenticar:", error);
+        showModalMessage("Error crítico al iniciar la aplicación: " + error.message, 'error');
+    }
 }
 
-/* Mobile View: Convertir cada fila en una tarjeta */
-.athlete-table-row {
-    display: block;
-    margin-bottom: 15px;
-    border-left: none !important; /* El borde pasa a la parte superior */
-    border-radius: 10px;
+/**
+ * Define la referencia a la colección de Firestore.
+ * Usamos una colección pública bajo /artifacts/{appId}/public/data/athletes
+ */
+function getAthletesCollectionRef() {
+    if (!db) {
+        console.error("Firestore no está inicializado.");
+        return null;
+    }
+    // athletes es el nombre de la colección. Es público para que todos vean los registros.
+    return collection(db, 'artifacts', appId, 'public', 'data', 'athletes');
 }
-.athlete-table-row td {
-    display: block; /* Cada celda toma el ancho completo de la tarjeta */
-    text-align: right;
-    padding: 10px 15px;
-    border-bottom: 1px solid var(--borde);
+
+
+/**
+ * Escucha los datos de la colección en tiempo real.
+ */
+function startDataListener() {
+    const collectionRef = getAthletesCollectionRef();
+    if (!collectionRef) return;
+
+    const q = query(collectionRef);
+
+    onSnapshot(q, (snapshot) => {
+        const tempAthletesData = [];
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            // Calcula y formatea datos para mostrar en la tabla
+            const formattedData = {
+                id: doc.id,
+                ...data,
+                // Formateo de Talla y Peso (asumiendo que son números)
+                tallaFormatted: `${data.talla || 0} cm`,
+                pesoFormatted: `${data.peso || 0} kg`,
+            };
+            tempAthletesData.push(formattedData);
+        });
+
+        // Actualiza el estado y re-renderiza la tabla (manteniendo el orden actual)
+        athletesData = tempAthletesData;
+        sortTable(currentSortKey, false); // Re-renderiza manteniendo el orden actual
+        
+    }, (error) => {
+        console.error("Error al escuchar datos de Firestore:", error);
+        showModalMessage("Error al sincronizar datos en tiempo real.", 'error');
+    });
+}
+
+
+/**
+ * Valida y formatea los datos del formulario.
+ * @param {HTMLFormElement} form - El formulario HTML.
+ * @returns {Object|null} - Objeto de datos limpios o null si falla la validación.
+ */
+function validateAndFormatForm(form) {
+    const data = {
+        club: form.club.value.trim(),
+        cedula: form.cedula.value.trim(),
+        nombre: form.nombre.value.trim(),
+        apellido: form.apellido.value.trim(),
+        fechaNac: form.fechaNac.value.trim(),
+        categoria: form.categoria.value,
+        // Usamos Number() para asegurar que sean números (o NaN si es vacío)
+        talla: Number(form.talla.value) || 0, 
+        peso: Number(form.peso.value) || 0,   
+        correo: form.correo.value.trim(),
+        telefono: form.telefono.value.trim(),
+        registradoPor: userId, // ID del usuario que registra
+        timestamp: new Date().toISOString()
+    };
+
+    // Validación mínima para campos requeridos
+    if (!data.club || !data.cedula || !data.nombre || !data.apellido || !data.fechaNac || !data.categoria) {
+        showModalMessage("Por favor, complete todos los campos obligatorios (*).", 'error');
+        return null;
+    }
     
-}
-.athlete-table-row td:last-child {
-    border-bottom: none;
-}
-
-/* Mostrar el nombre del campo (header) en la vista móvil usando el atributo data-label */
-.athlete-table-row td::before {
-    content: attr(data-label);
-    float: left;
-    font-weight: 700;
-    color: var(--vinotinto);
+    // Validación de números
+    if (isNaN(data.talla) || data.talla < 0 || isNaN(data.peso) || data.peso < 0) {
+        showModalMessage("Talla y Peso deben ser números positivos válidos (si se ingresan).", 'error');
+        return null;
+    }
+    
+    return data;
 }
 
-/* Ocultar / Mostrar columnas específicas en móvil */
-.table-hidden-mobile {
-    display: none; /* Ocultar en móvil por defecto */
-}
-.table-hidden-desktop {
-    display: block; /* Mostrar los campos importantes en móvil (ej. Correo, Teléfono) */
-}
-
-
-/* Vista de Escritorio (Desktop View) */
-@media (min-width: 768px) {
-    .athlete-data-table {
-        display: table;
-        border-spacing: 0 8px;
+/**
+ * Maneja el envío del formulario para agregar un nuevo atleta.
+ */
+async function handleFormSubmit(event) {
+    event.preventDefault();
+    const form = event.target;
+    
+    const athleteData = validateAndFormatForm(form);
+    if (!athleteData) {
+        return; // Detiene el proceso si la validación falla
     }
-    .athlete-data-table thead {
-        display: table-header-group;
-    }
-    .athlete-table-row {
-        display: table-row;
-        border-left: none;
-    }
-    .athlete-table-row td {
-        display: table-cell;
-        text-align: left;
-        border-bottom: none;
-    }
-    .athlete-table-row td::before {
-        content: none;
+    
+    const collectionRef = getAthletesCollectionRef();
+    if (!collectionRef) {
+        showModalMessage("Error: La base de datos no está disponible. Intente recargar.", 'error');
+        return;
     }
 
-    /* Mostrar / Ocultar columnas específicas en escritorio */
-    .table-hidden-mobile {
-        display: table-cell; /* Mostrar en escritorio */
-    }
-    .table-hidden-desktop {
-        display: table-cell; /* Mostrar campos importantes en escritorio */
-    }
+    try {
+        const docRef = await addDoc(collectionRef, athleteData);
+        console.log("Documento escrito con ID: ", docRef.id);
+        
+        // Mostrar mensaje de éxito y limpiar el formulario
+        showModalMessage(`Atleta ${athleteData.nombre} ${athleteData.apellido} registrado exitosamente.`, 'success');
+        form.reset(); 
 
-    /* NUEVO: Regla para darle más espacio a la columna F. Nac. (4ta columna) en escritorio */
-    .athlete-data-table thead tr th:nth-child(4),
-    .athlete-data-table tbody tr td:nth-child(4) {
-        min-width: 105px; /* Ajuste para asegurar que quepa el formato YYYY-MM-DD */
+    } catch (e) {
+        console.error("Error al añadir el documento: ", e);
+        showModalMessage("Error al registrar el atleta: " + e.message, 'error');
     }
 }
+
+
+// =========================================================================
+// 4. LÓGICA DE TABLA (ORDENAMIENTO Y RENDERIZADO)
+// =========================================================================
+
+/**
+ * Ordena el array de atletas y actualiza la vista.
+ * @param {string} key - Clave del campo por el que ordenar.
+ * @param {boolean} toggleDirection - Si es true, invierte la dirección si la clave es la misma.
+ */
+function sortTable(key, toggleDirection = true) {
+    
+    if (toggleDirection) {
+        if (currentSortKey === key) {
+            sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSortKey = key;
+            sortDirection = 'asc';
+        }
+    }
+
+    const isNumeric = ['cedula', 'talla', 'peso'].includes(currentSortKey);
+
+    athletesData.sort((a, b) => {
+        let valA = a[currentSortKey];
+        let valB = b[currentSortKey];
+        
+        // Manejo de valores nulos o indefinidos para evitar errores
+        if (valA === undefined) valA = isNumeric ? 0 : '';
+        if (valB === undefined) valB = isNumeric ? 0 : '';
+
+        if (isNumeric) {
+            valA = Number(valA);
+            valB = Number(valB);
+        } else {
+            valA = String(valA).toLowerCase();
+            valB = String(valB).toLowerCase();
+        }
+        
+        // Lógica de ordenamiento
+        if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+        if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    renderTable();
+}
+
+
+/**
+ * Renderiza la tabla de atletas en el DOM.
+ */
+function renderTable() {
+    const tableBody = document.getElementById('athleteTableBody');
+    const noDataMessage = document.getElementById('noDataMessage');
+    
+    if (!tableBody || !noDataMessage) {
+        console.error("Elementos de tabla no encontrados.");
+        return;
+    }
+    
+    // Muestra/Oculta el mensaje de "no hay datos"
+    if (athletesData.length === 0) {
+        tableBody.innerHTML = '';
+        noDataMessage.style.display = 'block';
+        return;
+    } else {
+        noDataMessage.style.display = 'none';
+    }
+
+    // Genera el HTML de las filas
+    let htmlContent = '';
+    athletesData.forEach(data => {
+        htmlContent += `
+            <tr class="athlete-table-row">
+                <td data-label="Club" class="table-data">${data.club}</td>
+                <td data-label="Cédula" class="table-data">${data.cedula}</td>
+                <td data-label="Nombre" class="table-data">${data.nombre}</td>
+                <td data-label="Apellido" class="table-data">${data.apellido}</td>
+                <td data-label="F. Nac." class="table-data table-hidden-mobile">${data.fechaNac}</td>
+                <td data-label="Categoría" class="table-data">${data.categoria}</td>
+                <td data-label="Talla" class="table-data table-hidden-mobile">${data.tallaFormatted}</td>
+                <td data-label="Peso" class="table-data table-hidden-mobile">${data.pesoFormatted}</td>
+                <td data-label="Correo" class="table-data table-hidden-desktop">${data.correo}</td>
+                <td data-label="Teléfono" class="table-data table-hidden-desktop">${data.telefono}</td>
+            </tr>
+        `;
+    });
+    
+    tableBody.innerHTML = htmlContent;
+
+    // Actualiza los indicadores de ordenamiento en los encabezados
+    document.querySelectorAll('#athleteTable th').forEach(th => {
+        th.classList.remove('sorted-asc', 'sorted-desc');
+        if (th.getAttribute('data-sort-key') === currentSortKey) {
+            th.classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
+        }
+    });
+}
+
+/**
+ * Configura los event listeners para el ordenamiento de la tabla.
+ */
+function setupSorting() {
+    document.querySelectorAll('#athleteTable th').forEach(header => {
+        const key = header.getAttribute('data-sort-key');
+        if (key) {
+            header.addEventListener('click', () => sortTable(key, true)); 
+        }
+    });
+}
+
+
+// =========================================================================
+// 5. INICIALIZACIÓN
+// =========================================================================
+
+/**
+ * Inicialización de la aplicación al cargar el DOM.
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Inicializa Firebase y autenticación
+    initializeAppAndAuth(); 
+
+    // 2. Configura el listener del formulario
+    const form = document.getElementById('athleteForm');
+    if (form) {
+        form.addEventListener('submit', handleFormSubmit);
+    }
+    
+    // 3. Configura el ordenamiento de la tabla
+    setupSorting(); 
+    
+    // 4. Inicializa la tabla vacía
+    renderTable(); 
+});
