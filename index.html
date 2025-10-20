@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data de Atletas - Liga de Voleibol</title>
+    <title>Data de Atletas - LVMeL</title>
+    
     <!-- Vincula el archivo de estilos CSS -->
     <link rel="stylesheet" href="styles.css">
     <!-- Vincula la fuente Montserrat de Google Fonts -->
@@ -12,100 +13,129 @@
 </head>
 <body>
     
-    <!-- El banner de encabezado fue eliminado según la solicitud del usuario. -->
+    <!-- BANNER DE ENCABEZADO -->
+    <div class="banner-wrapper">
+        <!-- RUTA DE IMAGEN LOCAL CORREGIDA: images/banner1.jpg -->
+        <!-- NOTA: Asegúrate de que esta imagen exista en la carpeta 'images' -->
+        <img src="images/banner1.jpg" onerror="this.onerror=null;this.src='https://placehold.co/1000x200/800020/ffffff?text=Liga+Voleibol+Menor+Lara'" alt="LVMeL - Liga de Voleibol Menor del Estado Lara" class="banner-image">
+    </div>
+    <!-- FIN DEL BANNER -->
 
     <div class="container">
+        <!-- SECCIÓN DE REGISTRO DE ATLETAS -->
         <div class="form-card">
             <div class="form-header">
                 <h2>Data de Atletas</h2>
-                <h2>&nbsp;Liga de Voleibol Menor del Estado Lara</h2>
+                <h2>Liga de Voleibol Menor del Estado Lara</h2>
                 <p>Por favor, complete el siguiente formulario para registrar a un atleta.</p>
             </div>
             
             <form id="athleteForm">
-                
-                <div class="form-group"> 
-                    <label for="club">Club <span class="required-star">*</span></label>
-                    <input type="text" id="club" name="club" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="nombre">Nombre <span class="required-star">*</span></label>
-                    <input type="text" id="nombre" name="nombre" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="apellido">Apellido <span class="required-star">*</span></label>
-                    <input type="text" id="apellido" name="apellido" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="cedula">Cédula de Identidad <span class="required-star">*</span></label>
-                    <input type="text" id="cedula" name="cedula" pattern="\d+" title="Solo se permiten números" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="fechaNac">Fecha de Nacimiento <span class="required-star">*</span></label>
-                    <input type="date" id="fechaNac" name="fechaNac" required>
+                <p class="required-note">Campos obligatorios marcados con (*)</p>
+                <div class="form-row">
+                    <!-- CLUB -->
+                    <div class="form-group"> 
+                        <label for="club">Club <span class="required-star">*</span></label>
+                        <input type="text" id="club" name="club" required>
+                    </div>
+                    <!-- CÉDULA -->
+                    <div class="form-group">
+                        <label for="cedula">Cédula <span class="required-star">*</span></label>
+                        <input type="number" id="cedula" name="cedula" required>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="categoria">Categoría <span class="required-star">*</span></label>
-                    <select id="categoria" name="categoria" required>
-                        <option value="">Seleccione Categoría</option>
-                        <option value="Mini-Voleibol">Mini-Voleibol</option>
-                        <option value="Infantil">Infantil</option>
-                        <option value="Juvenil">Juvenil</option>
-                    </select>
+                <div class="form-row">
+                    <!-- NOMBRE -->
+                    <div class="form-group">
+                        <label for="nombre">Nombre <span class="required-star">*</span></label>
+                        <input type="text" id="nombre" name="nombre" required>
+                    </div>
+                    <!-- APELLIDO -->
+                    <div class="form-group">
+                        <label for="apellido">Apellido <span class="required-star">*</span></label>
+                        <input type="text" id="apellido" name="apellido" required>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="talla">Talla (m) <span class="required-star">*</span></label>
-                    <input type="number" step="0.01" min="0" id="talla" name="talla" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="peso">Peso (kg) <span class="required-star">*</span></label>
-                    <input type="number" step="0.1" min="0" id="peso" name="peso" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="correo">Correo Electrónico <span class="required-star">*</span></label>
-                    <input type="email" id="correo" name="correo" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="telefono">Teléfono <span class="required-star">*</span></label>
-                    <input type="tel" id="telefono" name="telefono" pattern="\d{7,15}" title="Ingrese un número de teléfono válido" required>
+                <div class="form-row">
+                    <!-- FECHA DE NACIMIENTO -->
+                    <div class="form-group">
+                        <label for="fechaNac">Fecha de Nacimiento <span class="required-star">*</span></label>
+                        <input type="date" id="fechaNac" name="fechaNac" required>
+                    </div>
+                    <!-- CATEGORÍA -->
+                    <div class="form-group">
+                        <label for="categoria">Categoría <span class="required-star">*</span></label>
+                        <select id="categoria" name="categoria" required>
+                            <option value="" disabled selected>Seleccione la Categoría</option>
+                            <option value="Mini-Voleibol">Mini-Voleibol</option>
+                            <option value="Infantil">Infantil</option>
+                            <option value="Juvenil">Juvenil</option>
+                            <option value="Sub-21">Sub-21</option>
+                        </select>
+                    </div>
                 </div>
                 
-                <button type="submit" class="submit-button">Registrar Atleta</button>
+                <div class="form-row">
+                    <!-- TALLA (CM) -->
+                    <div class="form-group">
+                        <label for="talla">Talla (cm)</label>
+                        <input type="number" id="talla" name="talla" min="0" placeholder="Ej. 175">
+                    </div>
+                    <!-- PESO (KG) -->
+                    <div class="form-group">
+                        <label for="peso">Peso (kg)</label>
+                        <input type="number" id="peso" name="peso" min="0" step="0.1" placeholder="Ej. 68.5">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <!-- CORREO -->
+                    <div class="form-group">
+                        <label for="correo">Correo Electrónico</label>
+                        <input type="email" id="correo" name="correo" placeholder="ejemplo@dominio.com">
+                    </div>
+                    <!-- TELÉFONO -->
+                    <div class="form-group">
+                        <label for="telefono">Teléfono</label>
+                        <input type="tel" id="telefono" name="telefono" placeholder="Ej. 0412-1234567">
+                    </div>
+                </div>
+
+                <button type="submit">Registrar Atleta</button>
             </form>
         </div>
 
-        <div class="table-card">
-            <div class="table-header">
-                <h3>Listado de Atletas Registrados</h3>
-                <p id="noDataMessage" style="display:none;">Aún no hay atletas registrados. ¡Registra el primero!</p>
+        <!-- SECCIÓN DE DATOS REGISTRADOS -->
+        <div class="registered-athletes-section">
+            <h3>Atletas Registrados</h3>
+            
+            <p class="table-note-message" id="currentUserId">ID de Sesión: Cargando...</p>
+            
+            <div class="table-responsive-wrapper">
+                <table id="athleteTable" class="athlete-data-table">
+                    <thead>
+                        <tr>
+                            <!-- Columnas ordenables (data-sort-key) -->
+                            <th data-sort-key="club">Club</th>
+                            <th data-sort-key="cedula">Cédula</th>
+                            <th data-sort-key="nombre">Nombre</th>
+                            <th data-sort-key="apellido">Apellido</th>
+                            <th data-sort-key="fechaNac" class="table-hidden-mobile">F. Nac.</th>
+                            <th data-sort-key="categoria">Categoría</th>
+                            <th data-sort-key="talla" class="table-hidden-mobile">Talla</th>
+                            <th data-sort-key="peso" class="table-hidden-mobile">Peso</th>
+                            <th class="table-hidden-desktop">Correo</th>
+                            <th class="table-hidden-desktop">Teléfono</th>
+                        </tr>
+                    </thead>
+                    <tbody id="athleteTableBody">
+                        <!-- Las filas de datos se insertarán aquí por JavaScript -->
+                    </tbody>
+                </table>
             </div>
-            <table id="athleteTable" class="athlete-data-table">
-                <thead>
-                    <tr>
-                        <th data-sort-key="club">Club</th>
-                        <th data-sort-key="nombre">Nombre</th>
-                        <th data-sort-key="apellido">Apellido</th>
-                        <th data-sort-key="fechaNac" class="table-hidden-mobile">F. Nac.</th>
-                        <th data-sort-key="categoria">Categoría</th>
-                        <th data-sort-key="talla" class="table-hidden-mobile">Talla (m)</th>
-                        <th data-sort-key="peso" class="table-hidden-mobile">Peso (kg)</th>
-                        <th data-sort-key="correo" class="table-hidden-desktop">Correo</th>
-                        <th data-sort-key="telefono" class="table-hidden-desktop">Teléfono</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Filas de datos se insertarán aquí por JavaScript -->
-                </tbody>
-            </table>
+            <p id="noDataMessage" class="no-data-message">No hay atletas registrados aún. ¡Registra el primero!</p>
         </div>
         
     </div>
@@ -118,8 +148,6 @@
         // 1. Bloquea el botón derecho del ratón (menú contextual)
         document.addEventListener('contextmenu', function(e) {
             e.preventDefault();
-            // Opcional: Mostrar un mensaje si alguien intenta usar el botón derecho
-            // console.log("Acción bloqueada: No se permite el menú contextual.");
         });
 
         // 2. Bloquea las combinaciones de teclas (Ctrl+Shift+I, F12, Ctrl+U, etc.)
