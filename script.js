@@ -26,8 +26,6 @@ setLogLevel('Debug');
 
 // =========================================================================
 // CONFIGURACIÓN DE FIREBASE
-// Las variables __app_id, __firebase_config y __initial_auth_token
-// se proveen automáticamente por el entorno si están definidas.
 // =========================================================================
 const EXTERNAL_FIREBASE_CONFIG = {
     apiKey: "AIzaSyA5u1whBdu_fVb2Kw7SDRZbuyiM77RXVDE",
@@ -151,6 +149,7 @@ function setupAthleteListener() {
         athletesData = tempAthletesData;
         
         // 1. Aplicar el ordenamiento después de obtener los datos
+        // NOTA: Esta es la única llamada a sortTable que no es por un click del usuario.
         sortTable(currentSortKey, false); 
         
         // 2. Renderizar la tabla con los datos ya ordenados
@@ -257,7 +256,7 @@ function handleFormSubmit(e) {
 
 /**
  * Ordena la lista de atletas.
- * IMPORTANTE: Ya NO llama a renderTable().
+ * Solo modifica el array global athletesData. NO llama a renderTable.
  */
 function sortTable(key, toggleDirection = false) {
     if (currentSortKey === key && toggleDirection) {
@@ -273,7 +272,7 @@ function sortTable(key, toggleDirection = false) {
 
         let comparison = 0;
         
-        // Manejo de números
+        // Manejo de números (talla, peso, edad)
         if (key === 'talla' || key === 'peso' || key === 'age') {
             const numA = parseFloat(valA) || 0;
             const numB = parseFloat(valB) || 0;
@@ -287,26 +286,23 @@ function sortTable(key, toggleDirection = false) {
         return sortDirection === 'asc' ? comparison : comparison * -1;
     });
 
-    // ¡IMPORTANTE! QUITAR ESTA LÍNEA DE AQUÍ PARA ROMPER EL BUCLE:
-    // renderTable(); 
+    // IMPORTANTE: No hay llamada a renderTable() aquí.
 }
 
 
 /**
  * Renderiza la tabla de atletas en el DOM.
- * IMPORTANTE: Ya NO llama a sortTable().
+ * Solo lee el array global athletesData. NO llama a sortTable.
  */
 function renderTable() {
     const tableBody = document.getElementById('athleteTableBody');
     let html = '';
 
-    // No se llama a sortTable aquí. Asumimos que athletesData ya está ordenado.
-
+    // Asumimos que athletesData ya está ordenado
     athletesData.forEach(data => {
         // Formatear valores
         const tallaFormatted = data.talla ? `${data.talla.toFixed(2)} m` : 'N/A';
         const pesoFormatted = data.peso ? `${data.peso.toFixed(1)} kg` : 'N/A';
-        // Ajustar formato de fecha (se asume que data.fechaNac es YYYY-MM-DD)
         const dateObject = new Date(data.fechaNac + 'T00:00:00'); 
         const fechaNacFormatted = dateObject.toLocaleDateString('es-VE', {
             year: 'numeric', month: '2-digit', day: '2-digit'
@@ -349,13 +345,11 @@ function setupSorting() {
         if (key) {
             header.style.cursor = 'pointer'; 
             
-            // Re-añadir el event listener que ahora llama a sortTable y luego a renderTable
-            header.removeEventListener('click', header.clickHandler); 
-            header.clickHandler = () => {
-                sortTable(key, true); // Ordena los datos
-                renderTable(); // Vuelve a dibujar la tabla con los datos ordenados
-            }; 
-            header.addEventListener('click', header.clickHandler); 
+            // Asignamos la función de manejo de clic que ORDENA y luego RENDERIZA
+            header.addEventListener('click', () => {
+                sortTable(key, true); // 1. Ordena los datos
+                renderTable(); // 2. Vuelve a dibujar la tabla con los datos ordenados
+            }); 
         }
     });
 }
@@ -365,7 +359,7 @@ function setupSorting() {
 // =========================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Inicializa Firebase y Auth 
+    // 1. Inicializa Firebase y Auth (esto llama a setupAthleteListener cuando el usuario está listo)
     initializeFirebase(); 
 
     // 2. Configura el envío del formulario
