@@ -401,11 +401,18 @@
 
         // Variables globales del entorno (OBLIGATORIAS para este entorno)
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        // Intenta parsear la configuración. Si __firebase_config no existe, usa un objeto vacío.
+        let firebaseConfig = {};
+        try {
+            firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        } catch (e) {
+            console.error("FIREBASE PARSE ERROR: No se pudo parsear __firebase_config.", e);
+        }
+        
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         
-        let db;
-        let auth;
+        let db = null; // Inicializado como null
+        let auth = null; // Inicializado como null
         let userId = null;
         let athletesData = []; // Caché local de los datos
         let isAuthReady = false; // Bandera para saber si la autenticación está lista
@@ -441,14 +448,18 @@
         async function initApp() { 
             setStatus("Inicializando Firebase y autenticando usuario...", 'warning');
             
-            // --- INICIO DE VALIDACIÓN AÑADIDA PARA EL ERROR "projectId" ---
+            // --- VALIDACIÓN DE CONFIGURACIÓN Y MANEJO DE FALLO ---
             if (!firebaseConfig || !firebaseConfig.projectId) {
-                const errorMessage = 'Error crítico: La configuración de Firebase está incompleta. Falta el "projectId".';
+                const errorMessage = 'Error crítico: La configuración de Firebase está incompleta. La base de datos no funcionará. La aplicación seguirá, pero no guardará datos.';
                 console.error("FIREBASE CONFIG ERROR:", errorMessage, firebaseConfig);
                 setStatus(errorMessage, 'error');
+                // IMPORTANTE: Establecer isAuthReady a true para permitir interacciones, 
+                // pero db/auth serán null, que se comprueba en las funciones de datos.
+                isAuthReady = true; 
+                document.getElementById('userIDDisplay').textContent = `DB: Desconectado. Configuración Incompleta.`;
                 return; 
             }
-            // --- FIN DE VALIDACIÓN AÑADIDA ---
+            // ---------------------------------------------------
 
             try {
                 const app = initializeApp(firebaseConfig);
@@ -479,8 +490,11 @@
 
             } catch (error) {
                 console.error("FIREBASE ERROR: Error al inicializar o autenticar Firebase:", error);
-                // Si el error es de inicialización, mostrarlo al usuario
-                setStatus(`Error crítico de Firebase: ${error.message}`, 'error');
+                // Si el error es de inicialización, mostrarlo al usuario y establecer db/auth a null.
+                db = null;
+                auth = null;
+                isAuthReady = true;
+                setStatus(`Error crítico de Firebase: ${error.message}. La base de datos no funcionará.`, 'error');
             }
         }
 
@@ -488,6 +502,10 @@
          * Configura el listener de Firestore para actualizaciones en tiempo real.
          */
         function setupRealtimeListener(uid) {
+            if (!db) {
+                console.error("Firestore no está inicializado. No se puede configurar el listener.");
+                return;
+            }
             const collectionRef = collection(db, getCollectionPath(uid));
             onSnapshot(collectionRef, (snapshot) => {
                 athletesData = [];
@@ -507,14 +525,16 @@
          */
         function renderAthleteList(data) {
             // 1. Limpiar áreas
-            searchResultDiv.innerHTML = ''; // Limpia resultados de búsqueda
-            registeredDataDiv.innerHTML = ''; // Limpia lista general
+            searchResultDiv.innerHTML = ''; 
+            registeredDataDiv.innerHTML = ''; 
             
             // 2. Asegurar que el contenedor general esté visible
             registeredDataDiv.style.display = 'block'; 
 
             if (data.length === 0) {
-                registeredDataDiv.innerHTML = '<p class="no-data-message">No hay atletas registrados aún. ¡Registra el primero!</p>';
+                // Mensaje especial si no hay DB
+                const dbMessage = db ? '¡Registra el primero!' : 'La base de datos no está conectada. Los datos NO se guardarán.';
+                registeredDataDiv.innerHTML = `<p class="no-data-message">No hay atletas registrados aún. ${dbMessage}</p>`;
                 return;
             }
             
@@ -550,8 +570,8 @@
         async function handleFormSubmit(event) {
             event.preventDefault();
 
-            if (!isAuthReady) {
-                setStatus("La conexión a la base de datos no está lista. Intente en un momento.", 'warning', false);
+            if (!db || !isAuthReady) {
+                setStatus("Error: No se pudo establecer la conexión a la base de datos de Firebase. Por favor, revise la configuración.", 'error', false);
                 return;
             }
 
@@ -604,10 +624,15 @@
             searchResultDiv.innerHTML = '';
             
             const cedulaToSearch = searchCedulaInput.value;
+
+            if (!db || !isAuthReady) {
+                searchResultDiv.innerHTML = '<p class="search-message error">Error: Base de Datos no conectada. No se puede buscar.</p>';
+                return;
+            }
             
             if (!cedulaToSearch) {
                 // Si el campo de búsqueda está vacío, volvemos a mostrar la lista completa
-                registeredDataDiv.style.display = 'block'; // Asegurar visibilidad
+                registeredDataDiv.style.display = 'block'; 
                 renderAthleteList(athletesData);
                 return;
             }
