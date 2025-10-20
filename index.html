@@ -1,131 +1,534 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data de Atletas - Liga de Voleibol</title>
-    <!-- Vincula el archivo de estilos CSS -->
-    <link rel="stylesheet" href="styles.css">
-    <!-- Vincula la fuente Montserrat de Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&amp;display=swap"
-          rel="stylesheet">
-</head>
-<body>
-    
-    <div class="container">
-        <div class="form-card">
-            <div class="form-header">
-                <h2>Data de Atletas</h2>
-                <h2>&nbsp;Liga de Voleibol Menor del Estado Lara</h2>
-                <p>Por favor, complete el siguiente formulario para registrar o buscar un atleta.</p>
-                <!-- Contenedor para mensajes de sistema -->
-                <div id="messageBox" style="margin-top: 15px; padding: 10px; border-radius: 6px; display: none;"></div>
-            </div>
-            
-            <form id="athleteForm">
-                
-                <!-- CAMPO CÉDULA CON BOTÓN DE BÚSQUEDA (NUEVO ID PRINCIPAL) -->
-                <div class="form-row">
-                    <div class="form-group" style="flex-grow: 1; max-width: 450px;">
-                        <label for="cedula">Cédula de Identidad <span class="required-star">*</span></label>
-                        <div style="display: flex; gap: 10px;">
-                            <input id="cedula" name="cedula" required type="text" 
-                                   placeholder="Ej: V12345678" 
-                                   pattern="[VE]\d{7,9}">
-                            <!-- Botón Lupa (Búsqueda) -->
-                            <button type="button" id="searchButton" style="width: auto; padding: 10px 15px; margin: 0; display: flex; align-items: center; justify-content: center; background-color: #5B001F;">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: white;">
-                                    <circle cx="11" cy="11" r="8"></circle>
-                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <!-- El campo club se mantiene en la misma fila si hay espacio -->
-                    <div class="form-group" style="flex-grow: 1;"> 
-                        <label for="club">Club <span class="required-star">*</span></label>
-                        <input id="club" name="club" required type="text"> 
-                    </div>
-                </div>
+    <title>Registro de Atletas Deportivos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module">
+        // Importaciones de Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            signInAnonymously, 
+            signInWithCustomToken, 
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            setDoc, 
+            onSnapshot, 
+            collection, 
+            query, 
+            getDoc, 
+            deleteDoc,
+            setLogLevel
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-                <div class="form-row">
-                    <div class="form-group"> 
-                        <label for="nombre">Nombre <span class="required-star">*</span></label>
-                        <!-- Validar solo letras y espacios -->
-                        <input id="nombre" name="nombre" required type="text" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+"> 
-                    </div>
-                    <div class="form-group"> 
-                        <label for="apellido">Apellido <span class="required-star">*</span></label>
-                        <!-- Validar solo letras y espacios -->
-                        <input id="apellido" name="apellido" required type="text" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+"> 
-                    </div>
-                </div>
+        // Configuración de Tailwind para la fuente Inter
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary': '#720025', // Color principal: Granate oscuro
+                        'secondary': '#f7e8ec', // Fondo claro para secciones
+                    }
+                }
+            }
+        }
 
-                <div class="form-row">
-                    <div class="form-group"> 
-                        <label for="categoria">Categoría <span class="required-star">*</span></label>
-                        <select id="categoria" name="categoria" required>
-                            <option value="" disabled selected>Selecciona una Categoría</option>
-                            <option value="3ra División">3ra División</option>
-                            <option value="2da División">2da División</option>
-                            <option value="1era División">1era División</option>
-                            <option value="CIAR">CIAR</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group"> 
-                        <label for="talla">Talla (cm)</label> 
-                        <input id="talla" name="talla" type="number" step="0.01"> 
-                    </div>
-                    <div class="form-group"> 
-                        <label for="peso">Peso (kg)</label> 
-                        <input id="peso" name="peso" type="number"> 
-                    </div>
-                </div>
+        // ===============================================
+        // Variables Globales de Firebase (PROPORCIONADAS)
+        // ===============================================
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-                <div class="form-row">
-                    <div class="form-group"> 
-                        <label for="fechaNac">Fecha de Nacimiento <span class="required-star">*</span></label> 
-                        <input id="fechaNac" name="fechaNac" required pattern="\d{4}-\d{2}-\d{2}" type="date"> 
-                    </div>
-                    
-                    <div class="form-group"> 
-                        <label for="correo">Correo <span class="required-star">*</span></label>
-                        <input id="correo" name="correo" required type="email"> 
-                    </div>
+        /**
+         * Función segura para parsear __firebase_config.
+         * Es CRUCIAL para evitar errores si la variable no está definida o contiene JSON inválido.
+         */
+        const parseFirebaseConfig = () => {
+            try {
+                if (typeof __firebase_config === 'string' && __firebase_config.length > 0) {
+                    return JSON.parse(__firebase_config);
+                }
+            } catch (e) {
+                console.error("Error parsing __firebase_config JSON:", e);
+                // Si falla el parseo, devolver un objeto vacío
+            }
+            return {};
+        };
 
-                    <div class="form-group"> 
-                        <label for="telefono">Teléfono <span class="required-star">*</span></label>
-                        <!-- Formato sin símbolos: 04261234455 (11 dígitos) -->
-                        <input id="telefono" name="telefono" required type="tel" 
-                               placeholder="Ej: 04261234455"
-                               pattern="\d{11}"> 
-                    </div>
-                </div>
-                
-                <p class="required-note"><span class="required-star">*</span> Campos obligatorios</p>
+        const firebaseConfig = parseFirebaseConfig(); 
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-                <button type="submit" id="submitButton">Registrar Atleta</button> 
-            </form>
-        </div>
+        // Variables de estado global
+        let db;
+        let auth;
+        let userId = null;
+        let isAuthReady = false;
+        let isEditMode = false;
+        let currentAthleteId = null; 
 
-        <!-- SECCIÓN DONDE SE MOSTRARÁN LOS DATOS REGISTRADOS DINÁMICAMENTE -->
-        <div class="registered-athletes-section">
-            <h3>Atletas Registrados</h3>
-            <div id="registeredData" class="table-responsive-wrapper">
-                <p class="no-data-message">No hay atletas registrados aún. ¡Registra el primero!</p>
-            </div>
-            <p class="table-note-message">Clic en el encabezado de las columnas para ordenar los datos.</p>
-        </div>
+        // Elementos del DOM
+        const athleteForm = document.getElementById('athleteForm');
+        const registeredDataContainer = document.getElementById('registeredData');
+        const submitButton = document.getElementById('submitButton');
+        const searchButton = document.getElementById('searchButton');
+        const cedulaInput = document.getElementById('cedula');
+        const messageBox = document.getElementById('messageBox');
+        const connectionStatus = document.getElementById('connectionStatus');
+
+        // Utilerías
+        const showMessage = (message, type = 'info') => {
+            messageBox.textContent = message;
+            messageBox.className = `p-3 rounded-lg text-sm mb-4 transition-opacity duration-300 ${
+                type === 'error' ? 'bg-red-100 text-red-700' : 
+                (type === 'success' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700')
+            }`;
+            messageBox.style.display = 'block';
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+            }, 5000);
+        };
         
-    </div>
-    
-    <!-- Vincula el archivo de JavaScript con soporte para módulos -->
-    <script type="module" src="script.js"></script>
+        const updateConnectionStatus = (status, user) => {
+            if (status === 'connected') {
+                connectionStatus.className = 'text-green-500 font-bold';
+                connectionStatus.innerHTML = `✓ Conectado a Firestore | ID Usuario: <span class="text-xs break-all text-gray-700">${user}</span>`;
+            } else if (status === 'connecting') {
+                connectionStatus.className = 'text-yellow-500 font-bold';
+                connectionStatus.textContent = '... Conectando a Firebase';
+            } else {
+                connectionStatus.className = 'text-red-500 font-bold';
+                connectionStatus.textContent = '✗ Error de Conexión o Configuración';
+            }
+        };
 
-    <!-- BLOQUE DE CÓDIGO DE SEGURIDAD PARA PROTEGER EL CÓDIGO FUENTE -->
-    <script>
-        // ... (Tu bloque de seguridad se mantiene intacto)
+        // ===============================================
+        // FIREBASE INICIALIZACIÓN Y AUTENTICACIÓN (REFORZADO)
+        // ===============================================
+        const initializeFirebase = async () => {
+            updateConnectionStatus('connecting');
+
+            // REFORZADO: Verificar configuración antes de inicializar
+            if (!firebaseConfig || !firebaseConfig.projectId || Object.keys(firebaseConfig).length === 0) {
+                console.error("Firebase Initialization Error: firebaseConfig is missing or invalid.");
+                showMessage("Error: La configuración de la base de datos no está disponible. No se puede guardar ni leer data.", 'error');
+                updateConnectionStatus('error');
+                return;
+            }
+            
+            try {
+                // Habilitar logs para depuración
+                setLogLevel('Debug');
+                
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // Autenticación: Intenta con el token primero, si falla o no existe, usa anónimo.
+                const authenticate = async () => {
+                    if (initialAuthToken) {
+                        try {
+                            await signInWithCustomToken(auth, initialAuthToken);
+                        } catch (e) {
+                            console.warn("Custom token failed, falling back to anonymous sign-in:", e);
+                            await signInAnonymously(auth);
+                        }
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                };
+
+                await authenticate();
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        isAuthReady = true;
+                        console.log("Firebase Auth Ready. User ID:", userId);
+                        updateConnectionStatus('connected', userId);
+                        // Una vez autenticado, comenzamos a escuchar la data
+                        setupRealtimeListener();
+                    } else {
+                        console.error("No user signed in after authentication attempt.");
+                        updateConnectionStatus('error');
+                    }
+                });
+            } catch (error) {
+                console.error("FATAL Error initializing Firebase:", error);
+                // Si el error persiste, mostrar un mensaje al usuario
+                showMessage(`Error al conectar con la base de datos: ${error.message}`, 'error');
+                updateConnectionStatus('error');
+            }
+        };
+
+        // ===============================================
+        // LÓGICA DE BÚSQUEDA Y EDICIÓN (Mantenida)
+        // ===============================================
+
+        const normalizeCedula = (cedula) => cedula.toUpperCase().replace(/[^VE0-9]/g, '');
+
+        const toggleEditMode = (isEditing, buttonText = "Registrar Atleta") => {
+            isEditMode = isEditing;
+            submitButton.textContent = buttonText;
+            cedulaInput.disabled = isEditing;
+            cedulaInput.readOnly = isEditing; 
+        };
+
+        const buscarAtletaPorCedula = async () => {
+            if (!db || !isAuthReady) {
+                showMessage("El sistema no está listo. Espere la conexión a la base de datos.", 'error');
+                return;
+            }
+
+            const cedulaRaw = cedulaInput.value;
+            if (!cedulaRaw) {
+                showMessage("Por favor, ingrese una Cédula para buscar.", 'info');
+                return;
+            }
+
+            const cedulaId = normalizeCedula(cedulaRaw);
+            const athleteDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'athletes', cedulaId);
+
+            try {
+                const docSnap = await getDoc(athleteDocRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    currentAthleteId = cedulaId;
+                    
+                    document.getElementById('club').value = data.club || '';
+                    document.getElementById('nombre').value = data.nombre || '';
+                    document.getElementById('apellido').value = data.apellido || '';
+                    document.getElementById('categoria').value = data.categoria || '';
+                    document.getElementById('talla').value = data.talla || '';
+                    document.getElementById('peso').value = data.peso || '';
+                    document.getElementById('fechaNac').value = data.fechaNac || '';
+                    document.getElementById('correo').value = data.correo || '';
+                    document.getElementById('telefono').value = data.telefono || '';
+
+                    toggleEditMode(true, "Actualizar Atleta");
+                    showMessage(`Atleta con Cédula ${cedulaId} encontrado. Listo para actualizar.`, 'success');
+
+                } else {
+                    athleteForm.reset(); 
+                    cedulaInput.value = cedulaRaw; 
+                    currentAthleteId = null;
+                    toggleEditMode(false, "Registrar Atleta");
+                    showMessage(`Cédula ${cedulaId} no encontrada. Continúe para registrar un nuevo atleta.`, 'info');
+                }
+            } catch (error) {
+                console.error("Error al buscar atleta:", error);
+                showMessage("Error al buscar atleta en la base de datos.", 'error');
+            }
+        };
+
+        const handleFormSubmit = async (e) => {
+            e.preventDefault();
+
+            if (!isAuthReady || !db) {
+                showMessage("El sistema de base de datos no está listo. Intente de nuevo en un momento.", 'error');
+                return;
+            }
+
+            const formData = new FormData(athleteForm);
+            const athleteData = {};
+            for (const [key, value] of formData.entries()) {
+                athleteData[key] = value;
+            }
+
+            const cedulaId = normalizeCedula(athleteData.cedula);
+            const mode = isEditMode ? 'actualizar' : 'registrar';
+
+            try {
+                const athleteDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'athletes', cedulaId);
+                await setDoc(athleteDocRef, athleteData, { merge: true });
+
+                athleteForm.reset();
+                toggleEditMode(false, "Registrar Atleta");
+                currentAthleteId = null;
+                
+                showMessage(`Atleta con Cédula ${cedulaId} ${mode === 'registrar' ? 'registrado' : 'actualizado'} con éxito.`, 'success');
+
+            } catch (error) {
+                console.error(`Error al ${mode} atleta:`, error);
+                showMessage(`Error al ${mode} atleta: ${error.message}`, 'error');
+            }
+        };
+
+        const deleteAthlete = async (cedulaId) => {
+            if (!isAuthReady || !db) return;
+
+            // Usar un modal simple para la confirmación
+            if (window.confirm(`¿Está seguro que desea eliminar al atleta con Cédula ${cedulaId}?`)) {
+                try {
+                    const athleteDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'athletes', cedulaId);
+                    await deleteDoc(athleteDocRef);
+                    showMessage(`Atleta con Cédula ${cedulaId} eliminado.`, 'success');
+                    if (currentAthleteId === cedulaId) {
+                        athleteForm.reset();
+                        toggleEditMode(false);
+                        currentAthleteId = null;
+                    }
+                } catch (error) {
+                    console.error("Error al eliminar atleta:", error);
+                    showMessage("Error al eliminar atleta en la base de datos.", 'error');
+                }
+            }
+        };
+
+        // ===============================================
+        // LECTURA DE DATOS EN TIEMPO REAL (Mantenida)
+        // ===============================================
+
+        let currentSortField = 'cedula';
+        let currentSortDirection = 'asc';
+
+        const renderTable = (data) => {
+            if (data.length === 0) {
+                registeredDataContainer.innerHTML = '<p class="no-data-message p-4 text-center text-gray-500 italic">No hay atletas registrados aún. ¡Registra el primero!</p>';
+                return;
+            }
+            
+            data.sort((a, b) => {
+                const aValue = a[currentSortField] || '';
+                const bValue = b[currentSortField] || '';
+
+                if (aValue < bValue) return currentSortDirection === 'asc' ? -1 : 1;
+                if (aValue > bValue) return currentSortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            const tableHTML = `
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th data-field="cedula" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 rounded-tl-lg">Cédula</th>
+                            <th data-field="nombre" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">Nombre</th>
+                            <th data-field="apellido" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">Apellido</th>
+                            <th data-field="club" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 hidden sm:table-cell">Club</th>
+                            <th data-field="categoria" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">Cat.</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tr-lg">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        ${data.map(athlete => `
+                            <tr class="hover:bg-secondary">
+                                <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-primary">${athlete.cedula}</td>
+                                <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800">${athlete.nombre}</td>
+                                <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-800">${athlete.apellido}</td>
+                                <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500 hidden sm:table-cell">${athlete.club}</td>
+                                <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">${athlete.categoria}</td>
+                                <td class="px-3 py-2 whitespace-nowrap text-sm font-medium">
+                                    <div class="flex space-x-2">
+                                        <button data-id="${athlete.cedula}" class="edit-btn text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-100 transition" title="Editar">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5l4 4L7 21l-4 1 1-4L16.5 3.5z"></path></svg>
+                                        </button>
+                                        <button data-id="${athlete.cedula}" class="delete-btn text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-100 transition" title="Eliminar">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            registeredDataContainer.innerHTML = tableHTML;
+            addTableListeners();
+        };
+
+        const handleSort = (field) => {
+            if (currentSortField === field) {
+                currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSortField = field;
+                currentSortDirection = 'asc';
+            }
+            setupRealtimeListener(); 
+        };
+
+        const addTableListeners = () => {
+            registeredDataContainer.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', () => deleteAthlete(button.getAttribute('data-id')));
+            });
+
+            registeredDataContainer.querySelectorAll('.edit-btn').forEach(button => {
+                button.addEventListener('click', async () => {
+                    cedulaInput.value = button.getAttribute('data-id');
+                    await buscarAtletaPorCedula();
+                });
+            });
+
+            registeredDataContainer.querySelectorAll('th[data-field]').forEach(header => {
+                header.addEventListener('click', (e) => handleSort(e.currentTarget.getAttribute('data-field')));
+            });
+        };
+
+        const setupRealtimeListener = () => {
+            if (!db || !isAuthReady) {
+                console.log("Listener skip: DB or Auth not ready.");
+                return;
+            }
+            
+            const athletesColRef = collection(db, 'artifacts', appId, 'public', 'data', 'athletes');
+            const q = query(athletesColRef); 
+
+            onSnapshot(q, (snapshot) => {
+                const athletes = [];
+                snapshot.forEach((doc) => {
+                    athletes.push({
+                        cedula: doc.id,
+                        ...doc.data()
+                    });
+                });
+                renderTable(athletes);
+            }, (error) => {
+                console.error("Error en el listener de Firestore:", error);
+                showMessage("Error de conexión en tiempo real. Revise sus reglas de seguridad.", 'error');
+            });
+        };
+
+        // ===============================================
+        // ASIGNACIÓN DE LISTENERS E INICIO
+        // ===============================================
+        window.onload = () => {
+            if (athleteForm) {
+                athleteForm.addEventListener('submit', handleFormSubmit);
+            }
+            if (searchButton) {
+                searchButton.addEventListener('click', buscarAtletaPorCedula);
+            }
+            // Iniciar Firebase después de que el DOM esté listo
+            initializeFirebase(); 
+        };
+
     </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        /* Estilos personalizados para la tabla y responsividad */
+        .athlete-data-table {
+            width: 100%;
+        }
+        .athlete-data-table th, .athlete-data-table td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        /* Estilo para los botones */
+        .primary-btn {
+            background-color: #720025;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .primary-btn:hover {
+            background-color: #a00035;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Responsividad de la tabla (Modo lista en móvil) */
+        @media screen and (max-width: 640px) {
+            .athlete-data-table thead {
+                display: none;
+            }
+            .athlete-data-table tr {
+                display: block;
+                margin-bottom: 0.75rem;
+                border: 1px solid #e5e7eb;
+                border-radius: 0.5rem;
+                background-color: white;
+            }
+            .athlete-data-table td {
+                display: block;
+                text-align: right;
+                font-size: 0.875rem; /* text-sm */
+                padding: 0.5rem 1rem;
+                border-bottom: 1px solid #f3f4f6;
+            }
+            .athlete-data-table td:last-child {
+                border-bottom: none;
+            }
+            .athlete-data-table td::before {
+                content: attr(data-label);
+                float: left;
+                font-weight: 600;
+                color: #4b5563; /* gray-600 */
+            }
+            .table-hidden-mobile {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800">
+
+    <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="pb-6 border-b border-gray-200 mb-6 flex justify-between items-center flex-wrap gap-4">
+            <h1 class="text-3xl font-extrabold text-primary tracking-tight">
+                Sistema de Registro de Atletas
+            </h1>
+            <div id="connectionStatus" class="text-sm font-medium">
+                ... Conectando a Firebase
+            </div>
+        </header>
+
+        <!-- Contenedor de Mensajes -->
+        <div id="messageBox" style="display: none;" class="p-3 rounded-lg text-sm mb-4"></div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Sección de Registro/Edición -->
+            <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg h-fit sticky top-6">
+                <h2 class="text-xl font-semibold mb-6 text-primary border-b pb-2">Datos del Atleta</h2>
+                
+                <div class="mb-4 flex gap-2">
+                    <input type="text" id="cedula" name="cedula" placeholder="V-12345678" required class="flex-grow p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                    <button id="searchButton" type="button" class="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition duration-150 shadow-md flex items-center justify-center" title="Buscar Atleta">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </button>
+                </div>
+
+                <form id="athleteForm" class="space-y-4">
+                    
+                    <input type="text" id="club" name="club" placeholder="Club" required class="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="text" id="nombre" name="nombre" placeholder="Nombre" required class="p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                        <input type="text" id="apellido" name="apellido" placeholder="Apellido" required class="p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                    </div>
+                    
+                    <input type="text" id="categoria" name="categoria" placeholder="Categoría (Ej: Sub-18)" required class="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="number" id="talla" name="talla" placeholder="Talla (cm)" class="p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                        <input type="number" id="peso" name="peso" placeholder="Peso (kg)" class="p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                    </div>
+                    
+                    <label for="fechaNac" class="block text-sm font-medium text-gray-700">Fecha de Nacimiento:</label>
+                    <input type="date" id="fechaNac" name="fechaNac" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                    
+                    <input type="email" id="correo" name="correo" placeholder="Correo Electrónico" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                    <input type="tel" id="telefono" name="telefono" placeholder="Teléfono" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                    
+                    <button id="submitButton" type="submit" class="w-full primary-btn shadow-lg">Registrar Atleta</button>
+                </form>
+            </div>
+
+            <!-- Sección de Lista de Atletas (Data en tiempo real) -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
+                <h2 class="text-xl font-semibold mb-6 text-primary border-b pb-2">Atletas Registrados (Tiempo Real)</h2>
+                <div id="registeredData" class="overflow-x-auto rounded-lg shadow-sm">
+                    <!-- La tabla se renderiza aquí por JavaScript -->
+                    <p class="p-4 text-center text-gray-500 italic">Cargando datos...</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
