@@ -34,10 +34,11 @@
             margin-bottom: 20px;
             border-radius: 8px;
             font-weight: 600;
-            /* Inicialmente oculto o con estado de advertencia */
-            background-color: #fff3cd;
-            color: #856404;
-            display: none; 
+            display: flex; /* Usar flex para centrar contenido e iconos */
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         
         /* Clases para tipos de mensaje */
@@ -51,6 +52,10 @@
             color: #721c24 !important;
         }
         
+        .status-warning {
+            background-color: #fff3cd !important;
+            color: #856404 !important;
+        }
 
         /* Tarjeta del formulario */
         .form-card {
@@ -137,22 +142,43 @@
         }
 
         /* Botón de envío */
-        button[type="submit"] {
-            width: 100%;
-            padding: 15px;
-            background-color: #007bff;
-            color: #ffffff;
+        button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
             border: none;
             border-radius: 8px;
             font-size: 1.1em;
             font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, transform 0.1s;
         }
 
-        button[type="submit"]:hover {
+        /* Estilo para el botón de Registrar */
+        #submitButton {
+            width: 100%;
+            padding: 15px;
+            background-color: #007bff;
+            color: #ffffff;
+        }
+
+        #submitButton:hover {
             background-color: #0056b3; 
         }
+        
+        /* Estilo para el botón de Buscar */
+        #searchButton {
+            width: auto;
+            padding: 10px 15px;
+            background-color: #28a745; 
+            color: #ffffff;
+        }
+        
+        #searchButton:hover {
+            background-color: #1e7e34;
+        }
+
 
         /* --- ESTILOS DE BÚSQUEDA --- */
         .search-area {
@@ -169,24 +195,6 @@
             width: 250px; 
         }
 
-        #searchButton {
-            width: auto;
-            padding: 10px;
-            background-color: #28a745; 
-            color: #ffffff;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #searchButton:hover {
-            background-color: #1e7e34;
-        }
-
         /* Contenedor de resultados de búsqueda */
         .search-result-area {
             padding: 10px;
@@ -198,6 +206,7 @@
             padding: 10px;
             border-radius: 6px;
             font-weight: 600;
+            margin-bottom: 10px;
         }
 
         .search-message.error {
@@ -368,7 +377,10 @@
                 
                 <p class="required-note"><span class="required-star">*</span> Campos obligatorios</p>
 
-                <button type="submit" id="submitButton">Registrar Atleta</button>
+                <button type="submit" id="submitButton">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 0 0 20c.94 0 1.63-.52 2.76-1.55 1.4-1.28 2.87-2.3 4.29-3.26a1 1 0 0 0 .5-.86v-2.33a1 1 0 0 0-.4-1.2l-5.74-4.47a1.6 1.6 0 0 0-2.12 0l-5.74 4.47a1 1 0 0 0-.4 1.2v2.33a1 1 0 0 0 .5.86c1.42.96 2.89 1.98 4.29 3.26C9.61 20.48 10.3 21 11.24 21a10 10 0 0 0 .76-19Z"/></svg>
+                    Registrar Atleta
+                </button>
             </form>
         </div>
         
@@ -376,9 +388,8 @@
         <div class="search-area">
             <input type="number" id="searchCedula" placeholder="Buscar por Cédula (12345678)">
             <button id="searchButton" onclick="searchAthlete()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                Buscar
             </button>
         </div>
 
@@ -426,11 +437,23 @@
          * Muestra y da estilo a los mensajes de estado, con auto-ocultamiento si es un éxito.
          */
         function setStatus(message, type = 'warning', autoHide = false) {
-            statusMessage.style.display = 'block';
+            statusMessage.style.display = 'flex';
             statusMessage.textContent = message;
-            statusMessage.className = type === 'success' ? 'status-success' : (type === 'error' ? 'status-error' : '');
+            // Asegura que siempre se establezca la clase base y la específica
+            statusMessage.className = `status-${type}`;
             
-            if (autoHide) {
+            // Si es un error crítico, lo hacemos más evidente y no lo ocultamos
+            if (type === 'error' || type === 'warning') {
+                 // Añadir icono de alerta para errores/advertencias
+                 statusMessage.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-9-15.57L3.27 18Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> ${message}`;
+                 if (type === 'error' && !autoHide) {
+                     return; // No ocultar errores críticos
+                 }
+            } else {
+                statusMessage.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg> ${message}`;
+            }
+
+            if (autoHide && type === 'success') {
                 setTimeout(() => {
                     statusMessage.style.display = 'none';
                 }, 3000);
@@ -450,13 +473,15 @@
             
             // --- VALIDACIÓN DE CONFIGURACIÓN Y MANEJO DE FALLO ---
             if (!firebaseConfig || !firebaseConfig.projectId) {
-                const errorMessage = 'Error crítico: La configuración de Firebase está incompleta. La base de datos no funcionará. La aplicación seguirá, pero no guardará datos.';
+                const errorMessage = 'Error crítico: La base de datos no está conectada. El registro y la búsqueda NO funcionarán. Por favor, cargue una configuración de Firebase válida.';
                 console.error("FIREBASE CONFIG ERROR:", errorMessage, firebaseConfig);
                 setStatus(errorMessage, 'error');
                 // IMPORTANTE: Establecer isAuthReady a true para permitir interacciones, 
                 // pero db/auth serán null, que se comprueba en las funciones de datos.
                 isAuthReady = true; 
-                document.getElementById('userIDDisplay').textContent = `DB: Desconectado. Configuración Incompleta.`;
+                document.getElementById('userIDDisplay').textContent = `DB: Desconectado. (ID de Usuario no disponible)`;
+                // Renderizar la lista vacía con el mensaje de desconexión
+                renderAthleteList(athletesData); 
                 return; 
             }
             // ---------------------------------------------------
@@ -530,11 +555,15 @@
             
             // 2. Asegurar que el contenedor general esté visible
             registeredDataDiv.style.display = 'block'; 
+            
+            // Determinar el mensaje si no hay datos
+            let noDataMessageText = 'No hay atletas registrados aún. ¡Registra el primero!';
+            if (!db) {
+                noDataMessageText = 'La base de datos NO está conectada. Los datos NO se guardarán ni se mostrarán.';
+            }
 
             if (data.length === 0) {
-                // Mensaje especial si no hay DB
-                const dbMessage = db ? '¡Registra el primero!' : 'La base de datos no está conectada. Los datos NO se guardarán.';
-                registeredDataDiv.innerHTML = `<p class="no-data-message">No hay atletas registrados aún. ${dbMessage}</p>`;
+                registeredDataDiv.innerHTML = `<p class="no-data-message">${noDataMessageText}</p>`;
                 return;
             }
             
@@ -571,13 +600,12 @@
             event.preventDefault();
 
             if (!db || !isAuthReady) {
-                setStatus("Error: No se pudo establecer la conexión a la base de datos de Firebase. Por favor, revise la configuración.", 'error', false);
+                setStatus("Error: Base de datos desconectada. No se puede registrar el atleta.", 'error', false);
                 return;
             }
 
             // 1. Obtener los valores del formulario
             const cedula = document.getElementById('cedula').value; 
-            // ... resto de campos
 
             // 2. Validación de duplicidad (Revisión rápida contra el caché local)
             if (athletesData.some(athlete => athlete.cedula === cedula)) {
@@ -626,7 +654,7 @@
             const cedulaToSearch = searchCedulaInput.value;
 
             if (!db || !isAuthReady) {
-                searchResultDiv.innerHTML = '<p class="search-message error">Error: Base de Datos no conectada. No se puede buscar.</p>';
+                searchResultDiv.innerHTML = '<p class="search-message error">Error: Base de datos desconectada. No se puede buscar.</p>';
                 return;
             }
             
