@@ -146,8 +146,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 
-/* --- Botón de Envío --- */
-button[type="submit"] {
+/* --- Botón de Envío y Botón de Búsqueda --- */
+button[type="submit"], #searchButton {
     /* Botón Vinotinto */
     background-color: #720025;
     color: white;
@@ -163,16 +163,28 @@ button[type="submit"] {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-button[type="submit"]:hover {
+button[type="submit"]:hover, #searchButton:hover {
     /* Vinotinto más claro al pasar el ratón */
     background-color: #9C0033;
     transform: translateY(-1px);
 }
 
-button[type="submit"]:active {
+button[type="submit"]:active, #searchButton:active {
     /* Vinotinto más oscuro al hacer clic */
     background-color: #5B001F;
     transform: translateY(1px);
+}
+
+/* Botones de acción en la tabla */
+.edit-btn, .delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    transition: transform 0.1s;
+}
+.edit-btn:hover, .delete-btn:hover {
+    transform: scale(1.1);
 }
 
 /* --- Sección de Datos Registrados --- */
