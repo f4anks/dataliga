@@ -1,5 +1,4 @@
 // 1. IMPORTACIONES DE FIREBASE
-// Usamos versiones estables (10.12.0) para evitar errores 404 al cargar desde CDN.
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, collection, query, addDoc, onSnapshot, setLogLevel } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -8,17 +7,13 @@ import { getFirestore, collection, query, addDoc, onSnapshot, setLogLevel } from
 let db;
 let auth;
 let userId = ''; 
-let athletesData = []; // Array que contendrá los datos sincronizados de Firestore
+let athletesData = [];
 let currentSortKey = 'apellido'; 
 let sortDirection = 'asc'; 
 
-// Ajustar el nivel de log para depuración (opcional)
 setLogLevel('Debug');
 
-// =========================================================================
-// !!! ATENCIÓN: CONFIGURACIÓN PARA AMBIENTE EXTERNO (GitHub Pages) !!!
-// Se usa tu configuración real para que funcione fuera del Canvas.
-// =========================================================================
+// CONFIGURACIÓN PARA AMBIENTE EXTERNO (GitHub Pages)
 const EXTERNAL_FIREBASE_CONFIG = {
     apiKey: "AIzaSyA5u1whBdu_fVb2Kw7SDRZbuyiM77RXVDE",
   authDomain: "datalvmel.firebaseapp.com",
@@ -30,14 +25,11 @@ const EXTERNAL_FIREBASE_CONFIG = {
 
 /**
  * Muestra un mensaje temporal de estado en la interfaz.
- * Corregido el error 'Cannot set properties of null'.
- * @param {string} message - El texto a mostrar.
- * @param {string} type - 'success' o 'error'.
+ * CORRECCIÓN DE Cannot set properties of null
  */
 function displayStatusMessage(message, type) {
     let statusEl = document.getElementById('statusMessage');
     
-    // Si el elemento NO existe, lo creamos.
     if (!statusEl) {
         statusEl = document.createElement('div');
         statusEl.id = 'statusMessage';
@@ -51,7 +43,6 @@ function displayStatusMessage(message, type) {
         statusEl.style.transition = 'opacity 0.5s ease-in-out';
         statusEl.style.opacity = '0';
         
-        // Verificación de seguridad: Solo adjuntar si el <body> existe.
         if (document.body) {
             document.body.appendChild(statusEl);
         } else {
@@ -64,7 +55,6 @@ function displayStatusMessage(message, type) {
     statusEl.style.backgroundColor = type === 'success' ? '#10b981' : '#ef4444';
     statusEl.style.opacity = '1';
 
-    // Ocultar después de 4 segundos
     setTimeout(() => {
         statusEl.style.opacity = '0';
     }, 4000);
@@ -81,7 +71,6 @@ async function initFirebaseAndLoadData() {
         let appIdToUse;
         let tokenToUse = '';
 
-        // Determinar configuración para Canvas o GitHub Pages
         if (typeof __firebase_config !== 'undefined' && __firebase_config.length > 2) {
             configToUse = JSON.parse(__firebase_config);
             appIdToUse = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -95,7 +84,6 @@ async function initFirebaseAndLoadData() {
         db = getFirestore(app);
         auth = getAuth(app);
         
-        // Autenticación
         if (tokenToUse.length > 0) {
             await signInWithCustomToken(auth, tokenToUse);
         } else {
@@ -210,3 +198,80 @@ async function handleFormSubmit(event) {
     } catch(error) {
         console.error("!!! ERROR CRÍTICO AL INTENTAR GUARDAR !!!", error.message);
         console.error("CAUSA PROBABLE: REGLAS DE SEGURIDAD.", error);
+        // Mostrar error de permiso detallado para el usuario:
+        if (error.code === 'permission-denied') {
+             displayStatusMessage("❌ ERROR DE PERMISO: No se pudo guardar. Revisa tus Reglas de Firestore.", 'error');
+        } else {
+            displayStatusMessage(`❌ ERROR: ${error.message}`, 'error');
+        }
+
+    } finally {
+        console.log("handleFormSubmit ha finalizado. Reseteando formulario.");
+        // 4. Resetear el formulario.
+        form.reset();
+    }
+    
+    return false; 
+}
+
+/**
+ * LÓGICA DE ORDENAMIENTO Y RENDERIZADO
+ */
+function sortTable(key, toggleDirection = true) {
+    if (currentSortKey === key && toggleDirection) {
+        sortDirection = (sortDirection === 'asc') ? 'desc' : 'asc';
+    } else if (currentSortKey !== key) {
+        currentSortKey = key;
+        sortDirection = 'asc';
+    }
+
+    athletesData.sort((a, b) => {
+        let valA = a[key];
+        let valB = b[key];
+
+        if (key === 'tallaRaw' || key === 'pesoRaw') {
+            valA = parseFloat(valA) || 0;
+            valB = parseFloat(valB) || 0;
+        } else if (key === 'fechaNac') {
+            valA = new Date(valA);
+            valB = new Date(valB);
+        } else {
+            valA = String(valA).toLowerCase();
+            valB = String(valB).toLowerCase();
+        }
+
+        let comparison = 0;
+        if (valA > valB) { comparison = 1; } 
+        else if (valA < valB) { comparison = -1; }
+        
+        return (sortDirection === 'desc') ? (comparison * -1) : comparison;
+    });
+
+    renderTable();
+}
+
+function renderTable() {
+    const registeredDataContainer = document.getElementById('registeredData');
+    
+    if (athletesData.length === 0) {
+        registeredDataContainer.innerHTML = '<p class="no-data-message">No hay atletas registrados aún. ¡Registra el primero!</p>';
+        return;
+    }
+
+    let table = document.getElementById('athleteTable');
+    let tableBody = document.getElementById('athleteTableBody');
+
+    if (!table) {
+        registeredDataContainer.innerHTML = `
+            <div class="table-responsive-wrapper">
+                <table id="athleteTable" class="athlete-data-table">
+                    <thead>
+                        <tr class="table-header-row">
+                            <th data-sort-key="club">Club</th>
+                            <th data-sort-key="nombre">Nombre</th>
+                            <th data-sort-key="apellido">Apellido</th>
+                            <th data-sort-key="fechaNac" class="table-hidden-mobile">F. Nac.</th>
+                            <th data-sort-key="categoria">Categoría</th>
+                            <th data-sort-key="tallaRaw" class="table-hidden-mobile">Talla</th>
+                            <th data-sort-key="pesoRaw" class="table-hidden-mobile">Peso</th>
+                            <th data-sort-key="correo" class="table-hidden-desktop">Correo</th>
