@@ -174,6 +174,7 @@ async function handleFormSubmit(event) {
 	const tallaValue = form.talla.value; 
 	const pesoValue = form.peso.value; 
 	
+	// Se guardan TODOS los campos del formulario, aunque solo se muestren 6
 	const newAthlete = {
         cedula: form.cedula.value, 
 		club: form.club.value,
