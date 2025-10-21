@@ -1,10 +1,118 @@
-/* ... (Sección de estilos no modificados) ... */
+/* Estilos Base y Reset */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f4f7f9; /* Fondo de la página */
+    color: #333; /* Color de texto principal */
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+.page-header {
+    background-color: #007bff; /* Color de fondo del encabezado: Azul principal */
+    color: white; /* Color del texto del encabezado */
+    padding: 20px 0;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 0 15px;
+}
+
+h2 {
+    color: #007bff; /* Color de los subtítulos: Azul principal */
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 10px;
+    margin-top: 30px;
+}
+
+.separator {
+    border: 0;
+    height: 1px;
+    /* Gradiente con el color azul principal */
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 123, 255, 0.75), rgba(0, 0, 0, 0));
+    margin: 40px 0;
+}
+
+/* Estilos de Formulario */
+.athlete-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    background: #fff; /* Fondo del formulario: Blanco */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.form-group {
+    flex: 1 1 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.half-width {
+    flex: 1 1 calc(50% - 10px);
+}
+
+label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+input[type="text"], 
+input[type="number"], 
+input[type="date"], 
+input[type="email"], 
+input[type="tel"],
+select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+    background-color: white; /* Asegura fondo blanco en campos */
+
+    /* Estilos específicos del select */
+    appearance: none; 
+    -webkit-appearance: none;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007bff%22%20d%3D%22M287%2069.96c-3.13-3.13-8.24-3.13-11.37%200L146.2%20202.77%2016.8%2069.96c-3.13-3.13-8.24-3.13-11.37%200-3.13%203.13-3.13%208.24%200%2011.37l135.5%20135.5c3.13%203.13%208.24%203.13%2011.37%200l135.5-135.5c3.13-3.13%203.13-8.24%200-11.37z%22%2F%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right 10px top 50%;
+    background-size: 10px auto;
+    padding-right: 30px; 
+}
+
+input:focus, select:focus {
+    border-color: #007bff; /* Borde al enfocar: Azul principal */
+    outline: none;
+}
+
+.submit-button {
+    background-color: #28a745; /* Color del botón: Verde */
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background-color 0.3s;
+    margin-top: 10px;
+    flex: 1 1 100%;
+}
+
+.submit-button:hover {
+    background-color: #218838;
+}
 
 /* Estilos de la Tabla */
 .table-responsive-wrapper {
-    /* ESTO ES LO QUE HABILITA LA BARRA HORIZONTAL EN CASO DE SER NECESARIO */
-    overflow-x: auto; 
-    background: #fff;
+    overflow-x: auto;
+    background: #fff; /* Fondo de la tabla: Blanco */
     padding: 10px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -14,69 +122,65 @@
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
-    /* Asegura que la tabla no se colapse a menos que el wrapper lo pida */
-    min-width: 800px; /* Ancho mínimo para forzar el scroll horizontal en pantallas pequeñas */
+    min-width: 800px; /* Ancho mínimo para forzar el scroll horizontal */
 }
 
-/* ... (Sección de estilos no modificados) ... */
+.athlete-data-table th, .athlete-data-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
 
-/* Estilos Responsivos (Ocultar columnas y reorganizar en móvil) */
+.athlete-data-table th {
+    background-color: #f8f9fa; /* Fondo del encabezado de tabla: Gris claro */
+    color: #333;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+}
+
+/* Indicadores de Ordenamiento */
+.athlete-data-table th.sorted-asc::after {
+    content: ' ▲';
+    color: #007bff; /* Indicador de ordenación: Azul principal */
+}
+
+.athlete-data-table th.sorted-desc::after {
+    content: ' ▼';
+    color: #007bff; /* Indicador de ordenación: Azul principal */
+}
+
+.athlete-data-table tr:hover {
+    background-color: #f1f1f1; /* Fondo de fila al pasar el ratón */
+}
+
+.no-data-message, .loading-message, .table-note-message {
+    text-align: center;
+    padding: 20px;
+    color: #6c757d;
+    font-style: italic;
+    border: 1px dashed #ced4da;
+    border-radius: 4px;
+    margin-top: 20px;
+}
+
+/* Estilos Responsivos (Mantener Scroll Horizontal) */
 @media (max-width: 768px) {
-    /* ... (Estilos de formulario no modificados) ... */
+    .form-group.half-width {
+        flex: 1 1 100%;
+    }
 
-    /* Ocultar columnas menos importantes en móvil */
-    /* Club ya no está aquí, porque lo mantendremos visible en el script/tabla */
     .table-hidden-mobile {
         display: none;
     }
 
-    /* Mostrar columnas ocultas en escritorio */
     .table-hidden-desktop {
-        display: table-cell; /* Asegura que se muestren */
+        display: table-cell;
     }
-
-    /* Estilos de tabla en modo tarjeta para mejor lectura en móvil */
-    .athlete-data-table, .athlete-data-table tbody, .athlete-data-table tr, .athlete-data-table td {
-        /* Eliminamos display: block; para forzar la tabla estándar 
-           y permitir el scroll horizontal. Si el usuario insiste en 
-           la vista de tarjeta, descomentar las siguientes 4 líneas. */
-        /* display: block;
-        width: 100%; */
-    }
-    
-    .athlete-data-table thead {
-        /* display: none; */ /* Oculta el encabezado original en modo tarjeta */
-    }
-    /*
-    .athlete-data-table tr {
-        margin-bottom: 15px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    }
-
-    .athlete-data-table td {
-        text-align: right;
-        padding-left: 50%; 
-        position: relative;
-    }
-
-    .athlete-data-table td::before {
-        content: attr(data-label);
-        position: absolute;
-        left: 10px;
-        width: 45%;
-        padding-right: 10px;
-        white-space: nowrap;
-        text-align: left;
-        font-weight: bold;
-        color: #555;
-    } */
 }
 
-/* Mostrar columnas ocultas en escritorio */
 @media (min-width: 769px) {
     .table-hidden-desktop {
-        display: none; /* Oculta estas columnas en desktop */
+        display: none;
     }
 }
