@@ -1,245 +1,186 @@
-/*
-======================================================
-1. ESTILOS BASE Y TIPOGRAFÍA
-======================================================
-*/
-:root {
-    --primary-color: #3b82f6; /* Azul fuerte para botones y acentos */
-    --secondary-color: #10b981; /* Verde para éxito/notificaciones */
-    --background-color: #f3f4f6; /* Gris claro de fondo */
-    --card-background: #ffffff; /* Blanco para tarjetas */
-    --text-color: #1f2937; /* Gris oscuro para texto */
-    --border-color: #e5e7eb;
-    --error-color: #ef4444; /* Rojo para errores */
-}
-
-* {
-    box-sizing: border-box;
+/* Estilos Base y Reset */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f4f7f9;
+    color: #333;
     margin: 0;
     padding: 0;
+    line-height: 1.6;
 }
 
-body {
-    font-family: 'Montserrat', sans-serif;
-    background-color: var(--background-color);
-    color: var(--text-color);
-    line-height: 1.6;
-    padding: 20px;
+.page-header {
+    background-color: #007bff;
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .container {
     max-width: 1200px;
-    margin: 0 auto;
+    margin: 20px auto;
+    padding: 0 15px;
+}
+
+h2 {
+    color: #007bff;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 10px;
+    margin-top: 30px;
+}
+
+.separator {
+    border: 0;
+    height: 1px;
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 123, 255, 0.75), rgba(0, 0, 0, 0));
+    margin: 40px 0;
+}
+
+/* Estilos de Formulario */
+.athlete-form {
     display: flex;
-    flex-direction: column;
-    gap: 30px;
-}
-
-/*
-======================================================
-2. ESTILOS DEL FORMULARIO
-======================================================
-*/
-.form-card {
-    background: var(--card-background);
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.form-header h2 {
-    color: var(--primary-color);
-    margin-bottom: 5px;
-    font-weight: 700;
-}
-
-.form-header p {
-    color: #6b7280;
-    margin-bottom: 20px;
-}
-
-.required-star {
-    color: var(--error-color);
-    font-weight: bold;
-}
-
-.required-note {
-    font-size: 0.9em;
-    color: #6b7280;
-    margin-top: 15px;
+    flex-wrap: wrap;
+    gap: 20px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .form-group {
-    margin-bottom: 15px;
-    flex: 1; /* Permite que los grupos de formulario crezcan en form-row */
-    min-width: 200px; /* Evita que se aplasten demasiado */
+    flex: 1 1 100%; /* Por defecto, ocupa todo el ancho */
+    display: flex;
+    flex-direction: column;
 }
 
-.form-row {
-    display: flex;
-    gap: 20px;
-    /* Permite que los campos se envuelvan en pantallas pequeñas */
-    flex-wrap: wrap;
+.form-group.half-width {
+    flex: 1 1 calc(50% - 10px); /* Ocupa la mitad del ancho en pantallas grandes */
 }
 
 label {
-    display: block;
     margin-bottom: 5px;
-    font-weight: 600;
+    font-weight: bold;
+    color: #555;
 }
 
-input[type="text"],
-input[type="number"],
-input[type="date"],
-input[type="email"],
-input[type="tel"],
-select {
-    width: 100%;
+input[type="text"], 
+input[type="number"], 
+input[type="date"], 
+input[type="email"], 
+input[type="tel"] {
     padding: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
     transition: border-color 0.3s;
 }
 
-input:focus, select:focus {
-    border-color: var(--primary-color);
+input:focus {
+    border-color: #007bff;
     outline: none;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
-button[type="submit"] {
-    display: block;
-    width: 100%;
-    padding: 12px;
-    background-color: var(--primary-color);
+.submit-button {
+    background-color: #28a745;
     color: white;
+    padding: 12px 20px;
     border: none;
-    border-radius: 6px;
-    font-size: 1.1em;
-    font-weight: 600;
+    border-radius: 4px;
     cursor: pointer;
+    font-size: 18px;
     transition: background-color 0.3s;
-    margin-top: 20px;
+    margin-top: 10px;
+    flex: 1 1 100%; /* Ocupa todo el ancho */
 }
 
-button[type="submit"]:hover {
-    background-color: #2563eb;
+.submit-button:hover {
+    background-color: #218838;
 }
 
-/*
-======================================================
-3. ESTILOS DE LA TABLA DE DATOS REGISTRADOS
-======================================================
-*/
-.registered-athletes-section {
-    background: var(--card-background);
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.registered-athletes-section h3 {
-    color: var(--primary-color);
-    margin-bottom: 20px;
-    font-weight: 700;
-}
-
-.no-data-message {
-    text-align: center;
-    padding: 20px;
-    color: #6b7280;
-    border: 1px dashed var(--border-color);
-    border-radius: 6px;
-}
-
-.table-scroll-wrapper {
-    overflow-x: auto; /* Permite el scroll horizontal en la tabla */
-    width: 100%;
+/* Estilos de la Tabla */
+.table-responsive-wrapper {
+    overflow-x: auto;
+    background: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .athlete-data-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 15px;
-    min-width: 700px; /* Asegura un ancho mínimo para desktop */
+    margin-top: 20px;
 }
 
 .athlete-data-table th, .athlete-data-table td {
     padding: 12px 15px;
     text-align: left;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.athlete-data-table thead {
-    background-color: var(--primary-color);
-    color: white;
+    border-bottom: 1px solid #ddd;
 }
 
 .athlete-data-table th {
-    font-weight: 700;
+    background-color: #f8f9fa;
+    color: #333;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.2s;
+    position: relative;
 }
 
-.athlete-data-table th:hover {
-    background-color: #1e40af; /* Azul más oscuro al pasar el ratón */
-}
-
-.athlete-table-row:nth-child(even) {
-    background-color: #f9fafb; /* Color de fila alternado */
-}
-
-/* Indicadores de Ordenamiento (CSS generado por JS) */
+/* Indicadores de Ordenamiento */
 .athlete-data-table th.sorted-asc::after {
-    content: " ▲";
+    content: ' ▲';
+    color: #007bff;
 }
 
 .athlete-data-table th.sorted-desc::after {
-    content: " ▼";
+    content: ' ▼';
+    color: #007bff;
 }
 
-.table-note-message {
-    font-size: 0.85em;
-    color: #6b7280;
-    margin-top: 10px;
+.athlete-data-table tr:hover {
+    background-color: #f1f1f1;
 }
 
-/*
-======================================================
-4. ESTILOS PARA MENSAJES DE ESTADO (Generado por JS)
-======================================================
-*/
-#statusMessage {
-    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
-    transform: translateY(0);
+.no-data-message, .loading-message, .table-note-message {
+    text-align: center;
+    padding: 20px;
+    color: #6c757d;
+    font-style: italic;
+    border: 1px dashed #ced4da;
+    border-radius: 4px;
+    margin-top: 20px;
 }
 
-#statusMessage[style*="opacity: 0"] {
-    transform: translateY(-20px);
-}
-
-/*
-======================================================
-5. RESPONSIVE DESIGN (Móvil)
-======================================================
-*/
+/* Estilos Responsivos (Ocultar columnas y reorganizar en móvil) */
 @media (max-width: 768px) {
-    /* Oculta los encabezados de la tabla en móvil */
-    .athlete-data-table thead {
+    .form-group.half-width {
+        flex: 1 1 100%; /* Ocupa todo el ancho en móvil */
+    }
+
+    /* Ocultar columnas menos importantes en móvil */
+    .table-hidden-mobile {
         display: none;
     }
 
-    /* Aplica la lógica responsive de tabla que proporcionaste */
+    /* Mostrar columnas ocultas en escritorio */
+    .table-hidden-desktop {
+        display: table-cell; /* Asegura que se muestren */
+    }
+
+    /* Estilos de tabla en modo tarjeta para mejor lectura en móvil */
     .athlete-data-table, .athlete-data-table tbody, .athlete-data-table tr, .athlete-data-table td {
         display: block;
         width: 100%;
     }
+    
+    .athlete-data-table thead {
+        display: none; /* Oculta el encabezado original */
+    }
 
     .athlete-data-table tr {
         margin-bottom: 15px;
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
@@ -247,46 +188,24 @@ button[type="submit"]:hover {
         text-align: right;
         padding-left: 50%; /* Espacio para la etiqueta */
         position: relative;
-        border-bottom: 1px solid #f3f4f6;
-    }
-    
-    .athlete-data-table td:last-child {
-        border-bottom: none;
     }
 
-    /* Estilo de la etiqueta (data-label) */
     .athlete-data-table td::before {
-        content: attr(data-label);
+        content: attr(data-label); /* Usa el atributo data-label como etiqueta */
         position: absolute;
-        left: 0;
-        width: 50%;
-        padding-left: 15px;
-        font-weight: 600;
+        left: 10px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
         text-align: left;
-        color: #6b7280;
-    }
-
-    /* Oculta las columnas designadas como 'mobile-hidden' */
-    .table-hidden-mobile {
-        display: none !important;
-    }
-
-    /* Muestra la columna 'Teléfono' y 'Correo' en móvil (y oculta en desktop) */
-    .table-hidden-desktop {
-        display: block; /* Oculta en desktop, muestra en móvil */
-    }
-
-    .form-card {
-        padding: 20px;
-    }
-    
-    .container {
-        padding: 0;
+        font-weight: bold;
+        color: #555;
     }
 }
-/* Aseguramos que la columna 'Teléfono' se vea en móvil y no en desktop (era un ejemplo) */
+
+/* Mostrar columnas ocultas en escritorio */
 @media (min-width: 769px) {
     .table-hidden-desktop {
-        display: none !important; /* Oculta en resoluciones mayores a 768px */
+        display: none; /* Oculta estas columnas en desktop */
     }
 }
