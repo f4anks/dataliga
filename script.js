@@ -7,11 +7,10 @@ import { getFirestore, collection, query, addDoc, onSnapshot, setLogLevel } from
 let db;
 let auth;
 let userId = ''; 
-let athletesData = []; // Array que contendrá los datos sincronizados de Firestore
+let athletesData = []; 
 let currentSortKey = 'apellido'; 
 let sortDirection = 'asc'; 
 
-// Ajustar el nivel de log para depuración (opcional)
 setLogLevel('Debug');
 
 // =========================================================================
@@ -164,19 +163,19 @@ async function handleFormSubmit(event) {
     const form = document.getElementById('athleteForm');
 
     // 1. Recolectar datos y preparar el objeto (documento)
-    const tallaValue = form.talla.value; // Ya son decimales/metros
-    const pesoValue = form.peso.value; // Ya son decimales
+    const tallaValue = form.talla.value; 
+    const pesoValue = form.peso.value; 
     
     const newAthlete = {
-        cedula: form.cedula.value, // <--- CAMBIO: Nuevo campo
+        cedula: form.cedula.value, 
         club: form.club.value,
         nombre: form.nombre.value,
         apellido: form.apellido.value,
         fechaNac: form.fechaNac.value,
-        categoria: form.categoria.value, 
+        // CAMBIO: Usamos 'division' en lugar de 'categoria'
+        division: form.division.value, 
         tallaRaw: tallaValue, 
         pesoRaw: pesoValue,   
-        // CAMBIO: Actualizar formato de visualización (m y kg)
         tallaFormatted: tallaValue ? `${tallaValue} m` : 'N/A',
         pesoFormatted: pesoValue ? `${pesoValue} kg` : 'N/A',
         correo: form.correo.value,
@@ -228,7 +227,7 @@ function sortTable(key, toggleDirection = true) {
         let valA = a[key];
         let valB = b[key];
 
-        // Los campos 'tallaRaw' y 'pesoRaw' ahora siempre deben ser numéricos debido al input type="number" y step.
+        // Ordenar correctamente los campos numéricos
         if (key === 'tallaRaw' || key === 'pesoRaw') {
             valA = parseFloat(valA) || 0;
             valB = parseFloat(valB) || 0;
@@ -272,8 +271,8 @@ function renderTable() {
                             <th data-sort-key="nombre">Nombre</th>
                             <th data-sort-key="apellido">Apellido</th>
                             <th data-sort-key="fechaNac" class="table-hidden-mobile">F. Nac.</th>
-                            <th data-sort-key="categoria">Categoría</th>
-                                                        <th data-sort-key="tallaRaw" class="table-hidden-mobile">Talla (m)</th>
+                                                        <th data-sort-key="division">División</th> 
+                            <th data-sort-key="tallaRaw" class="table-hidden-mobile">Talla (m)</th>
                             <th data-sort-key="pesoRaw" class="table-hidden-mobile">Peso (kg)</th>
                             <th data-sort-key="correo" class="table-hidden-desktop">Correo</th>
                             <th data-sort-key="telefono" class="table-hidden-desktop">Teléfono</th>
@@ -283,7 +282,7 @@ function renderTable() {
                     </tbody>
                 </table>
             </div>
-            <p class="table-note-message">Haz clic en cualquier encabezado de la tabla para ordenar los resultados (por ejemplo, por Apellido o Categoría).</p>
+            <p class="table-note-message">Haz clic en cualquier encabezado de la tabla para ordenar los resultados (por ejemplo, por Apellido o División).</p>
         `;
         tableBody = document.getElementById('athleteTableBody');
         setupSorting(); 
@@ -300,7 +299,7 @@ function renderTable() {
             <td data-label="Nombre" class="table-data">${data.nombre}</td>
             <td data-label="Apellido" class="table-data">${data.apellido}</td>
             <td data-label="F. Nac." class="table-data table-hidden-mobile">${data.fechaNac}</td>
-            <td data-label="Categoría" class="table-data">${data.categoria}</td>
+            <td data-label="División" class="table-data">${data.division}</td>
             <td data-label="Talla" class="table-data table-hidden-mobile">${data.tallaFormatted}</td>
             <td data-label="Peso" class="table-data table-hidden-mobile">${data.pesoFormatted}</td>
             <td data-label="Correo" class="table-data table-hidden-desktop">${data.correo}</td>
@@ -310,6 +309,7 @@ function renderTable() {
 
     document.querySelectorAll('#athleteTable th').forEach(th => {
         th.classList.remove('sorted-asc', 'sorted-desc');
+        // CAMBIO: Aseguramos que el encabezado de División se resalte correctamente
         if (th.getAttribute('data-sort-key') === currentSortKey) {
             th.classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
         }
