@@ -6,7 +6,7 @@
     <title>Registro y Visualización de Atletas</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-        /* Estilos en línea para el mensaje de estado (opcional, se puede dejar en styles.css) */
+        /* Estilos en línea para el mensaje de estado (opcional) */
         #statusMessage {
             position: fixed;
             top: 10px;
@@ -57,8 +57,14 @@
                 </div>
 
                 <div class="form-group half-width">
-                    <label for="categoria">Categoría (Ej: Infantil, Juvenil):</label>
-                    <input type="text" id="categoria" name="categoria" required>
+                    <label for="division">División:</label>
+                    <select id="division" name="division" required>
+                        <option value="" disabled selected>Selecciona una División</option>
+                        <option value="CIAR">CIAR</option>
+                        <option value="1ra Division">1ra Division</option>
+                        <option value="2da Division">2da Division</option>
+                        <option value="3ra Division">3ra Division</option>
+                    </select>
                 </div>
                 
                 <div class="form-group half-width">
@@ -88,7 +94,7 @@
         <hr class="separator">
 
         <section class="data-section">
-            <h2>Atletas Registrados (Sincronizados con Firestore)</h2>
+            <h2>Lista de Atletas Registrados</h2>
             <div id="registeredData" class="registered-data-container">
                 <p class="loading-message">Cargando datos...</p>
             </div>
