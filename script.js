@@ -7,13 +7,16 @@ import { getFirestore, collection, query, addDoc, onSnapshot, setLogLevel } from
 let db;
 let auth;
 let userId = ''; 
-let athletesData = [];
+let athletesData = []; // Array que contendrá los datos sincronizados de Firestore
 let currentSortKey = 'apellido'; 
 let sortDirection = 'asc'; 
 
+// Ajustar el nivel de log para depuración (opcional)
 setLogLevel('Debug');
 
-// CONFIGURACIÓN PARA AMBIENTE EXTERNO (GitHub Pages)
+// =========================================================================
+// !!! ATENCIÓN: CONFIGURACIÓN PARA AMBIENTE EXTERNO (GitHub Pages) !!!
+// =========================================================================
 const EXTERNAL_FIREBASE_CONFIG = {
     apiKey: "AIzaSyA5u1whBdu_fVb2Kw7SDRZbuyiM77RXVDE",
   authDomain: "datalvmel.firebaseapp.com",
@@ -25,7 +28,6 @@ const EXTERNAL_FIREBASE_CONFIG = {
 
 /**
  * Muestra un mensaje temporal de estado en la interfaz.
- * CORRECCIÓN DE Cannot set properties of null
  */
 function displayStatusMessage(message, type) {
     let statusEl = document.getElementById('statusMessage');
@@ -162,10 +164,11 @@ async function handleFormSubmit(event) {
     const form = document.getElementById('athleteForm');
 
     // 1. Recolectar datos y preparar el objeto (documento)
-    const tallaValue = form.talla.value;
-    const pesoValue = form.peso.value;
+    const tallaValue = form.talla.value; // Ya son decimales/metros
+    const pesoValue = form.peso.value; // Ya son decimales
     
     const newAthlete = {
+        cedula: form.cedula.value, // <--- CAMBIO: Nuevo campo
         club: form.club.value,
         nombre: form.nombre.value,
         apellido: form.apellido.value,
@@ -173,7 +176,8 @@ async function handleFormSubmit(event) {
         categoria: form.categoria.value, 
         tallaRaw: tallaValue, 
         pesoRaw: pesoValue,   
-        tallaFormatted: tallaValue ? `${tallaValue} cm` : 'N/A',
+        // CAMBIO: Actualizar formato de visualización (m y kg)
+        tallaFormatted: tallaValue ? `${tallaValue} m` : 'N/A',
         pesoFormatted: pesoValue ? `${pesoValue} kg` : 'N/A',
         correo: form.correo.value,
         telefono: form.telefono.value,
@@ -181,7 +185,6 @@ async function handleFormSubmit(event) {
     };
     
     try {
-        // 2. OBTENER EL APP ID PARA LA RUTA DE GUARDADO
         let appIdToUse;
         if (typeof __app_id !== 'undefined') {
             appIdToUse = __app_id;
@@ -189,7 +192,6 @@ async function handleFormSubmit(event) {
             appIdToUse = EXTERNAL_FIREBASE_CONFIG.projectId;
         }
 
-        // 3. GUARDAR DATOS EN FIRESTORE
         const athletesColRef = collection(db, `artifacts/${appIdToUse}/public/data/athletes`);
         await addDoc(athletesColRef, newAthlete); 
         console.log("Atleta registrado y guardado en Firestore con éxito.");
@@ -197,8 +199,6 @@ async function handleFormSubmit(event) {
         
     } catch(error) {
         console.error("!!! ERROR CRÍTICO AL INTENTAR GUARDAR !!!", error.message);
-        console.error("CAUSA PROBABLE: REGLAS DE SEGURIDAD.", error);
-        // Mostrar error de permiso detallado para el usuario:
         if (error.code === 'permission-denied') {
              displayStatusMessage("❌ ERROR DE PERMISO: No se pudo guardar. Revisa tus Reglas de Firestore.", 'error');
         } else {
@@ -207,7 +207,6 @@ async function handleFormSubmit(event) {
 
     } finally {
         console.log("handleFormSubmit ha finalizado. Reseteando formulario.");
-        // 4. Resetear el formulario.
         form.reset();
     }
     
@@ -229,6 +228,7 @@ function sortTable(key, toggleDirection = true) {
         let valA = a[key];
         let valB = b[key];
 
+        // Los campos 'tallaRaw' y 'pesoRaw' ahora siempre deben ser numéricos debido al input type="number" y step.
         if (key === 'tallaRaw' || key === 'pesoRaw') {
             valA = parseFloat(valA) || 0;
             valB = parseFloat(valB) || 0;
@@ -267,13 +267,14 @@ function renderTable() {
                 <table id="athleteTable" class="athlete-data-table">
                     <thead>
                         <tr class="table-header-row">
+                            <th data-sort-key="cedula">Cédula</th>
                             <th data-sort-key="club">Club</th>
                             <th data-sort-key="nombre">Nombre</th>
                             <th data-sort-key="apellido">Apellido</th>
                             <th data-sort-key="fechaNac" class="table-hidden-mobile">F. Nac.</th>
                             <th data-sort-key="categoria">Categoría</th>
-                            <th data-sort-key="tallaRaw" class="table-hidden-mobile">Talla</th>
-                            <th data-sort-key="pesoRaw" class="table-hidden-mobile">Peso</th>
+                                                        <th data-sort-key="tallaRaw" class="table-hidden-mobile">Talla (m)</th>
+                            <th data-sort-key="pesoRaw" class="table-hidden-mobile">Peso (kg)</th>
                             <th data-sort-key="correo" class="table-hidden-desktop">Correo</th>
                             <th data-sort-key="telefono" class="table-hidden-desktop">Teléfono</th>
                         </tr>
@@ -294,6 +295,7 @@ function renderTable() {
         const newRow = tableBody.insertRow(-1); 
         newRow.classList.add('athlete-table-row');
         newRow.innerHTML = `
+            <td data-label="Cédula" class="table-data">${data.cedula}</td>
             <td data-label="Club" class="table-data">${data.club}</td>
             <td data-label="Nombre" class="table-data">${data.nombre}</td>
             <td data-label="Apellido" class="table-data">${data.apellido}</td>
