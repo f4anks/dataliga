@@ -275,3 +275,57 @@ function renderTable() {
                             <th data-sort-key="tallaRaw" class="table-hidden-mobile">Talla</th>
                             <th data-sort-key="pesoRaw" class="table-hidden-mobile">Peso</th>
                             <th data-sort-key="correo" class="table-hidden-desktop">Correo</th>
+                            <th data-sort-key="telefono" class="table-hidden-desktop">Teléfono</th>
+                        </tr>
+                    </thead>
+                    <tbody id="athleteTableBody">
+                    </tbody>
+                </table>
+            </div>
+            <p class="table-note-message">Haz clic en cualquier encabezado de la tabla para ordenar los resultados (por ejemplo, por Apellido o Categoría).</p>
+        `;
+        tableBody = document.getElementById('athleteTableBody');
+        setupSorting(); 
+    } else {
+        tableBody.innerHTML = '';
+    }
+    
+    athletesData.forEach(data => {
+        const newRow = tableBody.insertRow(-1); 
+        newRow.classList.add('athlete-table-row');
+        newRow.innerHTML = `
+            <td data-label="Club" class="table-data">${data.club}</td>
+            <td data-label="Nombre" class="table-data">${data.nombre}</td>
+            <td data-label="Apellido" class="table-data">${data.apellido}</td>
+            <td data-label="F. Nac." class="table-data table-hidden-mobile">${data.fechaNac}</td>
+            <td data-label="Categoría" class="table-data">${data.categoria}</td>
+            <td data-label="Talla" class="table-data table-hidden-mobile">${data.tallaFormatted}</td>
+            <td data-label="Peso" class="table-data table-hidden-mobile">${data.pesoFormatted}</td>
+            <td data-label="Correo" class="table-data table-hidden-desktop">${data.correo}</td>
+            <td data-label="Teléfono" class="table-data table-hidden-desktop">${data.telefono}</td>
+        `;
+    });
+
+    document.querySelectorAll('#athleteTable th').forEach(th => {
+        th.classList.remove('sorted-asc', 'sorted-desc');
+        if (th.getAttribute('data-sort-key') === currentSortKey) {
+            th.classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
+        }
+    });
+}
+
+function setupSorting() {
+    document.querySelectorAll('#athleteTable th').forEach(header => {
+        const key = header.getAttribute('data-sort-key');
+        if (key) {
+            header.style.cursor = 'pointer'; 
+            header.addEventListener('click', () => sortTable(key, true)); 
+        }
+    });
+}
+
+// Inicializar Firebase y los Listeners al cargar el contenido
+document.addEventListener('DOMContentLoaded', () => {
+    initFirebaseAndLoadData();
+    setupFormListener();
+});
