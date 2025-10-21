@@ -15,7 +15,7 @@ setLogLevel('Debug');
 
 // =========================================================================
 // !!! ATENCIÓN: CONFIGURACIÓN PARA AMBIENTE EXTERNO (GitHub Pages) !!!
-// REEMPLAZE CON SUS CLAVES REALES DE FIREBASE
+// REEMPLAZA ESTO CON TUS CLAVES REALES DE FIREBASE
 // =========================================================================
 const EXTERNAL_FIREBASE_CONFIG = {
     apiKey: "AIzaSyA5u1whBdu_fVb2Kw7SDRZbuyiM77RXVDE",
@@ -135,10 +135,13 @@ function setupRealtimeListener(appId) {
              renderTable();
         }
     }, (error) => {
+        // MANEJO DE ERROR MEJORADO: Indica problema de permisos de lectura
         console.error("Error en la escucha en tiempo real:", error);
-         if (error.code === 'permission-denied') {
-             displayStatusMessage("❌ ERROR DE PERMISO DE LECTURA: ¡REVISA TUS REGLAS DE FIRESTORE!", 'error');
-         }
+        if (error.code === 'permission-denied') {
+             displayStatusMessage("❌ ERROR DE PERMISO DE LECTURA: No se pueden mostrar los datos. ¡REVISA TUS REGLAS DE FIRESTORE!", 'error');
+        } else {
+             displayStatusMessage(`❌ Error al cargar datos: ${error.message}`, 'error');
+        }
     });
 }
 
@@ -201,11 +204,12 @@ async function handleFormSubmit(event) {
         displayStatusMessage("¡Atleta registrado con éxito! (Sincronizando tabla...)", 'success');
         
     } catch(error) {
+        // MANEJO DE ERROR MEJORADO: Indica problema de permisos de escritura
         console.error("!!! ERROR CRÍTICO AL INTENTAR GUARDAR !!!", error.message);
         if (error.code === 'permission-denied') {
-             displayStatusMessage("❌ ERROR DE PERMISO DE ESCRITURA: ¡REVISA TUS REGLAS DE FIRESTORE!", 'error');
+             displayStatusMessage("❌ ERROR DE PERMISO DE ESCRITURA: No se pudo guardar. ¡REVISA TUS REGLAS DE FIRESTORE!", 'error');
         } else {
-            displayStatusMessage(`❌ ERROR: ${error.message}`, 'error');
+            displayStatusMessage(`❌ ERROR al guardar: ${error.message}`, 'error');
         }
 
     } finally {
