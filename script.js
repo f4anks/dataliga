@@ -36,7 +36,7 @@ const EXTERNAL_FIREBASE_CONFIG = {
 function displayStatusMessage(message, type) {
     let statusEl = document.getElementById('statusMessage');
     
-    // CORRECCIÓN CLAVE: Garantizar que el elemento exista y que document.body esté disponible.
+    // Solución al error "Cannot set properties of null"
     if (!statusEl) {
         // Crea el elemento si no existe
         statusEl = document.createElement('div');
@@ -51,16 +51,15 @@ function displayStatusMessage(message, type) {
         statusEl.style.transition = 'opacity 0.5s ease-in-out';
         statusEl.style.opacity = '0';
         
-        // Verificación de seguridad: Solo adjuntar si el <body> existe.
+        // Verificación de seguridad para document.body
         if (document.body) {
             document.body.appendChild(statusEl);
         } else {
             console.error("No se pudo mostrar el mensaje de estado: El cuerpo del documento aún no está disponible.");
-            return; // Salir para evitar el TypeError
+            return; 
         }
     }
     
-    // Línea 156 (aproximadamente): Ahora statusEl está garantizado de existir y estar adjunto.
     statusEl.textContent = message; 
     statusEl.style.backgroundColor = type === 'success' ? '#10b981' : '#ef4444';
     statusEl.style.opacity = '1';
@@ -221,4 +220,81 @@ async function handleFormSubmit(event) {
             appIdToUse = EXTERNAL_FIREBASE_CONFIG.projectId; // Si estamos en GitHub Pages
         }
 
-        // 3. GUARDAR DATOS EN FIREST
+        // 3. GUARDAR DATOS EN FIRESTORE
+        const athletesColRef = collection(db, `artifacts/${appIdToUse}/public/data/athletes`);
+        await addDoc(athletesColRef, newAthlete); 
+        console.log("Atleta registrado y guardado en Firestore con éxito.");
+        displayStatusMessage("¡Atleta registrado con éxito! (Sincronizando tabla...)", 'success');
+        
+    } catch(error) {
+        console.error("!!! ERROR CRÍTICO AL INTENTAR GUARDAR !!!", error.message);
+        console.error("CAUSA PROBABLE: REGLAS DE SEGURIDAD.", error);
+        // Mostrar error de permiso detallado para el usuario:
+        if (error.code === 'permission-denied') {
+             displayStatusMessage("❌ ERROR DE PERMISO: No se pudo guardar. Revisa tus Reglas de Firestore.", 'error');
+        } else {
+            displayStatusMessage(`❌ ERROR: ${error.message}`, 'error');
+        }
+
+    } finally {
+        console.log("handleFormSubmit ha finalizado. Reseteando formulario.");
+        // 4. Resetear el formulario.
+        form.reset();
+    }
+    
+    // Devolvemos false para asegurar que no se envíe el formulario, aunque event.preventDefault() ya lo hizo.
+    return false; 
+}
+
+/**
+ * LÓGICA DE ORDENAMIENTO Y RENDERIZADO (sin cambios)
+ */
+function sortTable(key, toggleDirection = true) {
+    if (currentSortKey === key && toggleDirection) {
+        sortDirection = (sortDirection === 'asc') ? 'desc' : 'asc';
+    } else if (currentSortKey !== key) {
+        currentSortKey = key;
+        sortDirection = 'asc';
+    }
+
+    athletesData.sort((a, b) => {
+        let valA = a[key];
+        let valB = b[key];
+
+        if (key === 'tallaRaw' || key === 'pesoRaw') {
+            valA = parseFloat(valA) || 0;
+            valB = parseFloat(valB) || 0;
+        } else if (key === 'fechaNac') {
+            valA = new Date(valA);
+            valB = new Date(valB);
+        } else {
+            valA = String(valA).toLowerCase();
+            valB = String(valB).toLowerCase();
+        }
+
+        let comparison = 0;
+        if (valA > valB) { comparison = 1; } 
+        else if (valA < valB) { comparison = -1; }
+        
+        return (sortDirection === 'desc') ? (comparison * -1) : comparison;
+    });
+
+    renderTable();
+}
+
+function renderTable() {
+    const registeredDataContainer = document.getElementById('registeredData');
+    
+    if (athletesData.length === 0) {
+        registeredDataContainer.innerHTML = '<p class="no-data-message">No hay atletas registrados aún. ¡Registra el primero!</p>';
+        return;
+    }
+
+    let table = document.getElementById('athleteTable');
+    let tableBody = document.getElementById('athleteTableBody');
+
+    if (!table) {
+        registeredDataContainer.innerHTML = `
+            <div class="table-responsive-wrapper">
+                <table id="athleteTable" class="athlete-data-table">
+                    <thead>
