@@ -30,15 +30,15 @@ const EXTERNAL_FIREBASE_CONFIG = {
 
 /**
  * Muestra un mensaje temporal de estado en la interfaz.
+ * Corregido el error 'Cannot set properties of null'.
  * @param {string} message - El texto a mostrar.
  * @param {string} type - 'success' o 'error'.
  */
 function displayStatusMessage(message, type) {
     let statusEl = document.getElementById('statusMessage');
     
-    // Solución al error "Cannot set properties of null"
+    // Si el elemento NO existe, lo creamos.
     if (!statusEl) {
-        // Crea el elemento si no existe
         statusEl = document.createElement('div');
         statusEl.id = 'statusMessage';
         statusEl.style.position = 'fixed';
@@ -51,7 +51,7 @@ function displayStatusMessage(message, type) {
         statusEl.style.transition = 'opacity 0.5s ease-in-out';
         statusEl.style.opacity = '0';
         
-        // Verificación de seguridad para document.body
+        // Verificación de seguridad: Solo adjuntar si el <body> existe.
         if (document.body) {
             document.body.appendChild(statusEl);
         } else {
@@ -73,52 +73,42 @@ function displayStatusMessage(message, type) {
 
 /**
  * 2. INICIALIZACIÓN Y AUTENTICACIÓN
- * Inicializa Firebase, autentica al usuario y configura el listener en tiempo real.
  */
 async function initFirebaseAndLoadData() {
     console.log("Iniciando Firebase y autenticación...");
     try {
-        // Determinamos la configuración y el App ID
         let configToUse;
         let appIdToUse;
         let tokenToUse = '';
 
-        // Priorizamos las variables globales si estamos en el entorno Canvas
+        // Determinar configuración para Canvas o GitHub Pages
         if (typeof __firebase_config !== 'undefined' && __firebase_config.length > 2) {
             configToUse = JSON.parse(__firebase_config);
             appIdToUse = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
             tokenToUse = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : '';
         } else {
-            // Usamos la configuración fija si estamos en un entorno externo (GitHub Pages)
             configToUse = EXTERNAL_FIREBASE_CONFIG;
-            // Para la ruta de guardado, usamos el projectId como fallback para el appId
             appIdToUse = configToUse.projectId; 
-            
-            // Nota: En GitHub Pages, NO hay token inicial, así que solo usamos la autenticación anónima.
         }
 
         const app = initializeApp(configToUse);
         db = getFirestore(app);
         auth = getAuth(app);
         
-        // Autenticación: Intentar con token personalizado (solo en Canvas) o usar anónimo
+        // Autenticación
         if (tokenToUse.length > 0) {
             await signInWithCustomToken(auth, tokenToUse);
         } else {
-            // Autenticación anónima para GitHub Pages
             await signInAnonymously(auth);
         }
         
-        // Esperar el cambio de estado de autenticación
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 userId = user.uid;
                 console.log("Usuario autenticado. UID:", userId);
-                // Una vez autenticado, se puede empezar a escuchar los datos
                 setupRealtimeListener(appIdToUse);
             } else {
                 console.error("No se pudo autenticar al usuario.");
-                // Fallback para entornos sin autenticación
                 userId = crypto.randomUUID(); 
                 setupRealtimeListener(appIdToUse);
             }
@@ -131,10 +121,8 @@ async function initFirebaseAndLoadData() {
 
 /**
  * 3. ESCUCHA EN TIEMPO REAL (onSnapshot)
- * Configura la escucha en tiempo real para la colección de atletas.
  */
 function setupRealtimeListener(appId) {
-    // La ruta pública es: artifacts/{appId}/public/data/athletes
     const athletesColRef = collection(db, `artifacts/${appId}/public/data/athletes`);
     const q = query(athletesColRef);
 
@@ -143,31 +131,26 @@ function setupRealtimeListener(appId) {
         const fetchedData = [];
         snapshot.forEach((doc) => {
             fetchedData.push({ 
-                id: doc.id, // ID del documento
+                id: doc.id, 
                 ...doc.data() 
             });
         });
         
-        // Reemplazamos los datos locales y forzamos el ordenamiento
         athletesData = fetchedData;
         
         if (athletesData.length > 0) {
-            // Ordena sin cambiar la dirección (mantiene el estado)
             sortTable(currentSortKey, false); 
         } else {
              renderTable();
         }
     }, (error) => {
-        // Si aparece "Permission Denied", la regla de seguridad de Firebase está incorrecta.
         console.error("Error en la escucha en tiempo real:", error);
     });
 }
 
-// FUNCIÓN ACTUALIZADA: Asegura que el formulario esté en el DOM antes de adjuntar el listener.
 function setupFormListener() {
     const form = document.getElementById('athleteForm');
     if (form) {
-        // Adjunta el manejador de envío asíncrono directamente. Esto evita la recarga.
         form.addEventListener('submit', handleFormSubmit);
         console.log("Listener de formulario de atleta adjunto.");
     } else {
@@ -178,10 +161,8 @@ function setupFormListener() {
 
 /**
  * 4. FUNCIÓN DE GUARDADO (handleFormSubmit)
- * Maneja el envío del formulario y guarda los datos en Firestore.
  */
 async function handleFormSubmit(event) {
-    // ESTA ES LA LÍNEA CRÍTICA: Detiene la recarga de la página (el comportamiento por defecto del formulario).
     event.preventDefault(); 
 
     if (!db) {
@@ -215,9 +196,9 @@ async function handleFormSubmit(event) {
         // 2. OBTENER EL APP ID PARA LA RUTA DE GUARDADO
         let appIdToUse;
         if (typeof __app_id !== 'undefined') {
-            appIdToUse = __app_id; // Si estamos en Canvas
+            appIdToUse = __app_id;
         } else {
-            appIdToUse = EXTERNAL_FIREBASE_CONFIG.projectId; // Si estamos en GitHub Pages
+            appIdToUse = EXTERNAL_FIREBASE_CONFIG.projectId;
         }
 
         // 3. GUARDAR DATOS EN FIRESTORE
@@ -229,79 +210,3 @@ async function handleFormSubmit(event) {
     } catch(error) {
         console.error("!!! ERROR CRÍTICO AL INTENTAR GUARDAR !!!", error.message);
         console.error("CAUSA PROBABLE: REGLAS DE SEGURIDAD.", error);
-        // Mostrar error de permiso detallado para el usuario:
-        if (error.code === 'permission-denied') {
-             displayStatusMessage("❌ ERROR DE PERMISO: No se pudo guardar. Revisa tus Reglas de Firestore.", 'error');
-        } else {
-            displayStatusMessage(`❌ ERROR: ${error.message}`, 'error');
-        }
-
-    } finally {
-        console.log("handleFormSubmit ha finalizado. Reseteando formulario.");
-        // 4. Resetear el formulario.
-        form.reset();
-    }
-    
-    // Devolvemos false para asegurar que no se envíe el formulario, aunque event.preventDefault() ya lo hizo.
-    return false; 
-}
-
-/**
- * LÓGICA DE ORDENAMIENTO Y RENDERIZADO (sin cambios)
- */
-function sortTable(key, toggleDirection = true) {
-    if (currentSortKey === key && toggleDirection) {
-        sortDirection = (sortDirection === 'asc') ? 'desc' : 'asc';
-    } else if (currentSortKey !== key) {
-        currentSortKey = key;
-        sortDirection = 'asc';
-    }
-
-    athletesData.sort((a, b) => {
-        let valA = a[key];
-        let valB = b[key];
-
-        if (key === 'tallaRaw' || key === 'pesoRaw') {
-            valA = parseFloat(valA) || 0;
-            valB = parseFloat(valB) || 0;
-        } else if (key === 'fechaNac') {
-            valA = new Date(valA);
-            valB = new Date(valB);
-        } else {
-            valA = String(valA).toLowerCase();
-            valB = String(valB).toLowerCase();
-        }
-
-        let comparison = 0;
-        if (valA > valB) { comparison = 1; } 
-        else if (valA < valB) { comparison = -1; }
-        
-        return (sortDirection === 'desc') ? (comparison * -1) : comparison;
-    });
-
-    renderTable();
-}
-
-function renderTable() {
-    const registeredDataContainer = document.getElementById('registeredData');
-    
-    if (athletesData.length === 0) {
-        registeredDataContainer.innerHTML = '<p class="no-data-message">No hay atletas registrados aún. ¡Registra el primero!</p>';
-        return;
-    }
-
-    let table = document.getElementById('athleteTable');
-    let tableBody = document.getElementById('athleteTableBody');
-
-    if (!table) {
-        registeredDataContainer.innerHTML = `
-            <div class="table-responsive-wrapper">
-                <table id="athleteTable" class="athlete-data-table">
-                    <thead>
-                        <tr class="table-header-row">
-                            <th data-sort-key="club">Club</th>
-                            <th data-sort-key="nombre">Nombre</th>
-                            <th data-sort-key="apellido">Apellido</th>
-                            <th data-sort-key="fechaNac" class="table-hidden-mobile">F. Nac.</th>
-                            <th data-sort-key="categoria">Categoría</th>
-                            <th data-sort-key="tallaRaw" class="table-hidden-mobile">Talla</th>
