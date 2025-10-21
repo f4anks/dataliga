@@ -1,15 +1,15 @@
 /* Estilos Base y Reset */
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background-color: #f4f7f9; /* FONDO GRIS CLARO */
-    color: #333; /* TEXTO NEGRO */
+    background-color: #f4f7f9;
+    color: #333;
     margin: 0;
     padding: 0;
     line-height: 1.6;
 }
 
 .page-header {
-    background-color: #007bff; /* ENCABEZADO AZUL */
+    background-color: #007bff;
     color: white;
     padding: 20px 0;
     text-align: center;
@@ -23,13 +23,13 @@ body {
 }
 
 h2 {
-    color: #007bff; /* SUBTÍTULOS AZULES */
+    color: #007bff;
     border-bottom: 2px solid #e0e0e0;
     padding-bottom: 10px;
     margin-top: 30px;
 }
 
-/* MODIFICACIÓN: Centrar el título de la sección de resultados */
+/* Centrar el título de la sección de resultados */
 .data-section h2 {
     text-align: center; 
 }
@@ -97,7 +97,7 @@ input:focus, select:focus {
 }
 
 .submit-button {
-    background-color: #28a745; /* BOTÓN VERDE */
+    background-color: #28a745; 
     color: white;
     padding: 12px 20px;
     border: none;
@@ -129,10 +129,10 @@ input:focus, select:focus {
     min-width: 650px; 
 }
 
-/* MODIFICACIÓN: Centrar el contenido de los encabezados (TH) y las celdas (TD) */
+/* Centrar el contenido de los encabezados (TH) y las celdas (TD) */
 .athlete-data-table th, .athlete-data-table td {
     padding: 12px 15px;
-    text-align: center; /* ALINEACIÓN CENTRADA PARA TÍTULOS DE TABLA Y RESULTADOS */
+    text-align: center; /* CENTRADO PARA TÍTULOS Y RESULTADOS */
     border-bottom: 1px solid #ddd;
 }
 
@@ -170,7 +170,7 @@ input:focus, select:focus {
     margin-top: 20px;
 }
 
-/* Estilos Responsivos (sin cambios relevantes en la tabla simplificada) */
+/* Estilos Responsivos (sin cambios) */
 @media (max-width: 768px) {
     .form-group.half-width {
         flex: 1 1 100%;
