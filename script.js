@@ -36,9 +36,9 @@ const EXTERNAL_FIREBASE_CONFIG = {
 function displayStatusMessage(message, type) {
     let statusEl = document.getElementById('statusMessage');
     
-    // CORRECCIÓN: Si el elemento NO existe, lo creamos y lo asignamos a statusEl
+    // CORRECCIÓN CLAVE: Garantizar que el elemento exista y que document.body esté disponible.
     if (!statusEl) {
-        // Crea el elemento si no existe (lo inyectamos en el cuerpo)
+        // Crea el elemento si no existe
         statusEl = document.createElement('div');
         statusEl.id = 'statusMessage';
         statusEl.style.position = 'fixed';
@@ -50,10 +50,17 @@ function displayStatusMessage(message, type) {
         statusEl.style.color = '#fff';
         statusEl.style.transition = 'opacity 0.5s ease-in-out';
         statusEl.style.opacity = '0';
-        document.body.appendChild(statusEl);
+        
+        // Verificación de seguridad: Solo adjuntar si el <body> existe.
+        if (document.body) {
+            document.body.appendChild(statusEl);
+        } else {
+            console.error("No se pudo mostrar el mensaje de estado: El cuerpo del documento aún no está disponible.");
+            return; // Salir para evitar el TypeError
+        }
     }
     
-    // Línea donde ocurría el error: Ahora statusEl está garantizado de existir.
+    // Línea 156 (aproximadamente): Ahora statusEl está garantizado de existir y estar adjunto.
     statusEl.textContent = message; 
     statusEl.style.backgroundColor = type === 'success' ? '#10b981' : '#ef4444';
     statusEl.style.opacity = '1';
@@ -93,4 +100,125 @@ async function initFirebaseAndLoadData() {
 
         const app = initializeApp(configToUse);
         db = getFirestore(app);
-        auth = getAuth
+        auth = getAuth(app);
+        
+        // Autenticación: Intentar con token personalizado (solo en Canvas) o usar anónimo
+        if (tokenToUse.length > 0) {
+            await signInWithCustomToken(auth, tokenToUse);
+        } else {
+            // Autenticación anónima para GitHub Pages
+            await signInAnonymously(auth);
+        }
+        
+        // Esperar el cambio de estado de autenticación
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                userId = user.uid;
+                console.log("Usuario autenticado. UID:", userId);
+                // Una vez autenticado, se puede empezar a escuchar los datos
+                setupRealtimeListener(appIdToUse);
+            } else {
+                console.error("No se pudo autenticar al usuario.");
+                // Fallback para entornos sin autenticación
+                userId = crypto.randomUUID(); 
+                setupRealtimeListener(appIdToUse);
+            }
+        });
+
+    } catch (e) {
+        console.error("Error al inicializar Firebase:", e);
+    }
+}
+
+/**
+ * 3. ESCUCHA EN TIEMPO REAL (onSnapshot)
+ * Configura la escucha en tiempo real para la colección de atletas.
+ */
+function setupRealtimeListener(appId) {
+    // La ruta pública es: artifacts/{appId}/public/data/athletes
+    const athletesColRef = collection(db, `artifacts/${appId}/public/data/athletes`);
+    const q = query(athletesColRef);
+
+    onSnapshot(q, (snapshot) => {
+        console.log("Datos de Firestore actualizados. Sincronizando tabla...");
+        const fetchedData = [];
+        snapshot.forEach((doc) => {
+            fetchedData.push({ 
+                id: doc.id, // ID del documento
+                ...doc.data() 
+            });
+        });
+        
+        // Reemplazamos los datos locales y forzamos el ordenamiento
+        athletesData = fetchedData;
+        
+        if (athletesData.length > 0) {
+            // Ordena sin cambiar la dirección (mantiene el estado)
+            sortTable(currentSortKey, false); 
+        } else {
+             renderTable();
+        }
+    }, (error) => {
+        // Si aparece "Permission Denied", la regla de seguridad de Firebase está incorrecta.
+        console.error("Error en la escucha en tiempo real:", error);
+    });
+}
+
+// FUNCIÓN ACTUALIZADA: Asegura que el formulario esté en el DOM antes de adjuntar el listener.
+function setupFormListener() {
+    const form = document.getElementById('athleteForm');
+    if (form) {
+        // Adjunta el manejador de envío asíncrono directamente. Esto evita la recarga.
+        form.addEventListener('submit', handleFormSubmit);
+        console.log("Listener de formulario de atleta adjunto.");
+    } else {
+        console.error("Error: No se encontró el formulario con ID 'athleteForm'. ¿Está cargado el index.html?");
+    }
+}
+
+
+/**
+ * 4. FUNCIÓN DE GUARDADO (handleFormSubmit)
+ * Maneja el envío del formulario y guarda los datos en Firestore.
+ */
+async function handleFormSubmit(event) {
+    // ESTA ES LA LÍNEA CRÍTICA: Detiene la recarga de la página (el comportamiento por defecto del formulario).
+    event.preventDefault(); 
+
+    if (!db) {
+        console.error("Base de datos no inicializada. No se pudo guardar.");
+        displayStatusMessage("Error: La base de datos no está inicializada.", 'error');
+        return false;
+    }
+
+    const form = document.getElementById('athleteForm');
+
+    // 1. Recolectar datos y preparar el objeto (documento)
+    const tallaValue = form.talla.value;
+    const pesoValue = form.peso.value;
+    
+    const newAthlete = {
+        club: form.club.value,
+        nombre: form.nombre.value,
+        apellido: form.apellido.value,
+        fechaNac: form.fechaNac.value,
+        categoria: form.categoria.value, 
+        tallaRaw: tallaValue, 
+        pesoRaw: pesoValue,   
+        tallaFormatted: tallaValue ? `${tallaValue} cm` : 'N/A',
+        pesoFormatted: pesoValue ? `${pesoValue} kg` : 'N/A',
+        correo: form.correo.value,
+        telefono: form.telefono.value,
+        timestamp: Date.now() 
+    };
+    
+    try {
+        // 2. OBTENER EL APP ID PARA LA RUTA DE GUARDADO
+        let appIdToUse;
+        if (typeof __app_id !== 'undefined') {
+            appIdToUse = __app_id; // Si estamos en Canvas
+        } else {
+            appIdToUse = EXTERNAL_FIREBASE_CONFIG.projectId; // Si estamos en GitHub Pages
+        }
+
+        // 3. GUARDAR DATOS EN FIREST
