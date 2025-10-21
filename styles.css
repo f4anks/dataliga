@@ -1,15 +1,15 @@
 /* Estilos Base y Reset */
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background-color: #f4f7f9; /* FONDO GRIS CLARO */
-    color: #333; /* TEXTO NEGRO */
+    background-color: #f4f7f9;
+    color: #333;
     margin: 0;
     padding: 0;
     line-height: 1.6;
 }
 
 .page-header {
-    background-color: #007bff; /* ENCABEZADO AZUL */
+    background-color: #007bff;
     color: white;
     padding: 20px 0;
     text-align: center;
@@ -23,7 +23,7 @@ body {
 }
 
 h2 {
-    color: #007bff; /* SUBTÍTULOS AZULES */
+    color: #007bff;
     border-bottom: 2px solid #e0e0e0;
     padding-bottom: 10px;
     margin-top: 30px;
@@ -97,82 +97,10 @@ input:focus, select:focus {
 }
 
 .submit-button {
-    background-color: #28a745; /* BOTÓN VERDE */
+    background-color: #28a745; 
     color: white;
     padding: 12px 20px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 18px;
-    transition: background-color 0.3s;
-    margin-top: 10px;
-    flex: 1 1 100%;
-}
-
-.submit-button:hover {
-    background-color: #218838;
-}
-
-/* Estilos de la Tabla */
-.table-responsive-wrapper {
-    overflow-x: auto;
-    background: #fff;
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.athlete-data-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    min-width: 650px; 
-}
-
-/* MODIFICACIÓN: Centrar el contenido de los encabezados (TH) y las celdas (TD) */
-.athlete-data-table th, .athlete-data-table td {
-    padding: 12px 15px;
-    text-align: center; /* ALINEACIÓN CENTRADA PARA TÍTULOS DE TABLA Y RESULTADOS */
-    border-bottom: 1px solid #ddd;
-}
-
-.athlete-data-table th {
-    background-color: #f8f9fa;
-    color: #333;
-    font-weight: 600;
-    cursor: pointer;
-    position: relative;
-    white-space: nowrap; 
-}
-
-/* Indicadores de Ordenamiento (sin cambios) */
-.athlete-data-table th.sorted-asc::after {
-    content: ' ▲';
-    color: #007bff;
-}
-
-.athlete-data-table th.sorted-desc::after {
-    content: ' ▼';
-    color: #007bff;
-}
-
-.athlete-data-table tr:hover {
-    background-color: #f1f1f1;
-}
-
-.no-data-message, .loading-message, .table-note-message {
-    text-align: center;
-    padding: 20px;
-    color: #6c757d;
-    font-style: italic;
-    border: 1px dashed #ced4da;
-    border-radius: 4px;
-    margin-top: 20px;
-}
-
-/* Estilos Responsivos (sin cambios relevantes en la tabla simplificada) */
-@media (max-width: 768px) {
-    .form-group.half-width {
-        flex: 1 1 100%;
-    }
-}
+    font
