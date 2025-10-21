@@ -12,14 +12,7 @@
 </head>
 <body>
     
-    <!-- BANNER DE ENCABEZADO -->
-    <div class="banner-wrapper">
-        <!-- RUTA DE IMAGEN LOCAL CORREGIDA: images/banner1.jpg -->
-        <img src="images/banner1.jpg" alt="LVMeL - Liga de Voleibol Menor del Estado Lara" class="banner-image">
-    </div>
-    <!-- FIN DEL BANNER -->
-
-    <div class="container">
+       <div class="container">
         <div class="form-card">
             <div class="form-header">
                 <h2>Data de Atletas</h2>
@@ -31,127 +24,70 @@
                 
                 <div class="form-group"> 
                     <label for="club">Club <span class="required-star">*</span></label>
-                    <select id="club" name="club" required>
-                        <option value="" disabled selected>Seleccione un club</option>
-                        <option value="Club_A">Club A</option>
-                        <option value="Club_B">Club B</option>
-                        <option value="Club_C">Club C</option>
-                        <option value="Otro">Otro</option>
-                    </select>
-                </div>
-                
-                <!-- NUEVO CAMPO: Cédula de Identidad -->
-                <div class="form-group">
-                    <label for="cedula">Cédula de Identidad <span class="required-star">*</span></label>
-                    <!-- El patrón exige iniciar con V o E, seguido de un guión, y de 7 a 9 dígitos -->
-                    <input type="text" id="cedula" name="cedula" required 
-                           placeholder="V-12345678" 
-                           pattern="[VE]-[0-9]{7,9}" 
-                           title="Formato V-12345678 o E-12345678. Mínimo 7 y máximo 9 dígitos." 
-                           oninput="this.value = this.value.toUpperCase()">
-                    <p class="input-description">Formato V-12345678 o E-12345678. (V: Venezolano, E: Extranjero)</p>
-                </div>
-                <!-- FIN NUEVO CAMPO -->
-
-                <div class="form-group"> 
-                    <label for="nombre">Nombre <span class="required-star">*</span></label>
-                    <input type="text" id="nombre" name="nombre" required placeholder="Primer y segundo nombre">
+                    <input id="club" name="club" required="" type="text"> 
                 </div>
 
-                <div class="form-group">
-                    <label for="apellido">Apellido <span class="required-star">*</span></label>
-                    <input type="text" id="apellido" name="apellido" required placeholder="Primer y segundo apellido">
-                </div>
-                
-                <div class="form-group">
-                    <label for="fechaNac">Fecha de Nacimiento <span class="required-star">*</span></label>
-                    <input type="date" id="fechaNac" name="fechaNac" required>
-                    <p class="input-description">Día/Mes/Año</p>
-                </div>
-                
-                <div class="form-group">
-                    <label for="posicion">Posición Principal</label>
-                    <select id="posicion" name="posicion">
-                        <option value="" disabled selected>Seleccione una posición</option>
-                        <option value="Levantador">Levantador</option>
-                        <option value="Central">Central</option>
-                        <option value="Punta">Punta/Receptor</option>
-                        <option value="Opuesto">Opuesto</option>
-                        <option value="Libero">Líbero</option>
-                        <option value="Comodin">Comodín</option>
-                    </select>
-                </div>
-
-                <div class="form-group form-group-half">
-                    <label for="tallaFeet">Talla (m) <span class="required-star">*</span></label>
-                    <div class="input-group-inline">
-                        <input type="number" id="talla" name="talla" min="0.50" max="2.50" step="0.01" required placeholder="1.85">
-                        <span class="input-unit">m</span>
+                <div class="form-row">
+                    <div class="form-group"> 
+                        <label for="nombre">Nombre <span class="required-star">*</span></label>
+                        <input id="nombre" name="nombre" required="" type="text"> 
                     </div>
-                    <p class="input-description">Ejemplo: 1.85</p>
-                </div>
-
-                <div class="form-group form-group-half">
-                    <label for="peso">Peso (kg) <span class="required-star">*</span></label>
-                    <div class="input-group-inline">
-                        <input type="number" id="peso" name="peso" min="30" max="150" step="0.1" required placeholder="75.5">
-                        <span class="input-unit">kg</span>
+                    <div class="form-group"> 
+                        <label for="apellido">Apellido <span class="required-star">*</span></label>
+                        <input id="apellido" name="apellido" required="" type="text"> 
                     </div>
-                    <p class="input-description">Ejemplo: 75.5</p>
-                </div>
-                
-                <div class="form-group">
-                    <label for="correo">Correo Electrónico <span class="required-star">*</span></label>
-                    <input type="email" id="correo" name="correo" required placeholder="correo@ejemplo.com">
                 </div>
 
-                <div class="form-group">
-                    <label for="telefono">Teléfono <span class="required-star">*</span></label>
-                    <input type="tel" id="telefono" name="telefono" required placeholder="0412-1234567" pattern="[0-9]{4}-[0-9]{7}" title="Formato: 0412-1234567">
-                    <p class="input-description">Formato: 0412-1234567</p>
-                </div>
-                
-                <div class="form-group">
-                    <label for="observaciones">Observaciones</label>
-                    <textarea id="observaciones" name="observaciones" rows="3" placeholder="Alergias, lesiones recientes, o notas adicionales..."></textarea>
+                <div class="form-row">
+                    <div class="form-group"> 
+                        <label for="categoria">Categoría <span class="required-star">*</span></label>
+                        <select id="categoria" name="categoria" required="">
+                            <option value="" disabled="disabled" selected="selected">Selecciona una Categoría</option>
+                            <option value="3ra División">3ra División</option>
+                            <option value="2da División">2da División</option>
+                            <option value="1era División">1era División</option>
+                            <option value="CIAR">CIAR</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group"> 
+                        <label for="talla">Talla (cm)</label> 
+                        <input id="talla" name="talla" type="number"> 
+                    </div>
+                    <div class="form-group"> 
+                        <label for="peso">Peso (kg)</label> 
+                        <input id="peso" name="peso" type="number"> 
+                    </div>
                 </div>
 
-                <button type="submit" class="submit-button">Registrar Atleta</button>
+                <div class="form-row">
+                    <div class="form-group"> 
+                        <label for="fechaNac">Fecha de Nacimiento <span class="required-star">*</span></label> 
+                        <input id="fechaNac" name="fechaNac" required="" pattern="\d{4}-\d{2}-\d{2}" type="date"> 
+                    </div>
+                    
+                    <div class="form-group"> 
+                        <label for="correo">Correo <span class="required-star">*</span></label>
+                        <input id="correo" name="correo" required="" type="email"> 
+                    </div>
+
+                    <div class="form-group"> 
+                        <label for="telefono">Teléfono <span class="required-star">*</span></label>
+                        <input id="telefono" name="telefono" required="" type="tel"> 
+                    </div>
+                </div>
+                
+                <p class="required-note"><span class="required-star">*</span> Campos obligatorios</p>
+
+                <button type="submit">Registrar Atleta</button> 
             </form>
-            
-            <div id="messageBox" class="message-box hidden"></div>
         </div>
 
-        <!-- Seccion de la tabla de datos -->
-        <div class="table-card">
-            <div class="table-header">
-                <h2>Listado de Atletas Registrados</h2>
-                <p id="totalAthletesCount">0 Atletas registrados aún. ¡Registra el primero!</p>
-            </div>
-            
-            <div class="table-container">
-                <table id="athleteTable" class="athlete-data-table">
-                    <thead>
-                        <tr>
-                            <th data-sort-key="club">Club</th>
-                            <!-- NUEVO ENCABEZADO -->
-                            <th data-sort-key="cedula">Cédula</th>
-                            <!-- FIN NUEVO ENCABEZADO -->
-                            <th data-sort-key="nombre">Nombre</th>
-                            <th data-sort-key="apellido">Apellido</th>
-                            <th data-sort-key="fechaNac" class="table-hidden-mobile">F. Nac.</th>
-                            <th data-sort-key="categoria">Categoría</th>
-                            <th data-sort-key="talla" class="table-hidden-mobile">Talla</th>
-                            <th data-sort-key="peso" class="table-hidden-mobile">Peso</th>
-                            <th data-sort-key="correo" class="table-hidden-desktop">Correo</th>
-                            <th data-sort-key="telefono" class="table-hidden-desktop">Teléfono</th>
-                            <th></th> <!-- Columna para acciones (eliminar) -->
-                        </tr>
-                    </thead>
-                    <tbody id="athleteTableBody">
-                        <!-- Los datos de los atletas se insertarán aquí -->
-                    </tbody>
-                </table>
+        <!-- SECCIÓN DONDE SE MOSTRARÁN LOS DATOS REGISTRADOS DINÁMICAMENTE -->
+        <div class="registered-athletes-section">
+            <h3>Atletas Registrados</h3>
+            <div id="registeredData" class="table-scroll-wrapper">
+                <p class="no-data-message">No hay atletas registrados aún. ¡Registra el primero!</p>
             </div>
         </div>
         
