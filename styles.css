@@ -122,8 +122,8 @@ input:focus, select:focus {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
-    /* FUERZA UN ANCHO MÍNIMO PARA ACTIVAR EL SCROLL HORIZONTAL EN MÓVILES */
-    min-width: 850px; 
+    /* ANCHO MÍNIMO AJUSTADO A LAS 6 COLUMNAS */
+    min-width: 650px; 
 }
 
 .athlete-data-table th, .athlete-data-table td {
@@ -166,24 +166,17 @@ input:focus, select:focus {
     margin-top: 20px;
 }
 
-/* Estilos Responsivos (Ocultar columnas y reorganizar en móvil) */
+/* Estilos Responsivos */
 @media (max-width: 768px) {
     .form-group.half-width {
         flex: 1 1 100%;
     }
-
-    /* Ocultar columnas menos críticas en móvil para reducir el ancho de la tabla */
-    .table-hidden-mobile {
-        display: none;
-    }
-
-    /* Mostrar Correo y Teléfono en móvil (si se ocultaron en escritorio) */
-    .table-hidden-desktop {
-        display: table-cell;
+    
+    /* Las columnas ya no necesitan ser ocultadas */
+    .table-hidden-mobile, .table-hidden-desktop {
+        display: table-cell; 
     }
 }
-
-/* Mostrar columnas ocultas en escritorio */
 @media (min-width: 769px) {
     .table-hidden-desktop {
         display: none;
