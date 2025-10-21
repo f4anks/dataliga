@@ -15,6 +15,7 @@ setLogLevel('Debug');
 
 // =========================================================================
 // !!! ATENCIÓN: CONFIGURACIÓN PARA AMBIENTE EXTERNO (GitHub Pages) !!!
+// REEMPLAZE CON SUS CLAVES REALES DE FIREBASE
 // =========================================================================
 const EXTERNAL_FIREBASE_CONFIG = {
     apiKey: "AIzaSyA5u1whBdu_fVb2Kw7SDRZbuyiM77RXVDE",
@@ -135,6 +136,9 @@ function setupRealtimeListener(appId) {
         }
     }, (error) => {
         console.error("Error en la escucha en tiempo real:", error);
+         if (error.code === 'permission-denied') {
+             displayStatusMessage("❌ ERROR DE PERMISO DE LECTURA: ¡REVISA TUS REGLAS DE FIRESTORE!", 'error');
+         }
     });
 }
 
@@ -173,7 +177,6 @@ async function handleFormSubmit(event) {
         nombre: form.nombre.value,
         apellido: form.apellido.value,
         fechaNac: form.fechaNac.value,
-        // CAMPO MODIFICADO
         division: form.division.value, 
         tallaRaw: tallaValue, 
         pesoRaw: pesoValue,   
@@ -200,7 +203,7 @@ async function handleFormSubmit(event) {
     } catch(error) {
         console.error("!!! ERROR CRÍTICO AL INTENTAR GUARDAR !!!", error.message);
         if (error.code === 'permission-denied') {
-             displayStatusMessage("❌ ERROR DE PERMISO: No se pudo guardar. Revisa tus Reglas de Firestore.", 'error');
+             displayStatusMessage("❌ ERROR DE PERMISO DE ESCRITURA: ¡REVISA TUS REGLAS DE FIRESTORE!", 'error');
         } else {
             displayStatusMessage(`❌ ERROR: ${error.message}`, 'error');
         }
