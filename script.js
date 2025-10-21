@@ -298,3 +298,10 @@ function renderTable() {
             <div class="table-responsive-wrapper">
                 <table id="athleteTable" class="athlete-data-table">
                     <thead>
+                        <tr class="table-header-row">
+                            <th data-sort-key="club">Club</th>
+                            <th data-sort-key="nombre">Nombre</th>
+                            <th data-sort-key="apellido">Apellido</th>
+                            <th data-sort-key="fechaNac" class="table-hidden-mobile">F. Nac.</th>
+                            <th data-sort-key="categoria">Categoría</th>
+                            <th data-sort-key="tallaRaw" class="table-hidden-mobile">Talla</th>
