@@ -226,3 +226,4 @@ async function handleFormSubmit(event) {
 function sortTable(key, toggleDirection = true) {
     if (currentSortKey === key && toggleDirection) {
         sortDirection = (sortDirection === 'asc') ? 'desc
+
