@@ -29,6 +29,11 @@ h2 {
     margin-top: 30px;
 }
 
+/* MODIFICACIÓN: Centrar el título de la sección de resultados */
+.data-section h2 {
+    text-align: center; 
+}
+
 .separator {
     border: 0;
     height: 1px;
@@ -36,12 +41,12 @@ h2 {
     margin: 40px 0;
 }
 
-/* Estilos de Formulario */
+/* Estilos de Formulario (sin cambios) */
 .athlete-form {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
-    background: #fff; /* Fondo del formulario: Blanco */
+    background: #fff;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -110,7 +115,6 @@ input:focus, select:focus {
 
 /* Estilos de la Tabla */
 .table-responsive-wrapper {
-    /* HABILITA EL SCROLL HORIZONTAL CUANDO NO HAY ESPACIO */
     overflow-x: auto;
     background: #fff;
     padding: 10px;
@@ -121,4 +125,54 @@ input:focus, select:focus {
 .athlete-data-table {
     width: 100%;
     border-collapse: collapse;
-    margin
+    margin-top: 20px;
+    min-width: 650px; 
+}
+
+/* MODIFICACIÓN: Centrar el contenido de los encabezados (TH) y las celdas (TD) */
+.athlete-data-table th, .athlete-data-table td {
+    padding: 12px 15px;
+    text-align: center; /* ALINEACIÓN CENTRADA PARA TÍTULOS DE TABLA Y RESULTADOS */
+    border-bottom: 1px solid #ddd;
+}
+
+.athlete-data-table th {
+    background-color: #f8f9fa;
+    color: #333;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+    white-space: nowrap; 
+}
+
+/* Indicadores de Ordenamiento (sin cambios) */
+.athlete-data-table th.sorted-asc::after {
+    content: ' ▲';
+    color: #007bff;
+}
+
+.athlete-data-table th.sorted-desc::after {
+    content: ' ▼';
+    color: #007bff;
+}
+
+.athlete-data-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+.no-data-message, .loading-message, .table-note-message {
+    text-align: center;
+    padding: 20px;
+    color: #6c757d;
+    font-style: italic;
+    border: 1px dashed #ced4da;
+    border-radius: 4px;
+    margin-top: 20px;
+}
+
+/* Estilos Responsivos (sin cambios relevantes en la tabla simplificada) */
+@media (max-width: 768px) {
+    .form-group.half-width {
+        flex: 1 1 100%;
+    }
+}
