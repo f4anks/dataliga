@@ -1,132 +1,100 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data de Atletas - Liga de Voleibol</title>
-    <!-- Vincula el archivo de estilos CSS -->
-    <link rel="stylesheet" href="styles.css">
-    <!-- Vincula la fuente Montserrat de Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&amp;display=swap"
-          rel="stylesheet">
+    <title>Registro y Visualización de Atletas</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Estilos en línea para el mensaje de estado (opcional, se puede dejar en style.css) */
+        #statusMessage {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: #fff;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+    </style>
 </head>
 <body>
-    
-       <div class="container">
-        <div class="form-card">
-            <div class="form-header">
-                <h2>Data de Atletas</h2>
-                <h2>&nbsp;Liga de Voleibol Menor del Estado Lara</h2>
-                <p>Por favor, complete el siguiente formulario para registrar a un atleta.</p>
-            </div>
-            
-            <form id="athleteForm">
+
+    <header class="page-header">
+        <h1>Sistema de Registro de Atletas</h1>
+    </header>
+
+    <main class="container">
+        <section class="form-section">
+            <h2>Registrar Nuevo Atleta</h2>
+            <form id="athleteForm" class="athlete-form">
                 
-                <div class="form-group"> 
-                    <label for="club">Club <span class="required-star">*</span></label>
-                    <input id="club" name="club" required="" type="text"> 
+                <div class="form-group half-width">
+                    <label for="cedula">Cédula de Identidad:</label>
+                    <input type="text" id="cedula" name="cedula" placeholder="Ej: 34123100" required>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group"> 
-                        <label for="nombre">Nombre <span class="required-star">*</span></label>
-                        <input id="nombre" name="nombre" required="" type="text"> 
-                    </div>
-                    <div class="form-group"> 
-                        <label for="apellido">Apellido <span class="required-star">*</span></label>
-                        <input id="apellido" name="apellido" required="" type="text"> 
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group"> 
-                        <label for="categoria">Categoría <span class="required-star">*</span></label>
-                        <select id="categoria" name="categoria" required="">
-                            <option value="" disabled="disabled" selected="selected">Selecciona una Categoría</option>
-                            <option value="3ra División">3ra División</option>
-                            <option value="2da División">2da División</option>
-                            <option value="1era División">1era División</option>
-                            <option value="CIAR">CIAR</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group"> 
-                        <label for="talla">Talla (cm)</label> 
-                        <input id="talla" name="talla" type="number"> 
-                    </div>
-                    <div class="form-group"> 
-                        <label for="peso">Peso (kg)</label> 
-                        <input id="peso" name="peso" type="number"> 
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group"> 
-                        <label for="fechaNac">Fecha de Nacimiento <span class="required-star">*</span></label> 
-                        <input id="fechaNac" name="fechaNac" required="" pattern="\d{4}-\d{2}-\d{2}" type="date"> 
-                    </div>
-                    
-                    <div class="form-group"> 
-                        <label for="correo">Correo <span class="required-star">*</span></label>
-                        <input id="correo" name="correo" required="" type="email"> 
-                    </div>
-
-                    <div class="form-group"> 
-                        <label for="telefono">Teléfono <span class="required-star">*</span></label>
-                        <input id="telefono" name="telefono" required="" type="tel"> 
-                    </div>
+                <div class="form-group half-width">
+                    <label for="club">Club/Equipo:</label>
+                    <input type="text" id="club" name="club" required>
                 </div>
                 
-                <p class="required-note"><span class="required-star">*</span> Campos obligatorios</p>
+                <div class="form-group half-width">
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre" name="nombre" required>
+                </div>
+                
+                <div class="form-group half-width">
+                    <label for="apellido">Apellido:</label>
+                    <input type="text" id="apellido" name="apellido" required>
+                </div>
 
-                <button type="submit">Registrar Atleta</button> 
+                <div class="form-group half-width">
+                    <label for="fechaNac">Fecha de Nacimiento:</label>
+                    <input type="date" id="fechaNac" name="fechaNac" required>
+                </div>
+
+                <div class="form-group half-width">
+                    <label for="categoria">Categoría (Ej: Infantil, Juvenil):</label>
+                    <input type="text" id="categoria" name="categoria" required>
+                </div>
+                
+                <div class="form-group half-width">
+                    <label for="talla">Talla (m):</label>
+                    <input type="number" id="talla" name="talla" step="0.01" min="0.5" max="3" placeholder="Ej: 1.75">
+                </div>
+                
+                <div class="form-group half-width">
+                    <label for="peso">Peso (kg):</label>
+                    <input type="number" id="peso" name="peso" step="0.01" min="10" max="300" placeholder="Ej: 50.80">
+                </div>
+
+                <div class="form-group half-width">
+                    <label for="correo">Correo Electrónico:</label>
+                    <input type="email" id="correo" name="correo" placeholder="opcional@ejemplo.com">
+                </div>
+
+                <div class="form-group half-width">
+                    <label for="telefono">Teléfono:</label>
+                    <input type="tel" id="telefono" name="telefono" placeholder="Ej: 04261234455">
+                </div>
+
+                <button type="submit" class="submit-button">Registrar Atleta</button>
             </form>
-        </div>
+        </section>
 
-        <!-- SECCIÓN DONDE SE MOSTRARÁN LOS DATOS REGISTRADOS DINÁMICAMENTE -->
-        <div class="registered-athletes-section">
-            <h3>Atletas Registrados</h3>
-            <div id="registeredData" class="table-scroll-wrapper">
-                <p class="no-data-message">No hay atletas registrados aún. ¡Registra el primero!</p>
+        <hr class="separator">
+
+        <section class="data-section">
+            <h2>Atletas Registrados (Sincronizados con Firestore)</h2>
+            <div id="registeredData" class="registered-data-container">
+                <p class="loading-message">Cargando datos...</p>
             </div>
-        </div>
-        
-    </div>
-    
-    <!-- Vincula el archivo de JavaScript con soporte para módulos -->
+        </section>
+    </main>
+
     <script type="module" src="script.js"></script>
-
-    <!-- BLOQUE DE CÓDIGO DE SEGURIDAD PARA PROTEGER EL CÓDIGO FUENTE -->
-    <script>
-        // 1. Bloquea el botón derecho del ratón (menú contextual)
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-            // Opcional: Mostrar un mensaje si alguien intenta usar el botón derecho
-            // console.log("Acción bloqueada: No se permite el menú contextual.");
-        });
-
-        // 2. Bloquea las combinaciones de teclas (Ctrl+Shift+I, F12, Ctrl+U, etc.)
-        document.addEventListener('keydown', function(e) {
-            // F12
-            if (e.key === 'F12' || e.keyCode === 123) {
-                e.preventDefault();
-            }
-
-            // Ctrl+Shift+I (o Cmd+Option+I en Mac)
-            if (e.ctrlKey && e.shiftKey && (e.key === 'i' || e.key === 'I')) {
-                e.preventDefault();
-            }
-
-            // Ctrl+Shift+J (o Cmd+Option+J en Mac) - Para la consola
-            if (e.ctrlKey && e.shiftKey && (e.key === 'j' || e.key === 'J')) {
-                e.preventDefault();
-            }
-
-            // Ctrl+U (Ver código fuente)
-            if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) {
-                e.preventDefault();
-            }
-        });
-    </script>
 </body>
 </html>
