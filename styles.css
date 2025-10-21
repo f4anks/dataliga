@@ -67,15 +67,26 @@ input[type="text"],
 input[type="number"], 
 input[type="date"], 
 input[type="email"], 
-input[type="tel"] {
+input[type="tel"],
+/* CAMBIO: Se agrega el estilo para el select */
+select {
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 16px;
     transition: border-color 0.3s;
+    /* Ajuste específico para el select */
+    appearance: none; 
+    -webkit-appearance: none;
+    background-color: white;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007bff%22%20d%3D%22M287%2069.96c-3.13-3.13-8.24-3.13-11.37%200L146.2%20202.77%2016.8%2069.96c-3.13-3.13-8.24-3.13-11.37%200-3.13%203.13-3.13%208.24%200%2011.37l135.5%20135.5c3.13%203.13%208.24%203.13%2011.37%200l135.5-135.5c3.13-3.13%203.13-8.24%200-11.37z%22%2F%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right 10px top 50%;
+    background-size: 10px auto;
+    padding-right: 30px; /* Para que el texto no se oculte detrás del icono */
 }
 
-input:focus {
+input:focus, select:focus {
     border-color: #007bff;
     outline: none;
 }
