@@ -1,30 +1,48 @@
+/* Paleta de Colores:
+   - Primario (Azul): #007bff
+   - Secundario (Gris): #e9ecef (Bordes)
+   - Fondo: #f8f9fa (Casi blanco)
+   - Texto: #343a40 (Gris oscuro)
+*/
+
 /* Estilos Base y Reset */
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background-color: #f4f7f9;
-    color: #333;
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: #f8f9fa; /* FONDO MUY CLARO */
+    color: #343a40; /* TEXTO GRIS OSCURO */
     margin: 0;
     padding: 0;
     line-height: 1.6;
 }
 
 .page-header {
-    background-color: #007bff;
+    background-color: #007bff; /* ENCABEZADO AZUL PRIMARIO */
     color: white;
-    padding: 20px 0;
+    padding: 30px 0; /* Mayor padding para más impacto */
     text-align: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.page-header h1 {
+    font-size: 2.5rem; /* Título más grande */
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.85); /* Subtítulo más suave */
+    margin: 0;
 }
 
 .container {
     max-width: 1200px;
-    margin: 20px auto;
-    padding: 0 15px;
+    margin: 30px auto;
+    padding: 0 20px;
 }
 
 h2 {
-    color: #007bff;
-    border-bottom: 2px solid #e0e0e0;
+    color: #007bff; /* SUBTÍTULOS AZULES */
+    font-weight: 600;
     padding-bottom: 10px;
     margin-top: 30px;
 }
@@ -32,24 +50,25 @@ h2 {
 /* Centrar el título de la sección de resultados */
 .data-section h2 {
     text-align: center; 
+    border-bottom: 3px solid #e9ecef; /* Borde más grueso y suave */
 }
 
 .separator {
     border: 0;
     height: 1px;
-    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 123, 255, 0.75), rgba(0, 0, 0, 0));
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 123, 255, 0.5), rgba(0, 0, 0, 0));
     margin: 40px 0;
 }
 
-/* Estilos de Formulario (sin cambios) */
+/* Estilos de Formulario */
 .athlete-form {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    background: #ffffff; /* Fondo del formulario: Blanco */
+    padding: 30px;
+    border-radius: 12px; /* Bordes redondeados más suaves */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* Sombra sutil y moderna */
 }
 
 .form-group {
@@ -63,9 +82,9 @@ h2 {
 }
 
 label {
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #555;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #343a40;
 }
 
 input[type="text"], 
@@ -74,90 +93,111 @@ input[type="date"],
 input[type="email"], 
 input[type="tel"],
 select {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    padding: 12px;
+    border: 1px solid #ced4da; /* Borde suave */
+    border-radius: 6px;
     font-size: 16px;
-    transition: border-color 0.3s;
+    transition: border-color 0.3s, box-shadow 0.3s;
     background-color: white;
     
-    /* Estilos específicos del select */
     appearance: none; 
     -webkit-appearance: none;
     background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007bff%22%20d%3D%22M287%2069.96c-3.13-3.13-8.24-3.13-11.37%200L146.2%20202.77%2016.8%2069.96c-3.13-3.13-8.24-3.13-11.37%200-3.13%203.13-3.13%208.24%200%2011.37l135.5%20135.5c3.13%203.13%208.24%203.13%2011.37%200l135.5-135.5c3.13-3.13%203.13-8.24%200-11.37z%22%2F%3E%3C%2Fsvg%3E');
     background-repeat: no-repeat;
-    background-position: right 10px top 50%;
+    background-position: right 10px center;
     background-size: 10px auto;
     padding-right: 30px; 
 }
 
 input:focus, select:focus {
     border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Sombra de enfoque azul claro */
     outline: none;
 }
 
-.submit-button {
-    background-color: #28a745; 
-    color: white;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 18px;
-    transition: background-color 0.3s;
-    margin-top: 10px;
+/* Contenedor del botón para centrarlo */
+.button-container {
     flex: 1 1 100%;
+    display: flex;
+    justify-content: center; 
+    margin-top: 15px; 
+}
+
+/* Estilos del Botón Registrar (Azul, Pequeño) */
+.submit-button {
+    background-color: #007bff; 
+    color: white;
+    padding: 10px 25px; /* Tamaño ajustado */
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 17px; 
+    font-weight: 600;
+    transition: background-color 0.3s, transform 0.1s;
+    box-shadow: 0 4px 6px rgba(0, 123, 255, 0.3); /* Sombra de impacto */
 }
 
 .submit-button:hover {
-    background-color: #218838;
+    background-color: #0056b3; 
+    transform: translateY(-1px); /* Efecto 3D sutil */
+    box-shadow: 0 6px 8px rgba(0, 123, 255, 0.4);
 }
 
 /* Estilos de la Tabla */
 .table-responsive-wrapper {
     overflow-x: auto;
-    background: #fff;
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
 .athlete-data-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
-    min-width: 650px; 
+    min-width: 700px; /* Ancho mínimo ligeramente mayor */
 }
 
 /* Centrar el contenido de los encabezados (TH) y las celdas (TD) */
 .athlete-data-table th, .athlete-data-table td {
-    padding: 12px 15px;
-    text-align: center; /* CENTRADO PARA TÍTULOS Y RESULTADOS */
-    border-bottom: 1px solid #ddd;
+    padding: 15px 10px; /* Más padding vertical */
+    text-align: center; 
+    border-bottom: 1px solid #e9ecef;
 }
 
 .athlete-data-table th {
-    background-color: #f8f9fa;
-    color: #333;
-    font-weight: 600;
+    background-color: #e9f2ff; /* Fondo de encabezado azul muy claro */
+    color: #007bff; /* Texto de encabezado azul */
+    font-weight: 700;
     cursor: pointer;
     position: relative;
     white-space: nowrap; 
+    transition: background-color 0.2s;
 }
 
-/* Indicadores de Ordenamiento (sin cambios) */
+.athlete-data-table th:hover {
+    background-color: #d8e6ff; /* Fondo ligeramente más oscuro al pasar el ratón */
+}
+
+/* Filas */
+.athlete-data-table tr:nth-child(even) {
+    background-color: #f8f9fa; /* Rayas sutiles para legibilidad */
+}
+
+.athlete-data-table tr:hover {
+    background-color: #e6f2ff; /* Resaltado azul claro */
+}
+
+/* Indicadores de Ordenamiento */
 .athlete-data-table th.sorted-asc::after {
     content: ' ▲';
-    color: #007bff;
+    color: #0056b3;
 }
 
 .athlete-data-table th.sorted-desc::after {
     content: ' ▼';
-    color: #007bff;
-}
-
-.athlete-data-table tr:hover {
-    background-color: #f1f1f1;
+    color: #0056b3;
 }
 
 .no-data-message, .loading-message, .table-note-message {
@@ -166,12 +206,18 @@ input:focus, select:focus {
     color: #6c757d;
     font-style: italic;
     border: 1px dashed #ced4da;
-    border-radius: 4px;
+    border-radius: 8px;
     margin-top: 20px;
 }
 
-/* Estilos Responsivos (sin cambios) */
+/* Estilos Responsivos */
 @media (max-width: 768px) {
+    .container {
+        padding: 0 10px;
+    }
+    .page-header h1 {
+        font-size: 2rem;
+    }
     .form-group.half-width {
         flex: 1 1 100%;
     }
