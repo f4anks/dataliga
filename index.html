@@ -81,4 +81,31 @@
                 </div>
 
                 <div class="form-group half-width">
-                    <label
+                    <label for="correo">Correo Electrónico:</label>
+                    <input type="email" id="correo" name="correo" placeholder="opcional@ejemplo.com">
+                </div>
+
+                <div class="form-group half-width">
+                    <label for="telefono">Teléfono:</label>
+                    <input type="tel" id="telefono" name="telefono" placeholder="Ej: 04261234455">
+                </div>
+                
+                <div class="form-group button-container">
+                    <button type="submit" class="submit-button">Registrar Atleta</button>
+                </div>
+            </form>
+        </section>
+
+        <hr class="separator">
+
+        <section class="data-section">
+            <h2>Lista de Atletas Registrados</h2>
+            <div id="registeredData" class="registered-data-container">
+                <p class="loading-message">Cargando datos...</p>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
