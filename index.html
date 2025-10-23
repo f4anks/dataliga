@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro y Visualización de Atletas</title>
-    
-    <link rel="stylesheet" href="styles.css?v=2"> 
+    <title>Dataliga - Registro Oficial</title> <link rel="stylesheet" href="styles.css?v=3"> 
     
     <style>
-        /* Estilos en línea para el mensaje de estado (necesario para displayStatusMessage en script.js) */
+        /* Estilos en línea para el mensaje de estado */
         #statusMessage {
             position: fixed;
             top: 10px;
@@ -22,13 +20,16 @@
         }
     </style>
 </head>
-<body oncontextmenu="return false;"> <header class="page-header">
-        <h1>Sistema de Registro de Atletas</h1>
+<body oncontextmenu="return false;"> 
+
+    <header class="page-header">
+        <h1>Dataliga</h1>
+        <p class="subtitle">Gestión de la Liga de Voleibol Menor del Estado Lara</p>
     </header>
 
     <main class="container">
         <section class="form-section">
-            <h2>Registrar Nuevo Atleta</h2>
+            <h2>Data de Atletas - Liga de Voleibol Menor del Estado Lara</h2>
             <form id="athleteForm" class="athlete-form">
                 
                 <div class="form-group half-width">
@@ -86,8 +87,10 @@
                     <label for="telefono">Teléfono:</label>
                     <input type="tel" id="telefono" name="telefono" placeholder="Ej: 04261234455">
                 </div>
-
-                <button type="submit" class="submit-button">Registrar Atleta</button>
+                
+                <div class="form-group button-container">
+                    <button type="submit" class="submit-button">Registrar Atleta</button>
+                </div>
             </form>
         </section>
 
