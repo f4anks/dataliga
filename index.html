@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dataliga - Registro Oficial</title> <link rel="stylesheet" href="styles.css?v=3"> 
+    <title>Dataliga - Registro Oficial</title> 
+    
+    <link rel="stylesheet" href="styles.css?v=4"> 
     
     <style>
-        /* Estilos en línea para el mensaje de estado */
+        /* Estilos en línea para el mensaje de estado (necesario para displayStatusMessage en script.js) */
         #statusMessage {
             position: fixed;
             top: 10px;
@@ -20,16 +22,16 @@
         }
     </style>
 </head>
-<body oncontextmenu="return false;"> 
-
-    <header class="page-header">
+<body oncontextmenu="return false;"> <header class="page-header">
         <h1>Dataliga</h1>
         <p class="subtitle">Gestión de la Liga de Voleibol Menor del Estado Lara</p>
     </header>
 
     <main class="container">
+        
         <section class="form-section">
             <h2>Data de Atletas - Liga de Voleibol Menor del Estado Lara</h2>
+            
             <form id="athleteForm" class="athlete-form">
                 
                 <div class="form-group half-width">
@@ -74,36 +76,3 @@
                 </div>
                 
                 <div class="form-group half-width">
-                    <label for="peso">Peso (kg):</label>
-                    <input type="number" id="peso" name="peso" step="0.01" min="10" max="300" placeholder="Ej: 50.80">
-                </div>
-
-                <div class="form-group half-width">
-                    <label for="correo">Correo Electrónico:</label>
-                    <input type="email" id="correo" name="correo" placeholder="opcional@ejemplo.com">
-                </div>
-
-                <div class="form-group half-width">
-                    <label for="telefono">Teléfono:</label>
-                    <input type="tel" id="telefono" name="telefono" placeholder="Ej: 04261234455">
-                </div>
-                
-                <div class="form-group button-container">
-                    <button type="submit" class="submit-button">Registrar Atleta</button>
-                </div>
-            </form>
-        </section>
-
-        <hr class="separator">
-
-        <section class="data-section">
-            <h2>Lista de Atletas Registrados</h2>
-            <div id="registeredData" class="registered-data-container">
-                <p class="loading-message">Cargando datos...</p>
-            </div>
-        </section>
-    </main>
-
-    <script type="module" src="script.js"></script>
-</body>
-</html>
