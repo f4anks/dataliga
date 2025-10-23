@@ -45,18 +45,22 @@ h2 {
     font-weight: 600;
     padding-bottom: 10px;
     margin-top: 30px;
+    margin-left: unset;
+    margin-right: unset;
 }
 
-/* MODIFICACIÓN CLAVE 1: Centrar el título del formulario (Data de Atletas...) */
+/* Contenedor del Título del Formulario */
+.form-section {
+    text-align: center; /* Centra el h2 (bloque) y su contenido */
+}
+
+/* Centrar el título del formulario (Data de Atletas...) */
 .form-section h2 {
-    text-align: center;
+    text-align: center; 
     border-bottom: 3px solid #e9ecef;
-    width: 100%; 
-    margin-left: auto;
-    margin-right: auto;
 }
 
-/* MODIFICACIÓN CLAVE 2: Centrar el título de la sección de resultados (Lista de Atletas...) */
+/* Centrar el título de la sección de resultados (Lista de Atletas...) */
 .data-section h2 {
     text-align: center; 
     border-bottom: 3px solid #e9ecef; 
@@ -74,10 +78,11 @@ h2 {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
-    background: #ffffff; /* Fondo del formulario: Blanco */
+    background: #ffffff; 
     padding: 30px;
     border-radius: 12px; 
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* Sombra sutil y moderna */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); 
+    text-align: left; /* Asegura que los campos no se centren */
 }
 
 .form-group {
@@ -103,4 +108,131 @@ input[type="email"],
 input[type="tel"],
 select {
     padding: 12px;
-    border: 1px solid
+    border: 1px solid #ced4da; 
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    background-color: white;
+    
+    appearance: none; 
+    -webkit-appearance: none;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007bff%22%20d%3D%22M287%2069.96c-3.13-3.13-8.24-3.13-11.37%200L146.2%20202.77%2016.8%2069.96c-3.13-3.13-8.24-3.13-11.37%200-3.13%203.13-3.13%208.24%200%2011.37l135.5%20135.5c3.13%203.13%208.24%203.13%2011.37%200l135.5-135.5c3.13-3.13%203.13-8.24%200-11.37z%22%2F%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 10px auto;
+    padding-right: 30px; 
+}
+
+input:focus, select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); 
+    outline: none;
+}
+
+/* Contenedor del botón para centrarlo (dentro del form) */
+.button-container {
+    flex: 1 1 100%;
+    display: flex;
+    justify-content: center; /* Centra el botón */
+    margin-top: 15px; 
+}
+
+/* Estilos del Botón Registrar (Azul y Pequeño) */
+.submit-button {
+    background-color: #007bff; 
+    color: white;
+    padding: 10px 25px; 
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 17px; 
+    font-weight: 600;
+    transition: background-color 0.3s, transform 0.1s;
+    box-shadow: 0 4px 6px rgba(0, 123, 255, 0.3); 
+}
+
+.submit-button:hover {
+    background-color: #0056b3; 
+    transform: translateY(-1px); 
+    box-shadow: 0 6px 8px rgba(0, 123, 255, 0.4);
+}
+
+/* Estilos de la Tabla */
+.table-responsive-wrapper {
+    overflow-x: auto;
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.athlete-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    min-width: 700px; 
+}
+
+/* Centrar el contenido de los encabezados (TH) y las celdas (TD) */
+.athlete-data-table th, .athlete-data-table td {
+    padding: 15px 10px; 
+    text-align: center; /* CENTRADO DE DATOS Y TÍTULOS DE COLUMNAS */
+    border-bottom: 1px solid #e9ecef;
+}
+
+.athlete-data-table th {
+    background-color: #e9f2ff; 
+    color: #007bff; 
+    font-weight: 700;
+    cursor: pointer;
+    position: relative;
+    white-space: nowrap; 
+    transition: background-color 0.2s;
+}
+
+.athlete-data-table th:hover {
+    background-color: #d8e6ff; 
+}
+
+/* Filas */
+.athlete-data-table tr:nth-child(even) {
+    background-color: #f8f9fa; 
+}
+
+.athlete-data-table tr:hover {
+    background-color: #e6f2ff; 
+}
+
+/* Indicadores de Ordenamiento */
+.athlete-data-table th.sorted-asc::after {
+    content: ' ▲';
+    color: #0056b3;
+}
+
+.athlete-data-table th.sorted-desc::after {
+    content: ' ▼';
+    color: #0056b3;
+}
+
+.no-data-message, .loading-message, .table-note-message {
+    text-align: center;
+    padding: 20px;
+    color: #6c757d;
+    font-style: italic;
+    border: 1px dashed #ced4da;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+/* Estilos Responsivos */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 10px;
+    }
+    .page-header h1 {
+        font-size: 2rem;
+    }
+    .form-group.half-width {
+        flex: 1 1 100%;
+    }
+}
